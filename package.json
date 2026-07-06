@@ -1,0 +1,27 @@
+{
+  "name": "finanzas-ia",
+  "version": "1.0.0",
+  "description": "Se crea una herramienta para hacer el seguimiento de los deberes en pareja que se deben pagar cada mes y un monitoreo de las finanzas en pareja",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jav-P/finanzas-ia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jav-P/finanzas-ia/issues"
+  },
+  "homepage": "https://github.com/Jav-P/finanzas-ia#readme",
+  "devDependencies": {
+    "supabase": "^2.109.0"
+  }
+}

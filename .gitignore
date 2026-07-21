@@ -6,7 +6,7 @@ node_modules/
 .env.local
 .env.*.local
 
-# Build output (Angular / NestJS, cuando se agreguen)
+# Build output (Angular, cuando se agregue)
 dist/
 build/
 .angular/

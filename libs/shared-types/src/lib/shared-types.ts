@@ -59,3 +59,36 @@ export interface Pago {
   urlComprobante: string;
   createdAt: string;
 }
+
+// Instancia enriquecida con los datos que necesita el dashboard/detalle,
+// sin depender de resource embedding de PostgREST (no hay FKs en el schema).
+export interface InstanciaConDetalle extends ObligacionInstancia {
+  obligacion: Obligacion;
+  categoria: Categoria;
+  pago: Pago | null;
+}
+
+export interface CreateCategoriaDto {
+  hogarId: string;
+  nombre: string;
+  color?: string | null;
+}
+
+export interface CreateObligacionDto {
+  hogarId: string;
+  usuarioResponsableId?: string | null;
+  categoriaId: string;
+  descripcion: string;
+  monto: number;
+  recurrencia: Recurrencia;
+  diaVencimiento?: number | null;
+  fechaInicio: string;
+}
+
+export type UpdateObligacionDto = Partial<Omit<CreateObligacionDto, 'hogarId'>>;
+
+export interface RegistrarPagoDto {
+  usuarioPagoId: string;
+  fechaPago: string;
+  montoPagado: number;
+}

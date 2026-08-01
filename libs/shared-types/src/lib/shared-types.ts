@@ -92,3 +92,167 @@ export interface RegistrarPagoDto {
   fechaPago: string;
   montoPagado: number;
 }
+
+// --- Fase 2: ingresos, gastos variables, presupuestos ---
+
+export interface Ingreso {
+  id: string;
+  hogarId: string;
+  usuarioId: string;
+  descripcion: string;
+  monto: number;
+  periodicidad: Recurrencia;
+  diaPago: number | null; // solo si periodicidad = 'mensual'
+  fechaInicio: string;
+  activo: boolean;
+  createdAt: string;
+}
+
+export interface CreateIngresoDto {
+  hogarId: string;
+  usuarioId: string;
+  descripcion: string;
+  monto: number;
+  periodicidad: Recurrencia;
+  diaPago?: number | null;
+  fechaInicio: string;
+}
+
+export interface BalancePersona {
+  usuarioId: string;
+  nombre: string;
+  ingresos: number;
+  obligaciones: number;
+  gastos: number;
+  saldo: number;
+}
+
+export interface Balance {
+  periodo: string;
+  ingresos: number;
+  obligaciones: number;
+  gastos: number;
+  saldo: number;
+  porUsuario: BalancePersona[];
+}
+
+export type TipoMedioPago = 'efectivo' | 'debito' | 'credito' | 'transferencia';
+
+export interface MedioPago {
+  id: string;
+  hogarId: string;
+  nombre: string;
+  tipo: TipoMedioPago;
+  createdAt: string;
+}
+
+export interface CreateMedioPagoDto {
+  hogarId: string;
+  nombre: string;
+  tipo: TipoMedioPago;
+}
+
+export interface Lugar {
+  id: string;
+  hogarId: string;
+  nombre: string;
+  createdAt: string;
+}
+
+export interface CreateLugarDto {
+  hogarId: string;
+  nombre: string;
+}
+
+export interface Producto {
+  id: string;
+  hogarId: string;
+  categoriaId: string | null;
+  nombre: string;
+  createdAt: string;
+}
+
+export interface CreateProductoDto {
+  hogarId: string;
+  categoriaId?: string | null;
+  nombre: string;
+}
+
+export interface GastoItem {
+  id: string;
+  gastoId: string;
+  productoId: string;
+  cantidad: number;
+  precioUnitario: number;
+  calificacion: number | null; // 1-5
+  createdAt: string;
+}
+
+export interface CreateGastoItemDto {
+  productoId: string;
+  cantidad: number;
+  precioUnitario: number;
+  calificacion?: number | null;
+}
+
+export interface Gasto {
+  id: string;
+  hogarId: string;
+  usuarioId: string;
+  categoriaId: string;
+  lugarId: string | null;
+  medioPagoId: string | null;
+  descripcion: string;
+  montoTotal: number;
+  fecha: string;
+  urlComprobante: string | null;
+  createdAt: string;
+}
+
+export interface CreateGastoDto {
+  hogarId: string;
+  usuarioId: string;
+  categoriaId: string;
+  lugarId?: string | null;
+  medioPagoId?: string | null;
+  descripcion: string;
+  montoTotal: number;
+  fecha: string;
+  items?: CreateGastoItemDto[];
+}
+
+export interface GastoConItems extends Gasto {
+  items: GastoItem[];
+}
+
+export interface Presupuesto {
+  id: string;
+  hogarId: string;
+  categoriaId: string;
+  periodo: string;
+  montoPresupuestado: number;
+  createdAt: string;
+}
+
+export interface CreatePresupuestoDto {
+  hogarId: string;
+  categoriaId: string;
+  periodo: string;
+  montoPresupuestado: number;
+}
+
+export interface PresupuestoResumenItem {
+  categoriaId: string;
+  categoriaNombre: string;
+  presupuestado: number;
+  gastado: number;
+  diferencia: number; // presupuestado - gastado (negativo = te pasaste)
+}
+
+export interface HistoricoPrecioItem {
+  fecha: string;
+  lugarId: string | null;
+  lugarNombre: string | null;
+  cantidad: number;
+  precioUnitario: number;
+}

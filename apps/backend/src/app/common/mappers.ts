@@ -4,9 +4,16 @@
 
 import type {
   Categoria,
+  Gasto,
+  GastoItem,
+  Ingreso,
+  Lugar,
+  MedioPago,
   Obligacion,
   ObligacionInstancia,
   Pago,
+  Presupuesto,
+  Producto,
   Usuario,
 } from '@finanzas-ia/shared-types';
 
@@ -66,6 +73,89 @@ export function toPago(row: any): Pago {
     fechaPago: row.fecha_pago,
     montoPagado: row.monto_pagado,
     urlComprobante: row.url_comprobante,
+    createdAt: row.created_at,
+  };
+}
+
+export function toIngreso(row: any): Ingreso {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    usuarioId: row.usuario_id,
+    descripcion: row.descripcion,
+    monto: row.monto,
+    periodicidad: row.periodicidad,
+    diaPago: row.dia_pago,
+    fechaInicio: row.fecha_inicio,
+    activo: row.activo,
+    createdAt: row.created_at,
+  };
+}
+
+export function toMedioPago(row: any): MedioPago {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    nombre: row.nombre,
+    tipo: row.tipo,
+    createdAt: row.created_at,
+  };
+}
+
+export function toLugar(row: any): Lugar {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    nombre: row.nombre,
+    createdAt: row.created_at,
+  };
+}
+
+export function toProducto(row: any): Producto {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    categoriaId: row.categoria_id,
+    nombre: row.nombre,
+    createdAt: row.created_at,
+  };
+}
+
+export function toGasto(row: any): Gasto {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    usuarioId: row.usuario_id,
+    categoriaId: row.categoria_id,
+    lugarId: row.lugar_id,
+    medioPagoId: row.medio_pago_id,
+    descripcion: row.descripcion,
+    montoTotal: row.monto_total,
+    fecha: row.fecha,
+    urlComprobante: row.url_comprobante,
+    createdAt: row.created_at,
+  };
+}
+
+export function toGastoItem(row: any): GastoItem {
+  return {
+    id: row.id,
+    gastoId: row.gasto_id,
+    productoId: row.producto_id,
+    cantidad: row.cantidad,
+    precioUnitario: row.precio_unitario,
+    calificacion: row.calificacion,
+    createdAt: row.created_at,
+  };
+}
+
+export function toPresupuesto(row: any): Presupuesto {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    categoriaId: row.categoria_id,
+    periodo: row.periodo,
+    montoPresupuestado: row.monto_presupuestado,
     createdAt: row.created_at,
   };
 }

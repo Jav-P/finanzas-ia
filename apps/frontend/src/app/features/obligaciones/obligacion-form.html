@@ -1,0 +1,54 @@
+<h2>Nueva obligación</h2>
+
+<form (ngSubmit)="guardar()">
+  <label>
+    Descripción
+    <input name="descripcion" [(ngModel)]="descripcion" required />
+  </label>
+
+  <label>
+    Monto
+    <input name="monto" type="number" [(ngModel)]="monto" required />
+  </label>
+
+  <label>
+    Categoría
+    <select name="categoriaId" [(ngModel)]="categoriaId" required>
+      @for (categoria of categorias(); track categoria.id) {
+        <option [value]="categoria.id">{{ categoria.nombre }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    Responsable
+    <select name="usuarioResponsableId" [(ngModel)]="usuarioResponsableId">
+      <option value="">Compartida</option>
+      @for (usuario of session.usuarios(); track usuario.id) {
+        <option [value]="usuario.id">{{ usuario.nombre }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    Recurrencia
+    <select name="recurrencia" [(ngModel)]="recurrencia">
+      <option value="mensual">Mensual</option>
+      <option value="unica">Única</option>
+    </select>
+  </label>
+
+  @if (recurrencia === 'mensual') {
+    <label>
+      Día de vencimiento (1-31)
+      <input name="diaVencimiento" type="number" min="1" max="31" [(ngModel)]="diaVencimiento" />
+    </label>
+  }
+
+  <label>
+    Fecha {{ recurrencia === 'mensual' ? 'del primer vencimiento' : 'de vencimiento' }}
+    <input name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
+  </label>
+
+  <button type="submit" [disabled]="guardando()">Guardar</button>
+</form>

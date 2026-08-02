@@ -1,0 +1,67 @@
+<div class="card">
+  <h2>Ingresos registrados</h2>
+  <table>
+    <tr>
+      <th>Persona</th>
+      <th>Descripción</th>
+      <th>Monto</th>
+      <th>Periodicidad</th>
+      <th>Desde</th>
+    </tr>
+    @for (ingreso of ingresos(); track ingreso.id) {
+      <tr>
+        <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
+        <td>{{ ingreso.descripcion }}</td>
+        <td>{{ ingreso.monto | number: '1.0-0' }}</td>
+        <td>{{ ingreso.periodicidad }}</td>
+        <td>{{ ingreso.fechaInicio }}</td>
+      </tr>
+    }
+  </table>
+</div>
+
+<div class="card">
+  <h2>Nuevo ingreso</h2>
+  <form (ngSubmit)="guardar()">
+    <label>
+      Persona
+      <select name="usuarioId" [(ngModel)]="usuarioId" required>
+        @for (usuario of session.usuarios(); track usuario.id) {
+          <option [value]="usuario.id">{{ usuario.nombre }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Descripción
+      <input name="descripcion" [(ngModel)]="descripcion" placeholder="Salario" required />
+    </label>
+
+    <label>
+      Monto
+      <input name="monto" type="number" [(ngModel)]="monto" required />
+    </label>
+
+    <label>
+      Periodicidad
+      <select name="periodicidad" [(ngModel)]="periodicidad">
+        <option value="mensual">Mensual</option>
+        <option value="unica">Única</option>
+      </select>
+    </label>
+
+    @if (periodicidad === 'mensual') {
+      <label>
+        Día de pago (1-31)
+        <input name="diaPago" type="number" min="1" max="31" [(ngModel)]="diaPago" />
+      </label>
+    }
+
+    <label>
+      Desde
+      <input name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
+    </label>
+
+    <button type="submit" [disabled]="guardando()">Guardar</button>
+  </form>
+</div>

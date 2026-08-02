@@ -1,0 +1,57 @@
+@if (balance(); as b) {
+  <div class="card">
+    <h2>Balance de {{ b.periodo }}</h2>
+    <p>
+      Ingresos: {{ b.ingresos | number: '1.0-0' }} · Obligaciones: {{ b.obligaciones | number: '1.0-0' }} ·
+      Gastos: {{ b.gastos | number: '1.0-0' }}
+    </p>
+    <p><strong>Saldo consolidado: {{ b.saldo | number: '1.0-0' }}</strong></p>
+    <table>
+      <tr>
+        <th>Persona</th>
+        <th>Ingresos</th>
+        <th>Obligaciones</th>
+        <th>Gastos</th>
+        <th>Saldo</th>
+      </tr>
+      @for (persona of b.porUsuario; track persona.usuarioId) {
+        <tr>
+          <td>{{ persona.nombre }}</td>
+          <td>{{ persona.ingresos | number: '1.0-0' }}</td>
+          <td>{{ persona.obligaciones | number: '1.0-0' }}</td>
+          <td>{{ persona.gastos | number: '1.0-0' }}</td>
+          <td>{{ persona.saldo | number: '1.0-0' }}</td>
+        </tr>
+      }
+    </table>
+  </div>
+}
+
+<div class="card">
+  <div style="display:flex; justify-content: space-between; align-items:center;">
+    <h2>Mis obligaciones</h2>
+    <div>
+      @if (otroUsuario(); as otro) {
+        <button (click)="verOtro()">Ver las de {{ otro.nombre }}</button>
+      }
+      <a routerLink="/obligaciones/nueva"><button>+ Nueva obligación</button></a>
+    </div>
+  </div>
+
+  @if (!instancias().length) {
+    <p>No hay obligaciones registradas.</p>
+  }
+
+  <table>
+    @for (instancia of instancias(); track instancia.id) {
+      <tr>
+        <td><span class="badge" [class]="semaforo(instancia)">{{ semaforo(instancia) }}</span></td>
+        <td>{{ instancia.obligacion.descripcion }}</td>
+        <td>{{ instancia.categoria.nombre }}</td>
+        <td>{{ instancia.fechaVencimiento }}</td>
+        <td>{{ instancia.monto | number: '1.0-0' }}</td>
+        <td><a [routerLink]="['/obligaciones', instancia.id]">Ver</a></td>
+      </tr>
+    }
+  </table>
+</div>

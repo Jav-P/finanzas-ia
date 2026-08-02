@@ -1,0 +1,41 @@
+@if (instancia(); as i) {
+  <button (click)="volver()">&larr; Volver</button>
+
+  <div class="card">
+    <h2>{{ i.obligacion.descripcion }}</h2>
+    <p>Categoría: {{ i.categoria.nombre }}</p>
+    <p>Monto: {{ i.monto | number: '1.0-0' }}</p>
+    <p>Vence: {{ i.fechaVencimiento }}</p>
+    <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
+  </div>
+
+  @if (i.pago; as pago) {
+    <div class="card">
+      <h3>Comprobante</h3>
+      <p>Pagado el {{ pago.fechaPago }} · {{ pago.montoPagado | number: '1.0-0' }}</p>
+      <a [href]="pago.urlComprobante" target="_blank">Ver comprobante</a>
+    </div>
+  } @else {
+    <div class="card">
+      <h3>Registrar pago</h3>
+      <form (ngSubmit)="registrarPago()">
+        <label>
+          Fecha de pago
+          <input name="fechaPago" type="date" [(ngModel)]="fechaPago" required />
+        </label>
+        <label>
+          Monto pagado
+          <input name="montoPagado" type="number" [(ngModel)]="montoPagado" required />
+        </label>
+        <label>
+          Comprobante (imagen o PDF)
+          <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoSeleccionado($event)" required />
+        </label>
+        @if (error()) {
+          <p style="color:#dc2626">{{ error() }}</p>
+        }
+        <button type="submit" [disabled]="guardando()">Registrar pago</button>
+      </form>
+    </div>
+  }
+}

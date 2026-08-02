@@ -1,0 +1,48 @@
+<div class="card">
+  <h2>Presupuesto vs. gastado</h2>
+  <label>
+    Período
+    <input type="month" [value]="periodo()" (change)="cambiarPeriodo($event)" />
+  </label>
+
+  <table>
+    <tr>
+      <th>Categoría</th>
+      <th>Presupuestado</th>
+      <th>Gastado</th>
+      <th>Diferencia</th>
+    </tr>
+    @for (item of resumen(); track item.categoriaId) {
+      <tr>
+        <td>{{ item.categoriaNombre }}</td>
+        <td>{{ item.presupuestado | number: '1.0-0' }}</td>
+        <td>{{ item.gastado | number: '1.0-0' }}</td>
+        <td [style.color]="item.diferencia < 0 ? '#dc2626' : '#16a34a'">
+          {{ item.diferencia | number: '1.0-0' }}
+          {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
+        </td>
+      </tr>
+    }
+  </table>
+</div>
+
+<div class="card">
+  <h2>Definir presupuesto</h2>
+  <form (ngSubmit)="guardar()">
+    <label>
+      Categoría
+      <select name="categoriaId" [(ngModel)]="categoriaId" required>
+        @for (categoria of categorias(); track categoria.id) {
+          <option [value]="categoria.id">{{ categoria.nombre }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Monto presupuestado para {{ periodo() }}
+      <input name="montoPresupuestado" type="number" [(ngModel)]="montoPresupuestado" required />
+    </label>
+
+    <button type="submit" [disabled]="guardando()">Guardar</button>
+  </form>
+</div>

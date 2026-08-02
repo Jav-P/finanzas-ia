@@ -1,0 +1,139 @@
+<div class="card">
+  <h2>Registrar gasto (mercado, recibos, otros)</h2>
+  <form (ngSubmit)="guardar()">
+    <label>
+      Descripción
+      <input name="descripcion" [(ngModel)]="descripcion" required />
+    </label>
+
+    <label>
+      Categoría
+      <select name="categoriaId" [(ngModel)]="categoriaId" required>
+        @for (categoria of categorias(); track categoria.id) {
+          <option [value]="categoria.id">{{ categoria.nombre }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Lugar de compra
+      <input name="lugarNombre" [(ngModel)]="lugarNombre" list="lugares-datalist" placeholder="Éxito, D1..." />
+      <datalist id="lugares-datalist">
+        @for (lugar of lugares(); track lugar.id) {
+          <option [value]="lugar.nombre"></option>
+        }
+      </datalist>
+    </label>
+
+    <label>
+      Medio de pago
+      <select name="medioPagoId" [(ngModel)]="medioPagoId">
+        <option value="">Sin especificar</option>
+        @for (medio of mediosPago(); track medio.id) {
+          <option [value]="medio.id">{{ medio.nombre }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Fecha
+      <input name="fecha" type="date" [(ngModel)]="fecha" required />
+    </label>
+
+    <fieldset>
+      <legend>Productos comprados</legend>
+      @for (item of items; track $index) {
+        <div style="display:flex; gap:0.5rem; align-items:end; margin-bottom:0.5rem;">
+          <label style="flex:2">
+            Producto
+            <input [(ngModel)]="item.productoNombre" [name]="'producto' + $index" list="productos-datalist" />
+          </label>
+          <label style="flex:1">
+            Cantidad
+            <input type="number" [(ngModel)]="item.cantidad" [name]="'cantidad' + $index" min="0.001" step="0.001" />
+          </label>
+          <label style="flex:1">
+            Precio unitario
+            <input type="number" [(ngModel)]="item.precioUnitario" [name]="'precio' + $index" />
+          </label>
+          <label style="flex:1">
+            Calificación
+            <select [(ngModel)]="item.calificacion" [name]="'calificacion' + $index">
+              <option [ngValue]="null">—</option>
+              @for (n of [1, 2, 3, 4, 5]; track n) {
+                <option [ngValue]="n">{{ n }}</option>
+              }
+            </select>
+          </label>
+          <button type="button" (click)="quitarItem($index)">Quitar</button>
+        </div>
+      }
+      <datalist id="productos-datalist">
+        @for (producto of productos(); track producto.id) {
+          <option [value]="producto.nombre"></option>
+        }
+      </datalist>
+      <button type="button" (click)="agregarItem()">+ Agregar producto</button>
+    </fieldset>
+
+    <p><strong>Total: {{ montoTotal | number: '1.0-0' }}</strong></p>
+
+    <button type="submit" [disabled]="guardando()">Guardar gasto</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Comparar precios por producto</h2>
+  <select (change)="verHistorico($any($event.target).value)">
+    <option value="">Selecciona un producto</option>
+    @for (producto of productos(); track producto.id) {
+      <option [value]="producto.id">{{ producto.nombre }}</option>
+    }
+  </select>
+
+  @if (historico(); as h) {
+    <table>
+      <tr>
+        <th>Fecha</th>
+        <th>Lugar</th>
+        <th>Cantidad</th>
+        <th>Precio unitario</th>
+      </tr>
+      @for (item of h; track $index) {
+        <tr>
+          <td>{{ item.fecha }}</td>
+          <td>{{ item.lugarNombre ?? '—' }}</td>
+          <td>{{ item.cantidad }}</td>
+          <td>{{ item.precioUnitario | number: '1.0-0' }}</td>
+        </tr>
+      }
+    </table>
+    @if (!h.length) {
+      <p>Sin compras registradas de este producto todavía.</p>
+    }
+  }
+</div>
+
+<div class="card">
+  <h2>Gastos recientes</h2>
+  <table>
+    <tr>
+      <th>Fecha</th>
+      <th>Descripción</th>
+      <th>Monto</th>
+      <th>Items</th>
+    </tr>
+    @for (gasto of gastos(); track gasto.id) {
+      <tr>
+        <td>{{ gasto.fecha }}</td>
+        <td>{{ gasto.descripcion }}</td>
+        <td>{{ gasto.montoTotal | number: '1.0-0' }}</td>
+        <td>
+          @for (item of gasto.items; track item.id) {
+            <div>{{ nombreProducto(item.productoId) }}: {{ item.precioUnitario | number: '1.0-0' }}</div>
+          }
+        </td>
+      </tr>
+    }
+  </table>
+</div>

@@ -1,14 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 
 @Component({
   selector: 'app-obligacion-detalle',
-  imports: [FormsModule, DecimalPipe],
+  imports: [FormsModule, DecimalPipe, RouterLink],
   templateUrl: './obligacion-detalle.html',
 })
 export class ObligacionDetalle implements OnInit {
@@ -59,6 +59,24 @@ export class ObligacionDetalle implements OnInit {
 
   volver(): void {
     this.router.navigateByUrl('/dashboard');
+  }
+
+  revertirPago(): void {
+    const instancia = this.instancia();
+    if (!instancia) return;
+    this.api.revertirPago(instancia.id).subscribe(() => this.cargar(instancia.id));
+  }
+
+  desactivarObligacion(): void {
+    const instancia = this.instancia();
+    if (!instancia) return;
+    this.api.desactivarObligacion(instancia.obligacion.id).subscribe(() => this.cargar(instancia.id));
+  }
+
+  eliminarObligacion(): void {
+    const instancia = this.instancia();
+    if (!instancia) return;
+    this.api.eliminarObligacion(instancia.obligacion.id).subscribe(() => this.router.navigateByUrl('/dashboard'));
   }
 
   private cargar(id: string): void {

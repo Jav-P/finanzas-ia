@@ -24,6 +24,10 @@ export class Ingresos implements OnInit {
   protected diaPago: number | null = null;
   protected fechaInicio = new Date().toISOString().slice(0, 10);
 
+  protected readonly editandoId = signal<string | null>(null);
+  protected descripcionEdit = '';
+  protected montoEdit: number | null = null;
+
   constructor() {
     effect(() => {
       const usuarios = this.session.usuarios();
@@ -61,6 +65,30 @@ export class Ingresos implements OnInit {
         this.guardando.set(false);
         this.cargar();
       });
+  }
+
+  editar(ingreso: Ingreso): void {
+    this.editandoId.set(ingreso.id);
+    this.descripcionEdit = ingreso.descripcion;
+    this.montoEdit = ingreso.monto;
+  }
+
+  cancelarEdicion(): void {
+    this.editandoId.set(null);
+  }
+
+  guardarEdicion(id: string): void {
+    if (!this.descripcionEdit || !this.montoEdit) return;
+    this.api
+      .editarIngreso(id, { descripcion: this.descripcionEdit, monto: this.montoEdit })
+      .subscribe(() => {
+        this.editandoId.set(null);
+        this.cargar();
+      });
+  }
+
+  eliminar(id: string): void {
+    this.api.eliminarIngreso(id).subscribe(() => this.cargar());
   }
 
   private cargar(): void {

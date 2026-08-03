@@ -122,17 +122,33 @@
       <th>Descripción</th>
       <th>Monto</th>
       <th>Items</th>
+      <th></th>
     </tr>
     @for (gasto of gastos(); track gasto.id) {
       <tr>
-        <td>{{ gasto.fecha }}</td>
-        <td>{{ gasto.descripcion }}</td>
-        <td>{{ gasto.montoTotal | number: '1.0-0' }}</td>
-        <td>
-          @for (item of gasto.items; track item.id) {
-            <div>{{ nombreProducto(item.productoId) }}: {{ item.precioUnitario | number: '1.0-0' }}</div>
-          }
-        </td>
+        @if (editandoId() === gasto.id) {
+          <td><input type="date" [(ngModel)]="fechaEdit" name="fechaGastoEdit" /></td>
+          <td><input [(ngModel)]="descripcionEdit" name="descripcionGastoEdit" /></td>
+          <td><input type="number" [(ngModel)]="montoTotalEdit" name="montoGastoEdit" /></td>
+          <td></td>
+          <td>
+            <button (click)="guardarEdicionGasto(gasto.id)">Guardar</button>
+            <button (click)="cancelarEdicionGasto()">Cancelar</button>
+          </td>
+        } @else {
+          <td>{{ gasto.fecha }}</td>
+          <td>{{ gasto.descripcion }}</td>
+          <td>{{ gasto.montoTotal | number: '1.0-0' }}</td>
+          <td>
+            @for (item of gasto.items; track item.id) {
+              <div>{{ nombreProducto(item.productoId) }}: {{ item.precioUnitario | number: '1.0-0' }}</div>
+            }
+          </td>
+          <td>
+            <button (click)="editarGasto(gasto)">Editar</button>
+            <button (click)="eliminarGasto(gasto.id)">Eliminar</button>
+          </td>
+        }
       </tr>
     }
   </table>

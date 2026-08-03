@@ -23,6 +23,7 @@ export class Presupuestos implements OnInit {
   protected readonly resumen = signal<PresupuestoResumenItem[]>([]);
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly guardando = signal(false);
+  protected readonly presupuestoIdPorCategoria = signal<Map<string, string>>(new Map());
 
   protected categoriaId = '';
   protected montoPresupuestado: number | null = null;
@@ -58,9 +59,19 @@ export class Presupuestos implements OnInit {
       });
   }
 
+  eliminarPresupuesto(categoriaId: string): void {
+    const id = this.presupuestoIdPorCategoria().get(categoriaId);
+    if (!id) return;
+    this.api.eliminarPresupuesto(id).subscribe(() => this.cargar());
+  }
+
   private cargar(): void {
     this.api
       .presupuestosResumen(this.session.hogarId, this.periodo())
       .subscribe((resumen) => this.resumen.set(resumen));
+
+    this.api.presupuestos(this.session.hogarId, this.periodo()).subscribe((presupuestos) => {
+      this.presupuestoIdPorCategoria.set(new Map(presupuestos.map((p) => [p.categoriaId, p.id])));
+    });
   }
 }

@@ -7,14 +7,31 @@
       <th>Monto</th>
       <th>Periodicidad</th>
       <th>Desde</th>
+      <th></th>
     </tr>
     @for (ingreso of ingresos(); track ingreso.id) {
       <tr>
-        <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
-        <td>{{ ingreso.descripcion }}</td>
-        <td>{{ ingreso.monto | number: '1.0-0' }}</td>
-        <td>{{ ingreso.periodicidad }}</td>
-        <td>{{ ingreso.fechaInicio }}</td>
+        @if (editandoId() === ingreso.id) {
+          <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
+          <td><input [(ngModel)]="descripcionEdit" name="descripcionEdit" /></td>
+          <td><input type="number" [(ngModel)]="montoEdit" name="montoEdit" /></td>
+          <td>{{ ingreso.periodicidad }}</td>
+          <td>{{ ingreso.fechaInicio }}</td>
+          <td>
+            <button (click)="guardarEdicion(ingreso.id)">Guardar</button>
+            <button (click)="cancelarEdicion()">Cancelar</button>
+          </td>
+        } @else {
+          <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
+          <td>{{ ingreso.descripcion }}</td>
+          <td>{{ ingreso.monto | number: '1.0-0' }}</td>
+          <td>{{ ingreso.periodicidad }}</td>
+          <td>{{ ingreso.fechaInicio }}</td>
+          <td>
+            <button (click)="editar(ingreso)">Editar</button>
+            <button (click)="eliminar(ingreso.id)">Eliminar</button>
+          </td>
+        }
       </tr>
     }
   </table>

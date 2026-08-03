@@ -47,6 +47,11 @@ export class Gastos implements OnInit {
   protected fecha = new Date().toISOString().slice(0, 10);
   protected items: ItemBorrador[] = [];
 
+  protected readonly editandoId = signal<string | null>(null);
+  protected descripcionEdit = '';
+  protected montoTotalEdit: number | null = null;
+  protected fechaEdit = '';
+
   ngOnInit(): void {
     forkJoin({
       categorias: this.api.categorias(this.session.hogarId),
@@ -151,6 +156,35 @@ export class Gastos implements OnInit {
     const creado = await firstValueFrom(this.api.crearLugar({ hogarId: this.session.hogarId, nombre }));
     this.lugares.update((lista) => [...lista, creado]);
     return creado.id;
+  }
+
+  editarGasto(gasto: GastoConItems): void {
+    this.editandoId.set(gasto.id);
+    this.descripcionEdit = gasto.descripcion;
+    this.montoTotalEdit = gasto.montoTotal;
+    this.fechaEdit = gasto.fecha;
+  }
+
+  cancelarEdicionGasto(): void {
+    this.editandoId.set(null);
+  }
+
+  guardarEdicionGasto(id: string): void {
+    if (!this.descripcionEdit || !this.montoTotalEdit || !this.fechaEdit) return;
+    this.api
+      .editarGasto(id, {
+        descripcion: this.descripcionEdit,
+        montoTotal: this.montoTotalEdit,
+        fecha: this.fechaEdit,
+      })
+      .subscribe(() => {
+        this.editandoId.set(null);
+        this.cargarGastos();
+      });
+  }
+
+  eliminarGasto(id: string): void {
+    this.api.eliminarGasto(id).subscribe(() => this.cargarGastos());
   }
 
   private cargarGastos(): void {

@@ -2,11 +2,23 @@
   <button (click)="volver()">&larr; Volver</button>
 
   <div class="card">
-    <h2>{{ i.obligacion.descripcion }}</h2>
-    <p>Categoría: {{ i.categoria.nombre }}</p>
-    <p>Monto: {{ i.monto | number: '1.0-0' }}</p>
-    <p>Vence: {{ i.fechaVencimiento }}</p>
-    <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
+    <div style="display:flex; justify-content: space-between; align-items:start;">
+      <div>
+        <h2>{{ i.obligacion.descripcion }}</h2>
+        <p>Categoría: {{ i.categoria.nombre }}</p>
+        <p>Monto: {{ i.monto | number: '1.0-0' }}</p>
+        <p>Vence: {{ i.fechaVencimiento }}</p>
+        @if (i.obligacion.numeroCuotas) {
+          <p>Cuotas: {{ i.obligacion.numeroCuotas }}</p>
+        }
+        <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
+      </div>
+      <div style="display:flex; gap:0.5rem;">
+        <a [routerLink]="['/obligaciones', i.obligacion.id, 'editar']"><button>Editar</button></a>
+        <button (click)="desactivarObligacion()">Desactivar</button>
+        <button (click)="eliminarObligacion()">Eliminar</button>
+      </div>
+    </div>
   </div>
 
   @if (i.pago; as pago) {
@@ -14,6 +26,9 @@
       <h3>Comprobante</h3>
       <p>Pagado el {{ pago.fechaPago }} · {{ pago.montoPagado | number: '1.0-0' }}</p>
       <a [href]="pago.urlComprobante" target="_blank">Ver comprobante</a>
+      <div>
+        <button (click)="revertirPago()">Revertir pago</button>
+      </div>
     </div>
   } @else {
     <div class="card">

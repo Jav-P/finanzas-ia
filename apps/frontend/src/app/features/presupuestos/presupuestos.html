@@ -11,6 +11,7 @@
       <th>Presupuestado</th>
       <th>Gastado</th>
       <th>Diferencia</th>
+      <th></th>
     </tr>
     @for (item of resumen(); track item.categoriaId) {
       <tr>
@@ -20,6 +21,11 @@
         <td [style.color]="item.diferencia < 0 ? '#dc2626' : '#16a34a'">
           {{ item.diferencia | number: '1.0-0' }}
           {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
+        </td>
+        <td>
+          @if (presupuestoIdPorCategoria().has(item.categoriaId)) {
+            <button (click)="eliminarPresupuesto(item.categoriaId)">Eliminar</button>
+          }
         </td>
       </tr>
     }

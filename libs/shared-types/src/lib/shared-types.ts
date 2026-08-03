@@ -256,3 +256,31 @@ export interface HistoricoPrecioItem {
   cantidad: number;
   precioUnitario: number;
 }
+
+// --- OCR (Claude API) ---
+// Resultados "borrador": no se guardan solos, el usuario los revisa y
+// confirma antes de persistirlos via los endpoints normales (POST
+// /gastos, etc).
+
+export interface FacturaOcrItem {
+  productoNombre: string;
+  cantidad: number;
+  precioUnitario: number;
+}
+
+export interface FacturaOcrResultado {
+  lugarNombre: string | null;
+  fecha: string | null; // YYYY-MM-DD
+  montoTotal: number | null;
+  items: FacturaOcrItem[];
+}
+
+export interface ExtractoTransaccion {
+  fecha: string; // YYYY-MM-DD
+  descripcion: string;
+  monto: number;
+}
+
+export interface ExtractoOcrResultado {
+  transacciones: ExtractoTransaccion[];
+}

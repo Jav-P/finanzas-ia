@@ -14,6 +14,7 @@ import { MediosPagoModule } from './medios-pago/medios-pago.module';
 import { LugaresModule } from './lugares/lugares.module';
 import { ProductosModule } from './productos/productos.module';
 import { GastosModule } from './gastos/gastos.module';
+import { OcrModule } from './ocr/ocr.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { GastosModule } from './gastos/gastos.module';
     LugaresModule,
     ProductosModule,
     GastosModule,
+    OcrModule,
   ],
   controllers: [AppController],
   providers: [AppService],

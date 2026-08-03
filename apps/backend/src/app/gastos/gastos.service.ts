@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateGastoDto, GastoConItems } from '@finanzas-ia/shared-types';
+import type { CreateGastoDto, GastoConItems, UpdateGastoDto } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { toGasto, toGastoItem } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
@@ -87,6 +87,63 @@ export class GastosService {
     throwIfError(itemsError);
 
     return { ...toGasto(gastoRow), items: (itemRows ?? []).map(toGastoItem) };
+  }
+
+  async update(id: string, dto: UpdateGastoDto): Promise<GastoConItems> {
+    const patch: Record<string, unknown> = {};
+    if (dto.usuarioId !== undefined) patch['usuario_id'] = dto.usuarioId;
+    if (dto.categoriaId !== undefined) patch['categoria_id'] = dto.categoriaId;
+    if (dto.lugarId !== undefined) patch['lugar_id'] = dto.lugarId;
+    if (dto.medioPagoId !== undefined) patch['medio_pago_id'] = dto.medioPagoId;
+    if (dto.descripcion !== undefined) patch['descripcion'] = dto.descripcion;
+    if (dto.montoTotal !== undefined) patch['monto_total'] = dto.montoTotal;
+    if (dto.fecha !== undefined) patch['fecha'] = dto.fecha;
+
+    const { data: gastoRow, error } = await this.supabase.client
+      .from('gastos')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    throwIfError(error);
+    if (!gastoRow) throw new NotFoundException('Gasto no encontrado');
+
+    // Si vienen items, reemplazan por completo los existentes.
+    if (dto.items !== undefined) {
+      const { error: deleteError } = await this.supabase.client
+        .from('gasto_items')
+        .delete()
+        .eq('gasto_id', id);
+      throwIfError(deleteError);
+
+      if (dto.items.length) {
+        const { error: insertError } = await this.supabase.client.from('gasto_items').insert(
+          dto.items.map((item) => ({
+            gasto_id: id,
+            producto_id: item.productoId,
+            cantidad: item.cantidad,
+            precio_unitario: item.precioUnitario,
+            calificacion: item.calificacion ?? null,
+          })),
+        );
+        throwIfError(insertError);
+      }
+    }
+
+    const itemsByGasto = await this.fetchItemsAgrupados([id]);
+    return { ...toGasto(gastoRow), items: itemsByGasto.get(id) ?? [] };
+  }
+
+  async remove(id: string): Promise<void> {
+    const { error: itemsError } = await this.supabase.client
+      .from('gasto_items')
+      .delete()
+      .eq('gasto_id', id);
+    throwIfError(itemsError);
+
+    const { error } = await this.supabase.client.from('gastos').delete().eq('id', id);
+    throwIfError(error);
   }
 
   private async fetchItemsAgrupados(gastoIds: string[]) {

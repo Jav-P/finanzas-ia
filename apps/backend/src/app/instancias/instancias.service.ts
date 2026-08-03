@@ -142,6 +142,34 @@ export class InstanciasService {
     return this.withSignedUrl(toPago(pagoRow));
   }
 
+  // Elimina el pago registrado (y su comprobante en Storage) y devuelve
+  // la instancia a estado pendiente/vencido.
+  async revertirPago(instanciaId: string): Promise<void> {
+    const { data: pagoRow, error } = await this.supabase.client
+      .from('pagos')
+      .select('*')
+      .eq('instancia_id', instanciaId)
+      .maybeSingle();
+    throwIfError(error);
+    if (!pagoRow) throw new NotFoundException('Esta instancia no tiene un pago registrado');
+
+    const { error: deleteError } = await this.supabase.client
+      .from('pagos')
+      .delete()
+      .eq('instancia_id', instanciaId);
+    throwIfError(deleteError);
+
+    if (pagoRow.url_comprobante) {
+      await this.supabase.client.storage.from(BUCKET).remove([pagoRow.url_comprobante]);
+    }
+
+    const { error: updateError } = await this.supabase.client
+      .from('obligacion_instancias')
+      .update({ estado: 'pendiente' })
+      .eq('id', instanciaId);
+    throwIfError(updateError);
+  }
+
   private async withSignedUrl(pago: Pago): Promise<Pago> {
     const { data, error } = await this.supabase.client.storage
       .from(BUCKET)

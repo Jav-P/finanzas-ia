@@ -35,6 +35,7 @@ export interface Obligacion {
   monto: number;
   recurrencia: Recurrencia;
   diaVencimiento: number | null; // solo si recurrencia = 'mensual'
+  numeroCuotas: number | null; // solo si recurrencia = 'mensual'; null = indefinida
   fechaInicio: string;
   activa: boolean;
   createdAt: string;
@@ -74,6 +75,8 @@ export interface CreateCategoriaDto {
   color?: string | null;
 }
 
+export type UpdateCategoriaDto = Partial<Omit<CreateCategoriaDto, 'hogarId'>>;
+
 export interface CreateObligacionDto {
   hogarId: string;
   usuarioResponsableId?: string | null;
@@ -82,6 +85,7 @@ export interface CreateObligacionDto {
   monto: number;
   recurrencia: Recurrencia;
   diaVencimiento?: number | null;
+  numeroCuotas?: number | null;
   fechaInicio: string;
 }
 
@@ -118,6 +122,8 @@ export interface CreateIngresoDto {
   fechaInicio: string;
 }
 
+export type UpdateIngresoDto = Partial<Omit<CreateIngresoDto, 'hogarId'>>;
+
 export interface BalancePersona {
   usuarioId: string;
   nombre: string;
@@ -152,6 +158,8 @@ export interface CreateMedioPagoDto {
   tipo: TipoMedioPago;
 }
 
+export type UpdateMedioPagoDto = Partial<Omit<CreateMedioPagoDto, 'hogarId'>>;
+
 export interface Lugar {
   id: string;
   hogarId: string;
@@ -163,6 +171,8 @@ export interface CreateLugarDto {
   hogarId: string;
   nombre: string;
 }
+
+export type UpdateLugarDto = Partial<Omit<CreateLugarDto, 'hogarId'>>;
 
 export interface Producto {
   id: string;
@@ -177,6 +187,8 @@ export interface CreateProductoDto {
   categoriaId?: string | null;
   nombre: string;
 }
+
+export type UpdateProductoDto = Partial<Omit<CreateProductoDto, 'hogarId'>>;
 
 export interface GastoItem {
   id: string;
@@ -224,6 +236,10 @@ export interface CreateGastoDto {
 export interface GastoConItems extends Gasto {
   items: GastoItem[];
 }
+
+// Si se incluye "items", reemplaza por completo los items existentes
+// del gasto; si se omite, los items actuales quedan sin tocar.
+export type UpdateGastoDto = Partial<Omit<CreateGastoDto, 'hogarId'>>;
 
 export interface Presupuesto {
   id: string;

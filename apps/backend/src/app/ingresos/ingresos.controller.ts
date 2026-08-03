@@ -1,5 +1,15 @@
-import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common';
-import type { CreateIngresoDto } from '@finanzas-ia/shared-types';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import type { CreateIngresoDto, UpdateIngresoDto } from '@finanzas-ia/shared-types';
 import { IngresosService } from './ingresos.service';
 
 @Controller('ingresos')
@@ -22,5 +32,15 @@ export class IngresosController {
       );
     }
     return this.ingresos.create(dto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateIngresoDto) {
+    return this.ingresos.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.ingresos.remove(id);
   }
 }

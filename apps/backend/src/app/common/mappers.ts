@@ -47,6 +47,7 @@ export function toObligacion(row: any): Obligacion {
     monto: row.monto,
     recurrencia: row.recurrencia,
     diaVencimiento: row.dia_vencimiento,
+    numeroCuotas: row.numero_cuotas,
     fechaInicio: row.fecha_inicio,
     activa: row.activa,
     createdAt: row.created_at,

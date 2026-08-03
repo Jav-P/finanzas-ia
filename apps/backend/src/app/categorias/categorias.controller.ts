@@ -1,5 +1,15 @@
-import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common';
-import type { CreateCategoriaDto } from '@finanzas-ia/shared-types';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import type { CreateCategoriaDto, UpdateCategoriaDto } from '@finanzas-ia/shared-types';
 import { CategoriasService } from './categorias.service';
 
 @Controller('categorias')
@@ -20,5 +30,15 @@ export class CategoriasController {
       throw new BadRequestException('hogarId y nombre son requeridos');
     }
     return this.categorias.create(dto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateCategoriaDto) {
+    return this.categorias.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.categorias.remove(id);
   }
 }

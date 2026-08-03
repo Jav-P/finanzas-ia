@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import type { CreateLugarDto, Lugar } from '@finanzas-ia/shared-types';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type { CreateLugarDto, Lugar, UpdateLugarDto } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { toLugar } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
@@ -41,5 +41,26 @@ export class LugaresService {
     if (existente) return toLugar(existente);
 
     return this.create({ hogarId, nombre });
+  }
+
+  async update(id: string, dto: UpdateLugarDto): Promise<Lugar> {
+    const patch: Record<string, unknown> = {};
+    if (dto.nombre !== undefined) patch['nombre'] = dto.nombre;
+
+    const { data, error } = await this.supabase.client
+      .from('lugares')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    throwIfError(error);
+    if (!data) throw new NotFoundException('Lugar no encontrado');
+    return toLugar(data);
+  }
+
+  async remove(id: string): Promise<void> {
+    const { error } = await this.supabase.client.from('lugares').delete().eq('id', id);
+    throwIfError(error);
   }
 }

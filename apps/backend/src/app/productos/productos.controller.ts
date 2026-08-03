@@ -1,5 +1,15 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import type { CreateProductoDto } from '@finanzas-ia/shared-types';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import type { CreateProductoDto, UpdateProductoDto } from '@finanzas-ia/shared-types';
 import { ProductosService } from './productos.service';
 
 @Controller('productos')
@@ -25,5 +35,15 @@ export class ProductosController {
   @Get(':id/historico-precios')
   historicoPrecios(@Param('id') id: string) {
     return this.productos.historicoPrecios(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateProductoDto) {
+    return this.productos.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.productos.remove(id);
   }
 }

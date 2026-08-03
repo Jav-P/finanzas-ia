@@ -1,4 +1,13 @@
-import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import type { CreatePresupuestoDto } from '@finanzas-ia/shared-types';
 import { PresupuestosService } from './presupuestos.service';
 
@@ -30,5 +39,10 @@ export class PresupuestosController {
       );
     }
     return this.presupuestos.upsert(dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.presupuestos.remove(id);
   }
 }

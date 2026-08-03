@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -48,5 +49,10 @@ export class InstanciasController {
       throw new BadRequestException('usuarioPagoId, fechaPago y montoPagado son requeridos');
     }
     return this.instancias.registrarPago(id, dto, file);
+  }
+
+  @Delete(':id/pago')
+  revertirPago(@Param('id') id: string) {
+    return this.instancias.revertirPago(id);
   }
 }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -40,5 +41,10 @@ export class ObligacionesController {
   @Patch(':id/desactivar')
   desactivar(@Param('id') id: string) {
     return this.obligaciones.desactivar(id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.obligaciones.remove(id);
   }
 }

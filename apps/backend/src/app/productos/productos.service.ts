@@ -1,5 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import type { CreateProductoDto, HistoricoPrecioItem, Producto } from '@finanzas-ia/shared-types';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type {
+  CreateProductoDto,
+  HistoricoPrecioItem,
+  Producto,
+  UpdateProductoDto,
+} from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { toLugar, toProducto } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
@@ -45,6 +50,28 @@ export class ProductosService {
     if (existente) return toProducto(existente);
 
     return this.create({ hogarId, nombre });
+  }
+
+  async update(id: string, dto: UpdateProductoDto): Promise<Producto> {
+    const patch: Record<string, unknown> = {};
+    if (dto.nombre !== undefined) patch['nombre'] = dto.nombre;
+    if (dto.categoriaId !== undefined) patch['categoria_id'] = dto.categoriaId;
+
+    const { data, error } = await this.supabase.client
+      .from('productos')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    throwIfError(error);
+    if (!data) throw new NotFoundException('Producto no encontrado');
+    return toProducto(data);
+  }
+
+  async remove(id: string): Promise<void> {
+    const { error } = await this.supabase.client.from('productos').delete().eq('id', id);
+    throwIfError(error);
   }
 
   // Punto 4: comparar precios de un producto (ej. "carne") a traves del

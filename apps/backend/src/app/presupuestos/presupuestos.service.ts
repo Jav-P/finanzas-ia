@@ -43,6 +43,11 @@ export class PresupuestosService {
     return toPresupuesto(data);
   }
 
+  async remove(id: string): Promise<void> {
+    const { error } = await this.supabase.client.from('presupuestos').delete().eq('id', id);
+    throwIfError(error);
+  }
+
   async resumen(hogarId: string, periodo: string): Promise<PresupuestoResumenItem[]> {
     const inicio = periodStart(periodo);
     const fin = periodEnd(periodo);

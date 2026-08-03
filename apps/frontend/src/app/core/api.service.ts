@@ -12,6 +12,7 @@ import type {
   CreatePresupuestoDto,
   CreateProductoDto,
   GastoConItems,
+  GenerarInstanciasResultado,
   HistoricoPrecioItem,
   Ingreso,
   InstanciaConDetalle,
@@ -78,6 +79,10 @@ export class ApiService {
 
   eliminarObligacion(id: string) {
     return this.http.delete<void>(`${API_URL}/obligaciones/${id}`);
+  }
+
+  generarInstanciasPendientes() {
+    return this.http.post<GenerarInstanciasResultado>(`${API_URL}/obligaciones/generar-instancias`, {});
   }
 
   // Instancias

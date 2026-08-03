@@ -35,6 +35,7 @@
     <select name="recurrencia" [(ngModel)]="recurrencia">
       <option value="mensual">Mensual</option>
       <option value="unica">Única</option>
+      <option value="diaria">Diaria (solo para pruebas)</option>
     </select>
   </label>
 
@@ -43,7 +44,9 @@
       Día de vencimiento (1-31)
       <input name="diaVencimiento" type="number" min="1" max="31" [(ngModel)]="diaVencimiento" />
     </label>
+  }
 
+  @if (recurrencia !== 'unica') {
     <label>
       Número de cuotas (vacío = indefinida, ej. administración)
       <input name="numeroCuotas" type="number" min="1" [(ngModel)]="numeroCuotas" placeholder="ej. 36 para un crédito" />
@@ -51,7 +54,7 @@
   }
 
   <label>
-    Fecha {{ recurrencia === 'mensual' ? 'del primer vencimiento' : 'de vencimiento' }}
+    Fecha {{ recurrencia === 'unica' ? 'de vencimiento' : 'del primer vencimiento' }}
     <input name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
   </label>
 

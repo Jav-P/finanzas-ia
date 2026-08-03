@@ -28,6 +28,13 @@ export class ObligacionesController {
     return this.obligaciones.create(dto);
   }
 
+  // Trigger manual del generador de instancias (mensual/diaria). Util
+  // para pruebas y como destino de un cron externo (ej. GitHub Actions).
+  @Post('generar-instancias')
+  generarInstancias() {
+    return this.obligaciones.generarPendientes();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.obligaciones.findOne(id);

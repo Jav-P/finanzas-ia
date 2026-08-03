@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import type { Categoria, Recurrencia } from '@finanzas-ia/shared-types';
+import type { Categoria, RecurrenciaObligacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 
@@ -24,7 +24,7 @@ export class ObligacionForm implements OnInit {
   protected monto: number | null = null;
   protected categoriaId = '';
   protected usuarioResponsableId = ''; // '' = compartida
-  protected recurrencia: Recurrencia = 'mensual';
+  protected recurrencia: RecurrenciaObligacion = 'mensual';
   protected diaVencimiento: number | null = null;
   protected numeroCuotas: number | null = null;
   protected fechaInicio = '';
@@ -62,7 +62,7 @@ export class ObligacionForm implements OnInit {
       monto: this.monto,
       recurrencia: this.recurrencia,
       diaVencimiento: this.recurrencia === 'mensual' ? this.diaVencimiento : null,
-      numeroCuotas: this.recurrencia === 'mensual' ? this.numeroCuotas : null,
+      numeroCuotas: this.recurrencia !== 'unica' ? this.numeroCuotas : null,
       fechaInicio: this.fechaInicio,
     };
 

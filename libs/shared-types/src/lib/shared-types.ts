@@ -2,6 +2,9 @@
 // reflejando el esquema de supabase/migrations/*_init_schema.sql.
 
 export type Recurrencia = 'unica' | 'mensual';
+// 'diaria' es solo para probar el generador de instancias en dias en
+// vez de esperar un mes calendario; no tiene sentido para ingresos.
+export type RecurrenciaObligacion = Recurrencia | 'diaria';
 export type EstadoInstancia = 'pendiente' | 'pagado' | 'vencido';
 
 export interface Hogar {
@@ -33,9 +36,9 @@ export interface Obligacion {
   categoriaId: string;
   descripcion: string;
   monto: number;
-  recurrencia: Recurrencia;
+  recurrencia: RecurrenciaObligacion;
   diaVencimiento: number | null; // solo si recurrencia = 'mensual'
-  numeroCuotas: number | null; // solo si recurrencia = 'mensual'; null = indefinida
+  numeroCuotas: number | null; // solo si recurrencia != 'unica'; null = indefinida
   fechaInicio: string;
   activa: boolean;
   createdAt: string;
@@ -83,13 +86,18 @@ export interface CreateObligacionDto {
   categoriaId: string;
   descripcion: string;
   monto: number;
-  recurrencia: Recurrencia;
+  recurrencia: RecurrenciaObligacion;
   diaVencimiento?: number | null;
   numeroCuotas?: number | null;
   fechaInicio: string;
 }
 
 export type UpdateObligacionDto = Partial<Omit<CreateObligacionDto, 'hogarId'>>;
+
+export interface GenerarInstanciasResultado {
+  obligacionesRevisadas: number;
+  instanciasCreadas: number;
+}
 
 export interface RegistrarPagoDto {
   usuarioPagoId: string;

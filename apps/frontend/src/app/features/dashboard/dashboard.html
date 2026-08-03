@@ -34,9 +34,16 @@
       @if (otroUsuario(); as otro) {
         <button (click)="verOtro()">Ver las de {{ otro.nombre }}</button>
       }
+      <button (click)="generarInstancias()" [disabled]="generando()" title="Genera las cuotas mensuales/diarias pendientes (normalmente lo hace un cron una vez al dia)">
+        Generar instancias pendientes
+      </button>
       <a routerLink="/obligaciones/nueva"><button>+ Nueva obligación</button></a>
     </div>
   </div>
+
+  @if (mensajeGeneracion(); as msg) {
+    <p><em>{{ msg }}</em></p>
+  }
 
   @if (!instancias().length) {
     <p>No hay obligaciones registradas.</p>

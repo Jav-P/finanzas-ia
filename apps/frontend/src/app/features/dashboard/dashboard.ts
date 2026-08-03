@@ -29,6 +29,8 @@ export class Dashboard implements OnInit {
   protected readonly balance = signal<Balance | null>(null);
   protected readonly instancias = signal<InstanciaConDetalle[]>([]);
   protected readonly viendoUsuarioId = signal<string | null>(null);
+  protected readonly generando = signal(false);
+  protected readonly mensajeGeneracion = signal<string | null>(null);
 
   protected readonly otroUsuario = computed(() =>
     this.session.usuarios().find((u) => u.id !== this.viendoUsuarioId()),
@@ -65,6 +67,22 @@ export class Dashboard implements OnInit {
     if (instancia.estado === 'pagado') return 'pagado';
     if (instancia.estado === 'vencido') return 'vencido';
     return diasRestantes(instancia.fechaVencimiento) <= 5 ? 'proximo' : 'pendiente';
+  }
+
+  // Dispara a mano el generador de instancias (mensual/diaria) en vez
+  // de esperar al cron diario; util mientras se prueba con una
+  // obligacion "diaria".
+  generarInstancias(): void {
+    this.generando.set(true);
+    this.mensajeGeneracion.set(null);
+    this.api.generarInstanciasPendientes().subscribe((resultado) => {
+      this.generando.set(false);
+      this.mensajeGeneracion.set(
+        `${resultado.instanciasCreadas} instancia(s) nueva(s) (de ${resultado.obligacionesRevisadas} obligaciones revisadas)`,
+      );
+      const usuarioId = this.viendoUsuarioId();
+      if (usuarioId) this.cargarInstancias(usuarioId);
+    });
   }
 
   private cargarInstancias(usuarioId: string): void {

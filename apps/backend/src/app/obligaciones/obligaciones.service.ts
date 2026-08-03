@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type {
   CreateObligacionDto,
+  GenerarInstanciasResultado,
   Obligacion,
   UpdateObligacionDto,
 } from '@finanzas-ia/shared-types';
@@ -9,13 +10,33 @@ import { toObligacion } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 
 const BUCKET_COMPROBANTES = 'comprobantes';
+const UNIQUE_VIOLATION = '23505';
+const TOPE_ITERACIONES = 60; // salvaguarda: max instancias a generar por obligacion en una corrida
 
 function firstDayOfMonth(dateIso: string): string {
   return `${dateIso.slice(0, 7)}-01`;
 }
 
+function hoyIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function addDays(dateIso: string, dias: number): string {
+  const fecha = new Date(`${dateIso}T00:00:00Z`);
+  fecha.setUTCDate(fecha.getUTCDate() + dias);
+  return fecha.toISOString().slice(0, 10);
+}
+
+function addMonths(dateIso: string, meses: number): string {
+  const fecha = new Date(`${dateIso}T00:00:00Z`);
+  fecha.setUTCMonth(fecha.getUTCMonth() + meses);
+  return fecha.toISOString().slice(0, 10);
+}
+
 @Injectable()
 export class ObligacionesService {
+  private readonly logger = new Logger(ObligacionesService.name);
+
   constructor(private readonly supabase: SupabaseService) {}
 
   async create(dto: CreateObligacionDto): Promise<Obligacion> {
@@ -38,12 +59,15 @@ export class ObligacionesService {
     throwIfError(error);
 
     // La primera instancia se genera de inmediato; las siguientes (para
-    // obligaciones mensuales) las genera el job recurrente (pendiente).
+    // obligaciones mensuales/diarias) las genera generarPendientes().
+    const periodo =
+      dto.recurrencia === 'diaria' ? dto.fechaInicio : firstDayOfMonth(dto.fechaInicio);
+
     const { error: instanciaError } = await this.supabase.client
       .from('obligacion_instancias')
       .insert({
         obligacion_id: obligacionRow.id,
-        periodo: firstDayOfMonth(dto.fechaInicio),
+        periodo,
         fecha_vencimiento: dto.fechaInicio,
         monto: dto.monto,
       });
@@ -140,5 +164,100 @@ export class ObligacionesService {
 
     const { error } = await this.supabase.client.from('obligaciones').delete().eq('id', id);
     throwIfError(error);
+  }
+
+  // Genera las instancias que ya deberian existir (obligaciones mensual/
+  // diaria cuya ultima instancia quedo en el pasado). Se puede llamar a
+  // mano (endpoint) o via cron; "atrapa" varios periodos de una vez si
+  // hace falta (ej. si el proceso estuvo caido unos dias).
+  async generarPendientes(): Promise<GenerarInstanciasResultado> {
+    const { data: obligacionRows, error } = await this.supabase.client
+      .from('obligaciones')
+      .select('*')
+      .eq('activa', true)
+      .in('recurrencia', ['mensual', 'diaria']);
+    throwIfError(error);
+
+    const obligaciones = obligacionRows ?? [];
+    const hoy = hoyIso();
+    let instanciasCreadas = 0;
+
+    for (const obligacionRow of obligaciones) {
+      const obligacion = toObligacion(obligacionRow);
+      instanciasCreadas += await this.generarPendientesDeObligacion(obligacion, hoy);
+    }
+
+    this.logger.log(
+      `generarPendientes: ${obligaciones.length} obligaciones revisadas, ${instanciasCreadas} instancias creadas`,
+    );
+
+    return { obligacionesRevisadas: obligaciones.length, instanciasCreadas };
+  }
+
+  private async generarPendientesDeObligacion(obligacion: Obligacion, hoy: string): Promise<number> {
+    const { data: ultimaInstancia, error } = await this.supabase.client
+      .from('obligacion_instancias')
+      .select('*')
+      .eq('obligacion_id', obligacion.id)
+      .order('fecha_vencimiento', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    throwIfError(error);
+    if (!ultimaInstancia) return 0; // no deberia pasar: create() siempre genera la primera
+
+    let ultimaFecha: string = ultimaInstancia.fecha_vencimiento;
+    let cuotasGeneradas: number | null = null;
+    let creadas = 0;
+
+    for (let i = 0; i < TOPE_ITERACIONES; i++) {
+      const siguienteFecha =
+        obligacion.recurrencia === 'diaria' ? addDays(ultimaFecha, 1) : addMonths(ultimaFecha, 1);
+
+      if (siguienteFecha > hoy) break;
+
+      if (obligacion.numeroCuotas != null) {
+        if (cuotasGeneradas === null) {
+          cuotasGeneradas = await this.contarInstancias(obligacion.id);
+        }
+        if (cuotasGeneradas >= obligacion.numeroCuotas) {
+          await this.supabase.client
+            .from('obligaciones')
+            .update({ activa: false })
+            .eq('id', obligacion.id);
+          break;
+        }
+      }
+
+      const periodo =
+        obligacion.recurrencia === 'diaria' ? siguienteFecha : firstDayOfMonth(siguienteFecha);
+
+      const { error: insertError } = await this.supabase.client.from('obligacion_instancias').insert({
+        obligacion_id: obligacion.id,
+        periodo,
+        fecha_vencimiento: siguienteFecha,
+        monto: obligacion.monto,
+      });
+
+      if (insertError && (insertError as { code?: string }).code !== UNIQUE_VIOLATION) {
+        throwIfError(insertError);
+      }
+      if (!insertError) {
+        creadas++;
+        if (cuotasGeneradas !== null) cuotasGeneradas++;
+      }
+
+      ultimaFecha = siguienteFecha;
+    }
+
+    return creadas;
+  }
+
+  private async contarInstancias(obligacionId: string): Promise<number> {
+    const { count, error } = await this.supabase.client
+      .from('obligacion_instancias')
+      .select('*', { count: 'exact', head: true })
+      .eq('obligacion_id', obligacionId);
+    throwIfError(error);
+    return count ?? 0;
   }
 }

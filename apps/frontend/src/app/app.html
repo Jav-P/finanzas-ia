@@ -20,3 +20,12 @@
 <main>
   <router-outlet />
 </main>
+
+@if (notification.mensaje(); as mensaje) {
+  <div class="popup-overlay" (click)="notification.cerrar()">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <p>{{ mensaje }}</p>
+      <button (click)="notification.cerrar()">Cerrar</button>
+    </div>
+  </div>
+}

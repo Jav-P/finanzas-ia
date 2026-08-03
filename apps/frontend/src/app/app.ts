@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ApiService } from './core/api.service';
 import { SessionService } from './core/session.service';
+import { NotificationService } from './core/notification.service';
 
 @Component({
   imports: [RouterModule],
@@ -12,6 +13,7 @@ import { SessionService } from './core/session.service';
 export class App implements OnInit {
   private readonly api = inject(ApiService);
   protected readonly session = inject(SessionService);
+  protected readonly notification = inject(NotificationService);
 
   ngOnInit(): void {
     this.api.usuarios(this.session.hogarId).subscribe((usuarios) => {

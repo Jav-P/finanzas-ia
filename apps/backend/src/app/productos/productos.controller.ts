@@ -1,15 +1,6 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import type { CreateProductoDto, UpdateProductoDto } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { ProductosService } from './productos.service';
 
 @Controller('productos')
@@ -17,19 +8,16 @@ export class ProductosController {
   constructor(private readonly productos: ProductosService) {}
 
   @Get()
-  findAll(@Query('hogarId') hogarId?: string) {
-    if (!hogarId) {
-      throw new BadRequestException('hogarId es requerido');
-    }
+  findAll(@HogarActual() hogarId: string) {
     return this.productos.findByHogar(hogarId);
   }
 
   @Post()
-  create(@Body() dto: CreateProductoDto) {
-    if (!dto.hogarId || !dto.nombre) {
-      throw new BadRequestException('hogarId y nombre son requeridos');
+  create(@HogarActual() hogarId: string, @Body() dto: CreateProductoDto) {
+    if (!dto.nombre) {
+      throw new BadRequestException('nombre es requerido');
     }
-    return this.productos.create(dto);
+    return this.productos.create(hogarId, dto);
   }
 
   @Get(':id/historico-precios')

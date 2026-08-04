@@ -1,15 +1,6 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import type { CreateLugarDto, UpdateLugarDto } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { LugaresService } from './lugares.service';
 
 @Controller('lugares')
@@ -17,19 +8,16 @@ export class LugaresController {
   constructor(private readonly lugares: LugaresService) {}
 
   @Get()
-  findAll(@Query('hogarId') hogarId?: string) {
-    if (!hogarId) {
-      throw new BadRequestException('hogarId es requerido');
-    }
+  findAll(@HogarActual() hogarId: string) {
     return this.lugares.findByHogar(hogarId);
   }
 
   @Post()
-  create(@Body() dto: CreateLugarDto) {
-    if (!dto.hogarId || !dto.nombre) {
-      throw new BadRequestException('hogarId y nombre son requeridos');
+  create(@HogarActual() hogarId: string, @Body() dto: CreateLugarDto) {
+    if (!dto.nombre) {
+      throw new BadRequestException('nombre es requerido');
     }
-    return this.lugares.create(dto);
+    return this.lugares.create(hogarId, dto);
   }
 
   @Patch(':id')

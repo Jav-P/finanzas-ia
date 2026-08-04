@@ -19,11 +19,11 @@ export class IngresosService {
     return (data ?? []).map(toIngreso);
   }
 
-  async create(dto: CreateIngresoDto): Promise<Ingreso> {
+  async create(hogarId: string, dto: CreateIngresoDto): Promise<Ingreso> {
     const { data, error } = await this.supabase.client
       .from('ingresos')
       .insert({
-        hogar_id: dto.hogarId,
+        hogar_id: hogarId,
         usuario_id: dto.usuarioId,
         descripcion: dto.descripcion,
         monto: dto.monto,

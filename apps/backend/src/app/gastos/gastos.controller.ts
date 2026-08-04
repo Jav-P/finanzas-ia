@@ -10,6 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import type { CreateGastoDto, UpdateGastoDto } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { GastosService } from './gastos.service';
 
 @Controller('gastos')
@@ -18,13 +19,10 @@ export class GastosController {
 
   @Get()
   findAll(
-    @Query('hogarId') hogarId?: string,
+    @HogarActual() hogarId: string,
     @Query('desde') desde?: string,
     @Query('hasta') hasta?: string,
   ) {
-    if (!hogarId) {
-      throw new BadRequestException('hogarId es requerido');
-    }
     return this.gastos.findByHogar(hogarId, desde, hasta);
   }
 
@@ -34,13 +32,13 @@ export class GastosController {
   }
 
   @Post()
-  create(@Body() dto: CreateGastoDto) {
-    if (!dto.hogarId || !dto.usuarioId || !dto.categoriaId || !dto.descripcion || !dto.montoTotal || !dto.fecha) {
+  create(@HogarActual() hogarId: string, @Body() dto: CreateGastoDto) {
+    if (!dto.usuarioId || !dto.categoriaId || !dto.descripcion || !dto.montoTotal || !dto.fecha) {
       throw new BadRequestException(
-        'hogarId, usuarioId, categoriaId, descripcion, montoTotal y fecha son requeridos',
+        'usuarioId, categoriaId, descripcion, montoTotal y fecha son requeridos',
       );
     }
-    return this.gastos.create(dto);
+    return this.gastos.create(hogarId, dto);
   }
 
   @Patch(':id')

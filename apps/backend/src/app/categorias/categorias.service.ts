@@ -19,11 +19,11 @@ export class CategoriasService {
     return (data ?? []).map(toCategoria);
   }
 
-  async create(dto: CreateCategoriaDto): Promise<Categoria> {
+  async create(hogarId: string, dto: CreateCategoriaDto): Promise<Categoria> {
     const { data, error } = await this.supabase.client
       .from('categorias')
       .insert({
-        hogar_id: dto.hogarId,
+        hogar_id: hogarId,
         nombre: dto.nombre,
         color: dto.color ?? null,
       })

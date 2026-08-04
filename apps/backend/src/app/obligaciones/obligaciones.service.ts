@@ -39,11 +39,11 @@ export class ObligacionesService {
 
   constructor(private readonly supabase: SupabaseService) {}
 
-  async create(dto: CreateObligacionDto): Promise<Obligacion> {
+  async create(hogarId: string, dto: CreateObligacionDto): Promise<Obligacion> {
     const { data: obligacionRow, error } = await this.supabase.client
       .from('obligaciones')
       .insert({
-        hogar_id: dto.hogarId,
+        hogar_id: hogarId,
         usuario_responsable_id: dto.usuarioResponsableId ?? null,
         categoria_id: dto.categoriaId,
         descripcion: dto.descripcion,

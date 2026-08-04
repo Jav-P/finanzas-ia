@@ -19,10 +19,10 @@ export class MediosPagoService {
     return (data ?? []).map(toMedioPago);
   }
 
-  async create(dto: CreateMedioPagoDto): Promise<MedioPago> {
+  async create(hogarId: string, dto: CreateMedioPagoDto): Promise<MedioPago> {
     const { data, error } = await this.supabase.client
       .from('medios_pago')
-      .insert({ hogar_id: dto.hogarId, nombre: dto.nombre, tipo: dto.tipo })
+      .insert({ hogar_id: hogarId, nombre: dto.nombre, tipo: dto.tipo })
       .select()
       .single();
 

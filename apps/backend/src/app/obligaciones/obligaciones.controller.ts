@@ -12,6 +12,7 @@ import type {
   CreateObligacionDto,
   UpdateObligacionDto,
 } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { ObligacionesService } from './obligaciones.service';
 
 @Controller('obligaciones')
@@ -19,17 +20,18 @@ export class ObligacionesController {
   constructor(private readonly obligaciones: ObligacionesService) {}
 
   @Post()
-  create(@Body() dto: CreateObligacionDto) {
-    if (!dto.hogarId || !dto.categoriaId || !dto.descripcion || !dto.monto || !dto.recurrencia || !dto.fechaInicio) {
+  create(@HogarActual() hogarId: string, @Body() dto: CreateObligacionDto) {
+    if (!dto.categoriaId || !dto.descripcion || !dto.monto || !dto.recurrencia || !dto.fechaInicio) {
       throw new BadRequestException(
-        'hogarId, categoriaId, descripcion, monto, recurrencia y fechaInicio son requeridos',
+        'categoriaId, descripcion, monto, recurrencia y fechaInicio son requeridos',
       );
     }
-    return this.obligaciones.create(dto);
+    return this.obligaciones.create(hogarId, dto);
   }
 
-  // Trigger manual del generador de instancias (mensual/diaria). Util
-  // para pruebas y como destino de un cron externo (ej. GitHub Actions).
+  // Trigger manual del generador de instancias (mensual/diaria), para
+  // TODOS los hogares. Util para pruebas y como destino de un cron
+  // externo (ej. GitHub Actions).
   @Post('generar-instancias')
   generarInstancias() {
     return this.obligaciones.generarPendientes();

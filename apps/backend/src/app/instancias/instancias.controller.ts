@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { EstadoInstancia, RegistrarPagoDto } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { InstanciasService } from './instancias.service';
 
 @Controller('instancias')
@@ -20,13 +21,10 @@ export class InstanciasController {
 
   @Get()
   findAll(
-    @Query('hogarId') hogarId?: string,
+    @HogarActual() hogarId: string,
     @Query('usuarioId') usuarioId?: string,
     @Query('estado') estado?: EstadoInstancia,
   ) {
-    if (!hogarId) {
-      throw new BadRequestException('hogarId es requerido');
-    }
     return this.instancias.findAll(hogarId, usuarioId, estado);
   }
 

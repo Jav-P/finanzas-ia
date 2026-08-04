@@ -16,12 +16,20 @@ import { LugaresModule } from './lugares/lugares.module';
 import { ProductosModule } from './productos/productos.module';
 import { GastosModule } from './gastos/gastos.module';
 import { OcrModule } from './ocr/ocr.module';
+import { AuthModule } from './auth/auth.module';
+import { HogaresModule } from './hogares/hogares.module';
+import { InvitacionesModule } from './invitaciones/invitaciones.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
     SupabaseModule,
+    AuthModule,
+    HogaresModule,
+    InvitacionesModule,
+    MailModule,
     UsuariosModule,
     CategoriasModule,
     ObligacionesModule,

@@ -24,11 +24,11 @@ export class ProductosService {
     return (data ?? []).map(toProducto);
   }
 
-  async create(dto: CreateProductoDto): Promise<Producto> {
+  async create(hogarId: string, dto: CreateProductoDto): Promise<Producto> {
     const { data, error } = await this.supabase.client
       .from('productos')
       .insert({
-        hogar_id: dto.hogarId,
+        hogar_id: hogarId,
         categoria_id: dto.categoriaId ?? null,
         nombre: dto.nombre,
       })
@@ -49,7 +49,7 @@ export class ProductosService {
     throwIfError(findError);
     if (existente) return toProducto(existente);
 
-    return this.create({ hogarId, nombre });
+    return this.create(hogarId, { nombre });
   }
 
   async update(id: string, dto: UpdateProductoDto): Promise<Producto> {

@@ -19,10 +19,10 @@ export class LugaresService {
     return (data ?? []).map(toLugar);
   }
 
-  async create(dto: CreateLugarDto): Promise<Lugar> {
+  async create(hogarId: string, dto: CreateLugarDto): Promise<Lugar> {
     const { data, error } = await this.supabase.client
       .from('lugares')
-      .insert({ hogar_id: dto.hogarId, nombre: dto.nombre })
+      .insert({ hogar_id: hogarId, nombre: dto.nombre })
       .select()
       .single();
 
@@ -40,7 +40,7 @@ export class LugaresService {
     throwIfError(findError);
     if (existente) return toLugar(existente);
 
-    return this.create({ hogarId, nombre });
+    return this.create(hogarId, { nombre });
   }
 
   async update(id: string, dto: UpdateLugarDto): Promise<Lugar> {

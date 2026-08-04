@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import type { CreatePresupuestoDto } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { PresupuestosService } from './presupuestos.service';
 
 @Controller('presupuestos')
@@ -16,29 +17,27 @@ export class PresupuestosController {
   constructor(private readonly presupuestos: PresupuestosService) {}
 
   @Get()
-  findAll(@Query('hogarId') hogarId?: string, @Query('periodo') periodo?: string) {
-    if (!hogarId || !periodo) {
-      throw new BadRequestException('hogarId y periodo (YYYY-MM) son requeridos');
+  findAll(@HogarActual() hogarId: string, @Query('periodo') periodo?: string) {
+    if (!periodo) {
+      throw new BadRequestException('periodo (YYYY-MM) es requerido');
     }
     return this.presupuestos.findByHogarYPeriodo(hogarId, periodo);
   }
 
   @Get('resumen')
-  resumen(@Query('hogarId') hogarId?: string, @Query('periodo') periodo?: string) {
-    if (!hogarId || !periodo) {
-      throw new BadRequestException('hogarId y periodo (YYYY-MM) son requeridos');
+  resumen(@HogarActual() hogarId: string, @Query('periodo') periodo?: string) {
+    if (!periodo) {
+      throw new BadRequestException('periodo (YYYY-MM) es requerido');
     }
     return this.presupuestos.resumen(hogarId, periodo);
   }
 
   @Post()
-  upsert(@Body() dto: CreatePresupuestoDto) {
-    if (!dto.hogarId || !dto.categoriaId || !dto.periodo || dto.montoPresupuestado == null) {
-      throw new BadRequestException(
-        'hogarId, categoriaId, periodo y montoPresupuestado son requeridos',
-      );
+  upsert(@HogarActual() hogarId: string, @Body() dto: CreatePresupuestoDto) {
+    if (!dto.categoriaId || !dto.periodo || dto.montoPresupuestado == null) {
+      throw new BadRequestException('categoriaId, periodo y montoPresupuestado son requeridos');
     }
-    return this.presupuestos.upsert(dto);
+    return this.presupuestos.upsert(hogarId, dto);
   }
 
   @Delete(':id')

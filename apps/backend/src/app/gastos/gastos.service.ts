@@ -48,11 +48,11 @@ export class GastosService {
     return { ...toGasto(gastoRow), items: itemsByGasto.get(id) ?? [] };
   }
 
-  async create(dto: CreateGastoDto): Promise<GastoConItems> {
+  async create(hogarId: string, dto: CreateGastoDto): Promise<GastoConItems> {
     const { data: gastoRow, error } = await this.supabase.client
       .from('gastos')
       .insert({
-        hogar_id: dto.hogarId,
+        hogar_id: hogarId,
         usuario_id: dto.usuarioId,
         categoria_id: dto.categoriaId,
         lugar_id: dto.lugarId ?? null,

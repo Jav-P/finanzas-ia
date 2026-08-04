@@ -15,10 +15,51 @@ export interface Hogar {
 
 export interface Usuario {
   id: string;
-  hogarId: string;
+  hogarId: string | null; // null = registrado pero sin hogar (pendiente de crear uno o aceptar invitacion)
   nombre: string;
   email: string;
   createdAt: string;
+}
+
+// --- Auth / invitaciones ---
+
+export interface CompletarRegistroDto {
+  nombre: string;
+  nombreHogar?: string; // requerido si no viene invitacionToken
+  invitacionToken?: string; // si viene, el usuario queda sin hogar hasta aceptar
+}
+
+export interface CompletarRegistroResultado {
+  usuario: Usuario;
+  hogar: Hogar | null; // null si vino de invitacion (pendiente de aceptar)
+}
+
+export type EstadoInvitacion = 'pendiente' | 'aceptada' | 'rechazada';
+
+export interface Invitacion {
+  id: string;
+  hogarId: string;
+  token: string;
+  email: string | null; // null = link generico para compartir a mano
+  estado: EstadoInvitacion;
+  invitadoPor: string;
+  createdAt: string;
+}
+
+export interface CreateInvitacionDto {
+  email?: string; // si viene, se manda un correo; si no, solo se genera el link
+}
+
+export interface InvitacionCreada extends Invitacion {
+  link: string;
+  emailEnviado: boolean;
+}
+
+// Lo que ve quien todavia no se registro, antes de crear su cuenta.
+export interface InvitacionPublica {
+  hogarNombre: string;
+  email: string | null;
+  estado: EstadoInvitacion;
 }
 
 export interface Categoria {
@@ -73,15 +114,13 @@ export interface InstanciaConDetalle extends ObligacionInstancia {
 }
 
 export interface CreateCategoriaDto {
-  hogarId: string;
   nombre: string;
   color?: string | null;
 }
 
-export type UpdateCategoriaDto = Partial<Omit<CreateCategoriaDto, 'hogarId'>>;
+export type UpdateCategoriaDto = Partial<CreateCategoriaDto>;
 
 export interface CreateObligacionDto {
-  hogarId: string;
   usuarioResponsableId?: string | null;
   categoriaId: string;
   descripcion: string;
@@ -92,7 +131,7 @@ export interface CreateObligacionDto {
   fechaInicio: string;
 }
 
-export type UpdateObligacionDto = Partial<Omit<CreateObligacionDto, 'hogarId'>>;
+export type UpdateObligacionDto = Partial<CreateObligacionDto>;
 
 export interface GenerarInstanciasResultado {
   obligacionesRevisadas: number;
@@ -121,7 +160,6 @@ export interface Ingreso {
 }
 
 export interface CreateIngresoDto {
-  hogarId: string;
   usuarioId: string;
   descripcion: string;
   monto: number;
@@ -130,7 +168,7 @@ export interface CreateIngresoDto {
   fechaInicio: string;
 }
 
-export type UpdateIngresoDto = Partial<Omit<CreateIngresoDto, 'hogarId'>>;
+export type UpdateIngresoDto = Partial<CreateIngresoDto>;
 
 export interface BalancePersona {
   usuarioId: string;
@@ -161,12 +199,11 @@ export interface MedioPago {
 }
 
 export interface CreateMedioPagoDto {
-  hogarId: string;
   nombre: string;
   tipo: TipoMedioPago;
 }
 
-export type UpdateMedioPagoDto = Partial<Omit<CreateMedioPagoDto, 'hogarId'>>;
+export type UpdateMedioPagoDto = Partial<CreateMedioPagoDto>;
 
 export interface Lugar {
   id: string;
@@ -176,11 +213,10 @@ export interface Lugar {
 }
 
 export interface CreateLugarDto {
-  hogarId: string;
   nombre: string;
 }
 
-export type UpdateLugarDto = Partial<Omit<CreateLugarDto, 'hogarId'>>;
+export type UpdateLugarDto = Partial<CreateLugarDto>;
 
 export interface Producto {
   id: string;
@@ -191,12 +227,11 @@ export interface Producto {
 }
 
 export interface CreateProductoDto {
-  hogarId: string;
   categoriaId?: string | null;
   nombre: string;
 }
 
-export type UpdateProductoDto = Partial<Omit<CreateProductoDto, 'hogarId'>>;
+export type UpdateProductoDto = Partial<CreateProductoDto>;
 
 export interface GastoItem {
   id: string;
@@ -230,7 +265,6 @@ export interface Gasto {
 }
 
 export interface CreateGastoDto {
-  hogarId: string;
   usuarioId: string;
   categoriaId: string;
   lugarId?: string | null;
@@ -247,7 +281,7 @@ export interface GastoConItems extends Gasto {
 
 // Si se incluye "items", reemplaza por completo los items existentes
 // del gasto; si se omite, los items actuales quedan sin tocar.
-export type UpdateGastoDto = Partial<Omit<CreateGastoDto, 'hogarId'>>;
+export type UpdateGastoDto = Partial<CreateGastoDto>;
 
 export interface Presupuesto {
   id: string;
@@ -259,7 +293,6 @@ export interface Presupuesto {
 }
 
 export interface CreatePresupuestoDto {
-  hogarId: string;
   categoriaId: string;
   periodo: string;
   montoPresupuestado: number;

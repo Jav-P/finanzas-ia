@@ -1,15 +1,6 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import type { CreateCategoriaDto, UpdateCategoriaDto } from '@finanzas-ia/shared-types';
+import { HogarActual } from '../auth/usuario-actual.decorator';
 import { CategoriasService } from './categorias.service';
 
 @Controller('categorias')
@@ -17,19 +8,16 @@ export class CategoriasController {
   constructor(private readonly categorias: CategoriasService) {}
 
   @Get()
-  findAll(@Query('hogarId') hogarId?: string) {
-    if (!hogarId) {
-      throw new BadRequestException('hogarId es requerido');
-    }
+  findAll(@HogarActual() hogarId: string) {
     return this.categorias.findByHogar(hogarId);
   }
 
   @Post()
-  create(@Body() dto: CreateCategoriaDto) {
-    if (!dto.hogarId || !dto.nombre) {
-      throw new BadRequestException('hogarId y nombre son requeridos');
+  create(@HogarActual() hogarId: string, @Body() dto: CreateCategoriaDto) {
+    if (!dto.nombre) {
+      throw new BadRequestException('nombre es requerido');
     }
-    return this.categorias.create(dto);
+    return this.categorias.create(hogarId, dto);
   }
 
   @Patch(':id')

@@ -24,12 +24,12 @@ export class PresupuestosService {
     return (data ?? []).map(toPresupuesto);
   }
 
-  async upsert(dto: CreatePresupuestoDto): Promise<Presupuesto> {
+  async upsert(hogarId: string, dto: CreatePresupuestoDto): Promise<Presupuesto> {
     const { data, error } = await this.supabase.client
       .from('presupuestos')
       .upsert(
         {
-          hogar_id: dto.hogarId,
+          hogar_id: hogarId,
           categoria_id: dto.categoriaId,
           periodo: periodStart(dto.periodo),
           monto_presupuestado: dto.montoPresupuestado,

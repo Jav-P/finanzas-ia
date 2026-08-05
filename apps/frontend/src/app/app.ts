@@ -1,6 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { ApiService } from './core/api.service';
+import { Component, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { SessionService } from './core/session.service';
 import { NotificationService } from './core/notification.service';
 
@@ -10,22 +9,13 @@ import { NotificationService } from './core/notification.service';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements OnInit {
-  private readonly api = inject(ApiService);
+export class App {
   protected readonly session = inject(SessionService);
   protected readonly notification = inject(NotificationService);
+  private readonly router = inject(Router);
 
-  ngOnInit(): void {
-    this.api.usuarios(this.session.hogarId).subscribe((usuarios) => {
-      this.session.setUsuarios(usuarios);
-      if (!this.session.usuarioActualId() && usuarios.length) {
-        this.session.elegirUsuario(usuarios[0].id);
-      }
-    });
-  }
-
-  elegirUsuario(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    this.session.elegirUsuario(id);
+  async cerrarSesion(): Promise<void> {
+    await this.session.cerrarSesion();
+    this.router.navigateByUrl('/login');
   }
 }

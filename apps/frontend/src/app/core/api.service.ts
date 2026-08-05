@@ -3,9 +3,12 @@ import { Injectable, inject } from '@angular/core';
 import type {
   Balance,
   Categoria,
+  CompletarRegistroDto,
+  CompletarRegistroResultado,
   CreateCategoriaDto,
   CreateGastoDto,
   CreateIngresoDto,
+  CreateInvitacionDto,
   CreateLugarDto,
   CreateMedioPagoDto,
   CreateObligacionDto,
@@ -16,6 +19,8 @@ import type {
   HistoricoPrecioItem,
   Ingreso,
   InstanciaConDetalle,
+  InvitacionCreada,
+  InvitacionPublica,
   Lugar,
   MedioPago,
   Obligacion,
@@ -34,18 +39,46 @@ import type {
 } from '@finanzas-ia/shared-types';
 import { API_URL } from './config';
 
+// hogarId ya no se manda desde aca: el backend lo saca del token de
+// Supabase Auth (ver AuthGuard). Todo esto asume que el interceptor de
+// auth ya agrego el header Authorization.
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
 
-  // Usuarios
-  usuarios(hogarId: string) {
-    return this.http.get<Usuario[]>(`${API_URL}/usuarios`, { params: { hogarId } });
+  // Auth / invitaciones
+  usuarioYo() {
+    return this.http.get<Usuario | null>(`${API_URL}/usuarios/yo`);
+  }
+
+  completarRegistro(dto: CompletarRegistroDto) {
+    return this.http.post<CompletarRegistroResultado>(`${API_URL}/auth/completar-registro`, dto);
+  }
+
+  crearInvitacion(dto: CreateInvitacionDto) {
+    return this.http.post<InvitacionCreada>(`${API_URL}/invitaciones`, dto);
+  }
+
+  obtenerInvitacionPublica(token: string) {
+    return this.http.get<InvitacionPublica>(`${API_URL}/invitaciones/${token}`);
+  }
+
+  aceptarInvitacion(token: string) {
+    return this.http.post<void>(`${API_URL}/invitaciones/${token}/aceptar`, {});
+  }
+
+  rechazarInvitacion(token: string) {
+    return this.http.post<void>(`${API_URL}/invitaciones/${token}/rechazar`, {});
+  }
+
+  // Usuarios (del hogar actual)
+  usuarios() {
+    return this.http.get<Usuario[]>(`${API_URL}/usuarios`);
   }
 
   // Categorias
-  categorias(hogarId: string) {
-    return this.http.get<Categoria[]>(`${API_URL}/categorias`, { params: { hogarId } });
+  categorias() {
+    return this.http.get<Categoria[]>(`${API_URL}/categorias`);
   }
 
   crearCategoria(dto: CreateCategoriaDto) {
@@ -86,8 +119,8 @@ export class ApiService {
   }
 
   // Instancias
-  instancias(hogarId: string, usuarioId?: string, estado?: string) {
-    let params = new HttpParams().set('hogarId', hogarId);
+  instancias(usuarioId?: string, estado?: string) {
+    let params = new HttpParams();
     if (usuarioId) params = params.set('usuarioId', usuarioId);
     if (estado) params = params.set('estado', estado);
     return this.http.get<InstanciaConDetalle[]>(`${API_URL}/instancias`, { params });
@@ -111,8 +144,8 @@ export class ApiService {
   }
 
   // Ingresos + balance
-  ingresos(hogarId: string) {
-    return this.http.get<Ingreso[]>(`${API_URL}/ingresos`, { params: { hogarId } });
+  ingresos() {
+    return this.http.get<Ingreso[]>(`${API_URL}/ingresos`);
   }
 
   crearIngreso(dto: CreateIngresoDto) {
@@ -127,19 +160,19 @@ export class ApiService {
     return this.http.delete<void>(`${API_URL}/ingresos/${id}`);
   }
 
-  balance(hogarId: string, periodo: string) {
-    return this.http.get<Balance>(`${API_URL}/balance`, { params: { hogarId, periodo } });
+  balance(periodo: string) {
+    return this.http.get<Balance>(`${API_URL}/balance`, { params: { periodo } });
   }
 
   // Presupuestos
-  presupuestosResumen(hogarId: string, periodo: string) {
+  presupuestosResumen(periodo: string) {
     return this.http.get<PresupuestoResumenItem[]>(`${API_URL}/presupuestos/resumen`, {
-      params: { hogarId, periodo },
+      params: { periodo },
     });
   }
 
-  presupuestos(hogarId: string, periodo: string) {
-    return this.http.get<Presupuesto[]>(`${API_URL}/presupuestos`, { params: { hogarId, periodo } });
+  presupuestos(periodo: string) {
+    return this.http.get<Presupuesto[]>(`${API_URL}/presupuestos`, { params: { periodo } });
   }
 
   guardarPresupuesto(dto: CreatePresupuestoDto) {
@@ -151,8 +184,8 @@ export class ApiService {
   }
 
   // Catalogos
-  mediosPago(hogarId: string) {
-    return this.http.get<MedioPago[]>(`${API_URL}/medios-pago`, { params: { hogarId } });
+  mediosPago() {
+    return this.http.get<MedioPago[]>(`${API_URL}/medios-pago`);
   }
 
   crearMedioPago(dto: CreateMedioPagoDto) {
@@ -167,8 +200,8 @@ export class ApiService {
     return this.http.delete<void>(`${API_URL}/medios-pago/${id}`);
   }
 
-  lugares(hogarId: string) {
-    return this.http.get<Lugar[]>(`${API_URL}/lugares`, { params: { hogarId } });
+  lugares() {
+    return this.http.get<Lugar[]>(`${API_URL}/lugares`);
   }
 
   crearLugar(dto: CreateLugarDto) {
@@ -183,8 +216,8 @@ export class ApiService {
     return this.http.delete<void>(`${API_URL}/lugares/${id}`);
   }
 
-  productos(hogarId: string) {
-    return this.http.get<Producto[]>(`${API_URL}/productos`, { params: { hogarId } });
+  productos() {
+    return this.http.get<Producto[]>(`${API_URL}/productos`);
   }
 
   crearProducto(dto: CreateProductoDto) {
@@ -204,8 +237,8 @@ export class ApiService {
   }
 
   // Gastos
-  gastos(hogarId: string, desde?: string, hasta?: string) {
-    let params = new HttpParams().set('hogarId', hogarId);
+  gastos(desde?: string, hasta?: string) {
+    let params = new HttpParams();
     if (desde) params = params.set('desde', desde);
     if (hasta) params = params.set('hasta', hasta);
     return this.http.get<GastoConItems[]>(`${API_URL}/gastos`, { params });

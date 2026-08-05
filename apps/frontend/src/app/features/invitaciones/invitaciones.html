@@ -1,0 +1,34 @@
+<div class="card">
+  <h2>Invitar a alguien a tu hogar</h2>
+
+  <form (ngSubmit)="generar()">
+    <label>
+      <input type="radio" name="modo" value="link" [(ngModel)]="modo" /> Compartir un link yo mismo
+    </label>
+    <label>
+      <input type="radio" name="modo" value="email" [(ngModel)]="modo" /> Enviar por correo
+    </label>
+
+    @if (modo === 'email') {
+      <label>
+        Correo de la persona
+        <input name="email" type="email" [(ngModel)]="email" required />
+      </label>
+    }
+
+    <button type="submit" [disabled]="generando()">
+      {{ modo === 'email' ? 'Enviar invitación' : 'Generar link' }}
+    </button>
+  </form>
+
+  @if (resultado(); as inv) {
+    <div class="card" style="margin-top:1rem;">
+      @if (inv.emailEnviado) {
+        <p>Correo enviado a <strong>{{ inv.email }}</strong>.</p>
+      }
+      <p>Link de invitación (también puedes compartirlo a mano):</p>
+      <p style="word-break:break-all;"><code>{{ inv.link }}</code></p>
+      <button (click)="copiarLink()">{{ copiado() ? 'Copiado' : 'Copiar link' }}</button>
+    </div>
+  }
+</div>

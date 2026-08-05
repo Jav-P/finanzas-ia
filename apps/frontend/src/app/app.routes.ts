@@ -6,15 +6,26 @@ import { Ingresos } from './features/ingresos/ingresos';
 import { Presupuestos } from './features/presupuestos/presupuestos';
 import { Gastos } from './features/gastos/gastos';
 import { Catalogos } from './features/catalogos/catalogos';
+import { Login } from './features/auth/login';
+import { Registro } from './features/auth/registro';
+import { InvitacionAceptar } from './features/auth/invitacion-aceptar';
+import { SinHogar } from './features/auth/sin-hogar';
+import { Invitaciones } from './features/invitaciones/invitaciones';
+import { authGuard, hogarGuard } from './core/auth.guard';
 
 export const appRoutes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-  { path: 'dashboard', component: Dashboard },
-  { path: 'obligaciones/nueva', component: ObligacionForm },
-  { path: 'obligaciones/:id/editar', component: ObligacionForm },
-  { path: 'obligaciones/:id', component: ObligacionDetalle },
-  { path: 'ingresos', component: Ingresos },
-  { path: 'presupuestos', component: Presupuestos },
-  { path: 'gastos', component: Gastos },
-  { path: 'catalogos', component: Catalogos },
+  { path: 'login', component: Login },
+  { path: 'registro', component: Registro },
+  { path: 'sin-hogar', component: SinHogar, canActivate: [authGuard] },
+  { path: 'invitacion/:token', component: InvitacionAceptar, canActivate: [authGuard] },
+  { path: 'invitar', component: Invitaciones, canActivate: [hogarGuard] },
+  { path: 'dashboard', component: Dashboard, canActivate: [hogarGuard] },
+  { path: 'obligaciones/nueva', component: ObligacionForm, canActivate: [hogarGuard] },
+  { path: 'obligaciones/:id/editar', component: ObligacionForm, canActivate: [hogarGuard] },
+  { path: 'obligaciones/:id', component: ObligacionDetalle, canActivate: [hogarGuard] },
+  { path: 'ingresos', component: Ingresos, canActivate: [hogarGuard] },
+  { path: 'presupuestos', component: Presupuestos, canActivate: [hogarGuard] },
+  { path: 'gastos', component: Gastos, canActivate: [hogarGuard] },
+  { path: 'catalogos', component: Catalogos, canActivate: [hogarGuard] },
 ];

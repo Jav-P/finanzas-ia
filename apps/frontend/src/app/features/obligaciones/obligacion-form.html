@@ -24,7 +24,7 @@
     Responsable
     <select name="usuarioResponsableId" [(ngModel)]="usuarioResponsableId">
       <option value="">Compartida</option>
-      @for (usuario of session.usuarios(); track usuario.id) {
+      @for (usuario of session.miembrosHogar(); track usuario.id) {
         <option [value]="usuario.id">{{ usuario.nombre }}</option>
       }
     </select>

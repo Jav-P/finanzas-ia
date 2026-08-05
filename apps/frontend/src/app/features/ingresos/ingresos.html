@@ -43,7 +43,7 @@
     <label>
       Persona
       <select name="usuarioId" [(ngModel)]="usuarioId" required>
-        @for (usuario of session.usuarios(); track usuario.id) {
+        @for (usuario of session.miembrosHogar(); track usuario.id) {
           <option [value]="usuario.id">{{ usuario.nombre }}</option>
         }
       </select>

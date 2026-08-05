@@ -37,7 +37,7 @@ export class ObligacionDetalle implements OnInit {
 
   registrarPago(): void {
     const instancia = this.instancia();
-    const usuarioId = this.session.usuarioActualId();
+    const usuarioId = this.session.usuario()?.id;
     if (!instancia || !usuarioId || !this.archivo || !this.montoPagado) return;
 
     this.guardando.set(true);

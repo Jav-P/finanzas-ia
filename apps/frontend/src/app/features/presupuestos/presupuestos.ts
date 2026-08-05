@@ -3,7 +3,6 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { Categoria, PresupuestoResumenItem } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
-import { SessionService } from '../../core/session.service';
 
 function periodoActual(): string {
   const hoy = new Date();
@@ -17,7 +16,6 @@ function periodoActual(): string {
 })
 export class Presupuestos implements OnInit {
   private readonly api = inject(ApiService);
-  protected readonly session = inject(SessionService);
 
   protected readonly periodo = signal(periodoActual());
   protected readonly resumen = signal<PresupuestoResumenItem[]>([]);
@@ -29,7 +27,7 @@ export class Presupuestos implements OnInit {
   protected montoPresupuestado: number | null = null;
 
   ngOnInit(): void {
-    this.api.categorias(this.session.hogarId).subscribe((categorias) => {
+    this.api.categorias().subscribe((categorias) => {
       this.categorias.set(categorias);
       if (categorias.length) this.categoriaId = categorias[0].id;
     });
@@ -47,7 +45,6 @@ export class Presupuestos implements OnInit {
     this.guardando.set(true);
     this.api
       .guardarPresupuesto({
-        hogarId: this.session.hogarId,
         categoriaId: this.categoriaId,
         periodo: this.periodo(),
         montoPresupuestado: this.montoPresupuestado,
@@ -66,11 +63,9 @@ export class Presupuestos implements OnInit {
   }
 
   private cargar(): void {
-    this.api
-      .presupuestosResumen(this.session.hogarId, this.periodo())
-      .subscribe((resumen) => this.resumen.set(resumen));
+    this.api.presupuestosResumen(this.periodo()).subscribe((resumen) => this.resumen.set(resumen));
 
-    this.api.presupuestos(this.session.hogarId, this.periodo()).subscribe((presupuestos) => {
+    this.api.presupuestos(this.periodo()).subscribe((presupuestos) => {
       this.presupuestoIdPorCategoria.set(new Map(presupuestos.map((p) => [p.categoriaId, p.id])));
     });
   }

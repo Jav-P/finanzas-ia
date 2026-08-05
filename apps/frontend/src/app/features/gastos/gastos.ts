@@ -54,10 +54,10 @@ export class Gastos implements OnInit {
 
   ngOnInit(): void {
     forkJoin({
-      categorias: this.api.categorias(this.session.hogarId),
-      lugares: this.api.lugares(this.session.hogarId),
-      mediosPago: this.api.mediosPago(this.session.hogarId),
-      productos: this.api.productos(this.session.hogarId),
+      categorias: this.api.categorias(),
+      lugares: this.api.lugares(),
+      mediosPago: this.api.mediosPago(),
+      productos: this.api.productos(),
     }).subscribe(({ categorias, lugares, mediosPago, productos }) => {
       this.categorias.set(categorias);
       this.lugares.set(lugares);
@@ -92,7 +92,7 @@ export class Gastos implements OnInit {
   }
 
   async guardar(): Promise<void> {
-    const usuarioId = this.session.usuarioActualId();
+    const usuarioId = this.session.usuario()?.id;
     if (!usuarioId || !this.categoriaId || !this.fecha || !this.items.length) return;
 
     this.guardando.set(true);
@@ -102,7 +102,6 @@ export class Gastos implements OnInit {
 
     this.api
       .crearGasto({
-        hogarId: this.session.hogarId,
         usuarioId,
         categoriaId: this.categoriaId,
         lugarId,
@@ -142,9 +141,7 @@ export class Gastos implements OnInit {
     const existente = this.productos().find((p) => p.nombre.toLowerCase() === nombre.toLowerCase());
     if (existente) return existente.id;
 
-    const creado = await firstValueFrom(
-      this.api.crearProducto({ hogarId: this.session.hogarId, nombre }),
-    );
+    const creado = await firstValueFrom(this.api.crearProducto({ nombre }));
     this.productos.update((lista) => [...lista, creado]);
     return creado.id;
   }
@@ -153,7 +150,7 @@ export class Gastos implements OnInit {
     const existente = this.lugares().find((l) => l.nombre.toLowerCase() === nombre.toLowerCase());
     if (existente) return existente.id;
 
-    const creado = await firstValueFrom(this.api.crearLugar({ hogarId: this.session.hogarId, nombre }));
+    const creado = await firstValueFrom(this.api.crearLugar({ nombre }));
     this.lugares.update((lista) => [...lista, creado]);
     return creado.id;
   }
@@ -188,6 +185,6 @@ export class Gastos implements OnInit {
   }
 
   private cargarGastos(): void {
-    this.api.gastos(this.session.hogarId).subscribe((gastos) => this.gastos.set(gastos));
+    this.api.gastos().subscribe((gastos) => this.gastos.set(gastos));
   }
 }

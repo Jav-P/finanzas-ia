@@ -1,0 +1,39 @@
+<div class="card" style="max-width:420px; margin: 3rem auto;">
+  <h2>Crear cuenta</h2>
+
+  @if (invitacion(); as inv) {
+    <p>Te invitaron a unirte al hogar <strong>{{ inv.hogarNombre }}</strong>.</p>
+  }
+
+  <form (ngSubmit)="registrar()">
+    <label>
+      Tu nombre
+      <input name="nombre" [(ngModel)]="nombre" required />
+    </label>
+
+    <label>
+      Correo
+      <input name="email" type="email" [(ngModel)]="email" required />
+    </label>
+
+    <label>
+      Contraseña
+      <input name="password" type="password" [(ngModel)]="password" required minlength="6" />
+    </label>
+
+    @if (!invitacionToken()) {
+      <label>
+        Nombre de tu hogar
+        <input name="nombreHogar" [(ngModel)]="nombreHogar" placeholder="ej. Javi y Xime" required />
+      </label>
+    }
+
+    @if (error()) {
+      <p style="color:#dc2626">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="cargando()">Crear cuenta</button>
+  </form>
+
+  <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+</div>

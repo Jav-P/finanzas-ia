@@ -30,9 +30,9 @@ export class Ingresos implements OnInit {
 
   constructor() {
     effect(() => {
-      const usuarios = this.session.usuarios();
-      if (usuarios.length && !this.usuarioId) {
-        this.usuarioId = usuarios[0].id;
+      const miembros = this.session.miembrosHogar();
+      if (miembros.length && !this.usuarioId) {
+        this.usuarioId = miembros[0].id;
       }
     });
   }
@@ -42,7 +42,7 @@ export class Ingresos implements OnInit {
   }
 
   nombreUsuario(usuarioId: string): string {
-    return this.session.usuarios().find((u) => u.id === usuarioId)?.nombre ?? '—';
+    return this.session.miembrosHogar().find((u) => u.id === usuarioId)?.nombre ?? '—';
   }
 
   guardar(): void {
@@ -51,7 +51,6 @@ export class Ingresos implements OnInit {
     this.guardando.set(true);
     this.api
       .crearIngreso({
-        hogarId: this.session.hogarId,
         usuarioId: this.usuarioId,
         descripcion: this.descripcion,
         monto: this.monto,
@@ -92,6 +91,6 @@ export class Ingresos implements OnInit {
   }
 
   private cargar(): void {
-    this.api.ingresos(this.session.hogarId).subscribe((ingresos) => this.ingresos.set(ingresos));
+    this.api.ingresos().subscribe((ingresos) => this.ingresos.set(ingresos));
   }
 }

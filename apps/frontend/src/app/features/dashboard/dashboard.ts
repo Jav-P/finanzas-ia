@@ -33,12 +33,12 @@ export class Dashboard implements OnInit {
   protected readonly mensajeGeneracion = signal<string | null>(null);
 
   protected readonly otroUsuario = computed(() =>
-    this.session.usuarios().find((u) => u.id !== this.viendoUsuarioId()),
+    this.session.miembrosHogar().find((u) => u.id !== this.viendoUsuarioId()),
   );
 
   constructor() {
     effect(() => {
-      const usuarioId = this.session.usuarioActualId();
+      const usuarioId = this.session.usuario()?.id;
       if (usuarioId && !this.viendoUsuarioId()) {
         this.viendoUsuarioId.set(usuarioId);
       }
@@ -53,7 +53,7 @@ export class Dashboard implements OnInit {
   }
 
   ngOnInit(): void {
-    this.api.balance(this.session.hogarId, periodoActual()).subscribe((balance) => {
+    this.api.balance(periodoActual()).subscribe((balance) => {
       this.balance.set(balance);
     });
   }
@@ -86,7 +86,7 @@ export class Dashboard implements OnInit {
   }
 
   private cargarInstancias(usuarioId: string): void {
-    this.api.instancias(this.session.hogarId, usuarioId).subscribe((instancias) => {
+    this.api.instancias(usuarioId).subscribe((instancias) => {
       this.instancias.set(instancias);
     });
   }

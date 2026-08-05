@@ -30,7 +30,7 @@ export class ObligacionForm implements OnInit {
   protected fechaInicio = '';
 
   ngOnInit(): void {
-    this.api.categorias(this.session.hogarId).subscribe((categorias) => {
+    this.api.categorias().subscribe((categorias) => {
       this.categorias.set(categorias);
       if (categorias.length && !this.categoriaId) this.categoriaId = categorias[0].id;
     });
@@ -67,9 +67,7 @@ export class ObligacionForm implements OnInit {
     };
 
     const id = this.obligacionId();
-    const request = id
-      ? this.api.editarObligacion(id, dto)
-      : this.api.crearObligacion({ ...dto, hogarId: this.session.hogarId });
+    const request = id ? this.api.editarObligacion(id, dto) : this.api.crearObligacion(dto);
 
     request.subscribe({
       // /obligaciones/:id es la vista de detalle de una INSTANCIA, no de

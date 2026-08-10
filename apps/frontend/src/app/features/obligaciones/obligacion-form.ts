@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import type { Categoria, RecurrenciaObligacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
@@ -19,6 +20,7 @@ import { SessionService } from '../../core/session.service';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatCheckboxModule,
   ],
   templateUrl: './obligacion-form.html',
 })
@@ -40,6 +42,9 @@ export class ObligacionForm implements OnInit {
   protected diaVencimiento: number | null = null;
   protected numeroCuotas: number | null = null;
   protected fechaInicio = '';
+  protected esCredito = false;
+  protected banco = '';
+  protected tasaInteres: number | null = null;
 
   ngOnInit(): void {
     this.api.categorias().subscribe((categorias) => {
@@ -59,6 +64,9 @@ export class ObligacionForm implements OnInit {
         this.diaVencimiento = obligacion.diaVencimiento;
         this.numeroCuotas = obligacion.numeroCuotas;
         this.fechaInicio = obligacion.fechaInicio;
+        this.esCredito = !!obligacion.banco;
+        this.banco = obligacion.banco ?? '';
+        this.tasaInteres = obligacion.tasaInteres;
       });
     }
   }
@@ -76,6 +84,8 @@ export class ObligacionForm implements OnInit {
       diaVencimiento: this.recurrencia === 'mensual' ? this.diaVencimiento : null,
       numeroCuotas: this.recurrencia !== 'unica' ? this.numeroCuotas : null,
       fechaInicio: this.fechaInicio,
+      banco: this.esCredito ? this.banco || null : null,
+      tasaInteres: this.esCredito ? this.tasaInteres : null,
     };
 
     const id = this.obligacionId();

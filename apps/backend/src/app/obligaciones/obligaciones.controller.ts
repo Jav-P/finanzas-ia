@@ -37,6 +37,11 @@ export class ObligacionesController {
     return this.obligaciones.generarPendientes();
   }
 
+  @Get('creditos')
+  listCreditos(@HogarActual() hogarId: string) {
+    return this.obligaciones.listCreditos(hogarId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.obligaciones.findOne(id);

@@ -1,12 +1,13 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type {
   CreateObligacionDto,
+  CreditoResumen,
   GenerarInstanciasResultado,
   Obligacion,
   UpdateObligacionDto,
 } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
-import { toObligacion } from '../common/mappers';
+import { toCategoria, toObligacion } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 
 const BUCKET_COMPROBANTES = 'comprobantes';
@@ -52,6 +53,8 @@ export class ObligacionesService {
         dia_vencimiento: dto.diaVencimiento ?? null,
         numero_cuotas: dto.numeroCuotas ?? null,
         fecha_inicio: dto.fechaInicio,
+        banco: dto.banco ?? null,
+        tasa_interes: dto.tasaInteres ?? null,
       })
       .select()
       .single();
@@ -99,6 +102,8 @@ export class ObligacionesService {
     if (dto.diaVencimiento !== undefined) patch['dia_vencimiento'] = dto.diaVencimiento;
     if (dto.numeroCuotas !== undefined) patch['numero_cuotas'] = dto.numeroCuotas;
     if (dto.fechaInicio !== undefined) patch['fecha_inicio'] = dto.fechaInicio;
+    if (dto.banco !== undefined) patch['banco'] = dto.banco;
+    if (dto.tasaInteres !== undefined) patch['tasa_interes'] = dto.tasaInteres;
 
     const { data, error } = await this.supabase.client
       .from('obligaciones')
@@ -259,5 +264,54 @@ export class ObligacionesService {
       .eq('obligacion_id', obligacionId);
     throwIfError(error);
     return count ?? 0;
+  }
+
+  // Un credito es cualquier obligacion con banco asignado. No hace falta
+  // un flag aparte: si tiene banco, es un credito.
+  async listCreditos(hogarId: string): Promise<CreditoResumen[]> {
+    const { data: obligacionRows, error } = await this.supabase.client
+      .from('obligaciones')
+      .select('*')
+      .eq('hogar_id', hogarId)
+      .not('banco', 'is', null);
+    throwIfError(error);
+
+    const obligaciones = (obligacionRows ?? []).map(toObligacion);
+    if (!obligaciones.length) return [];
+
+    const obligacionIds = obligaciones.map((o) => o.id);
+    const [{ data: categoriaRows, error: categoriaError }, { data: instanciaRows, error: instanciaError }] =
+      await Promise.all([
+        this.supabase.client.from('categorias').select('*').or(`hogar_id.is.null,hogar_id.eq.${hogarId}`),
+        this.supabase.client
+          .from('obligacion_instancias')
+          .select('*')
+          .in('obligacion_id', obligacionIds)
+          .order('fecha_vencimiento'),
+      ]);
+    throwIfError(categoriaError);
+    throwIfError(instanciaError);
+
+    const categoriasById = new Map((categoriaRows ?? []).map((c) => [c.id, toCategoria(c)]));
+
+    return obligaciones.map((obligacion) => {
+      const instancias = (instanciaRows ?? []).filter((i) => i.obligacion_id === obligacion.id);
+      const cuotasPagadas = instancias.filter((i) => i.estado === 'pagado').length;
+      const proxima = instancias.find((i) => i.estado !== 'pagado');
+
+      return {
+        obligacionId: obligacion.id,
+        descripcion: obligacion.descripcion,
+        categoriaNombre: categoriasById.get(obligacion.categoriaId)?.nombre ?? '—',
+        banco: obligacion.banco,
+        tasaInteres: obligacion.tasaInteres,
+        montoCuota: obligacion.monto,
+        numeroCuotas: obligacion.numeroCuotas,
+        cuotasPagadas,
+        cuotasRestantes: obligacion.numeroCuotas != null ? obligacion.numeroCuotas - cuotasPagadas : null,
+        proximaFechaVencimiento: proxima ? proxima.fecha_vencimiento : null,
+        activa: obligacion.activa,
+      };
+    });
   }
 }

@@ -60,6 +60,20 @@
         <input matInput name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
       </mat-form-field>
 
+      <mat-checkbox name="esCredito" [(ngModel)]="esCredito">Es un crédito bancario</mat-checkbox>
+
+      @if (esCredito) {
+        <mat-form-field appearance="outline">
+          <mat-label>Banco</mat-label>
+          <input matInput name="banco" [(ngModel)]="banco" placeholder="ej. Bancolombia" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tasa de interés efectiva anual (%)</mat-label>
+          <input matInput name="tasaInteres" type="number" min="0" step="0.01" [(ngModel)]="tasaInteres" />
+        </mat-form-field>
+      }
+
       <div class="form-actions">
         <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
       </div>

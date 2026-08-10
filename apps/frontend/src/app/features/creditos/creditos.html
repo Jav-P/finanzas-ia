@@ -1,0 +1,50 @@
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Mis créditos</h2>
+
+    @if (!creditos().length) {
+      <p>
+        No tienes créditos registrados todavía. Marca "Es un crédito bancario" al crear o editar una
+        obligación para que aparezca aquí.
+      </p>
+    }
+
+    @if (creditos().length) {
+      <table>
+        <tr>
+          <th>Banco</th>
+          <th>Descripción</th>
+          <th>Categoría</th>
+          <th>Cuota</th>
+          <th>Tasa E.A.</th>
+          <th>Cuotas</th>
+          <th>Próximo vencimiento</th>
+          <th>Estado</th>
+        </tr>
+        @for (credito of creditos(); track credito.obligacionId) {
+          <tr>
+            <td>{{ credito.banco }}</td>
+            <td>{{ credito.descripcion }}</td>
+            <td>{{ credito.categoriaNombre }}</td>
+            <td>{{ credito.montoCuota | number: '1.0-0' }}</td>
+            <td>{{ credito.tasaInteres != null ? (credito.tasaInteres | number: '1.2-2') + '%' : '—' }}</td>
+            <td>
+              @if (credito.numeroCuotas != null) {
+                {{ credito.cuotasPagadas }} / {{ credito.numeroCuotas }}
+                ({{ credito.cuotasRestantes }} restantes)
+              } @else {
+                {{ credito.cuotasPagadas }} pagadas (indefinido)
+              }
+            </td>
+            <td>{{ credito.proximaFechaVencimiento ?? '—' }}</td>
+            <td>
+              <span class="badge" [class]="credito.activa ? 'pendiente' : 'pagado'">
+                {{ credito.activa ? 'activo' : 'terminado' }}
+              </span>
+            </td>
+          </tr>
+        }
+      </table>
+    }
+  </mat-card-content>
+</mat-card>

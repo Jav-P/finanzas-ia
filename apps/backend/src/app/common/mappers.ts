@@ -50,6 +50,8 @@ export function toObligacion(row: any): Obligacion {
     numeroCuotas: row.numero_cuotas,
     fechaInicio: row.fecha_inicio,
     activa: row.activa,
+    banco: row.banco,
+    tasaInteres: row.tasa_interes,
     createdAt: row.created_at,
   };
 }

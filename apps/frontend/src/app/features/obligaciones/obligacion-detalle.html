@@ -15,6 +15,12 @@
           @if (i.obligacion.numeroCuotas) {
             <p>Cuotas: {{ i.obligacion.numeroCuotas }}</p>
           }
+          @if (i.obligacion.banco) {
+            <p>Banco: {{ i.obligacion.banco }}</p>
+            @if (i.obligacion.tasaInteres != null) {
+              <p>Tasa E.A.: {{ i.obligacion.tasaInteres | number: '1.2-2' }}%</p>
+            }
+          }
           <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
         </div>
         <div style="display:flex; gap:0.5rem;">

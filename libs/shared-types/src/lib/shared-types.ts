@@ -82,6 +82,8 @@ export interface Obligacion {
   numeroCuotas: number | null; // solo si recurrencia != 'unica'; null = indefinida
   fechaInicio: string;
   activa: boolean;
+  banco: string | null; // solo si es un credito
+  tasaInteres: number | null; // tasa efectiva anual (%), solo si es un credito
   createdAt: string;
 }
 
@@ -129,6 +131,8 @@ export interface CreateObligacionDto {
   diaVencimiento?: number | null;
   numeroCuotas?: number | null;
   fechaInicio: string;
+  banco?: string | null;
+  tasaInteres?: number | null;
 }
 
 export type UpdateObligacionDto = Partial<CreateObligacionDto>;
@@ -136,6 +140,21 @@ export type UpdateObligacionDto = Partial<CreateObligacionDto>;
 export interface GenerarInstanciasResultado {
   obligacionesRevisadas: number;
   instanciasCreadas: number;
+}
+
+// Una obligacion se considera "credito" cuando tiene banco asignado.
+export interface CreditoResumen {
+  obligacionId: string;
+  descripcion: string;
+  categoriaNombre: string;
+  banco: string | null;
+  tasaInteres: number | null;
+  montoCuota: number;
+  numeroCuotas: number | null;
+  cuotasPagadas: number;
+  cuotasRestantes: number | null; // null = indefinida (sin numeroCuotas)
+  proximaFechaVencimiento: string | null;
+  activa: boolean;
 }
 
 export interface RegistrarPagoDto {

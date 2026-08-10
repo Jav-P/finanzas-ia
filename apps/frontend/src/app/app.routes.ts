@@ -6,6 +6,7 @@ import { Ingresos } from './features/ingresos/ingresos';
 import { Presupuestos } from './features/presupuestos/presupuestos';
 import { Gastos } from './features/gastos/gastos';
 import { Catalogos } from './features/catalogos/catalogos';
+import { Creditos } from './features/creditos/creditos';
 import { Login } from './features/auth/login';
 import { Registro } from './features/auth/registro';
 import { InvitacionAceptar } from './features/auth/invitacion-aceptar';
@@ -26,6 +27,7 @@ export const appRoutes: Route[] = [
   { path: 'obligaciones/:id', component: ObligacionDetalle, canActivate: [hogarGuard] },
   { path: 'ingresos', component: Ingresos, canActivate: [hogarGuard] },
   { path: 'presupuestos', component: Presupuestos, canActivate: [hogarGuard] },
+  { path: 'creditos', component: Creditos, canActivate: [hogarGuard] },
   { path: 'gastos', component: Gastos, canActivate: [hogarGuard] },
   { path: 'catalogos', component: Catalogos, canActivate: [hogarGuard] },
 ];

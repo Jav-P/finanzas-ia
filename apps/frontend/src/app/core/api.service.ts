@@ -14,6 +14,7 @@ import type {
   CreateObligacionDto,
   CreatePresupuestoDto,
   CreateProductoDto,
+  CreditoResumen,
   GastoConItems,
   GenerarInstanciasResultado,
   HistoricoPrecioItem,
@@ -116,6 +117,10 @@ export class ApiService {
 
   generarInstanciasPendientes() {
     return this.http.post<GenerarInstanciasResultado>(`${API_URL}/obligaciones/generar-instancias`, {});
+  }
+
+  creditos() {
+    return this.http.get<CreditoResumen[]>(`${API_URL}/obligaciones/creditos`);
   }
 
   // Instancias

@@ -1,62 +1,68 @@
-<h2>{{ obligacionId() ? 'Editar obligación' : 'Nueva obligación' }}</h2>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>{{ obligacionId() ? 'Editar obligación' : 'Nueva obligación' }}</h2>
 
-<form (ngSubmit)="guardar()">
-  <label>
-    Descripción
-    <input name="descripcion" [(ngModel)]="descripcion" required />
-  </label>
+    <form class="form-grid" (ngSubmit)="guardar()">
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción</mat-label>
+        <input matInput name="descripcion" [(ngModel)]="descripcion" required />
+      </mat-form-field>
 
-  <label>
-    Monto
-    <input name="monto" type="number" [(ngModel)]="monto" required />
-  </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Monto</mat-label>
+        <input matInput name="monto" type="number" [(ngModel)]="monto" required />
+      </mat-form-field>
 
-  <label>
-    Categoría
-    <select name="categoriaId" [(ngModel)]="categoriaId" required>
-      @for (categoria of categorias(); track categoria.id) {
-        <option [value]="categoria.id">{{ categoria.nombre }}</option>
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+          @for (categoria of categorias(); track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Responsable</mat-label>
+        <mat-select name="usuarioResponsableId" [(ngModel)]="usuarioResponsableId">
+          <mat-option value="">Compartida</mat-option>
+          @for (usuario of session.miembrosHogar(); track usuario.id) {
+            <mat-option [value]="usuario.id">{{ usuario.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Recurrencia</mat-label>
+        <mat-select name="recurrencia" [(ngModel)]="recurrencia">
+          <mat-option value="mensual">Mensual</mat-option>
+          <mat-option value="unica">Única</mat-option>
+          <mat-option value="diaria">Diaria (solo para pruebas)</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (recurrencia === 'mensual') {
+        <mat-form-field appearance="outline">
+          <mat-label>Día de vencimiento (1-31)</mat-label>
+          <input matInput name="diaVencimiento" type="number" min="1" max="31" [(ngModel)]="diaVencimiento" />
+        </mat-form-field>
       }
-    </select>
-  </label>
 
-  <label>
-    Responsable
-    <select name="usuarioResponsableId" [(ngModel)]="usuarioResponsableId">
-      <option value="">Compartida</option>
-      @for (usuario of session.miembrosHogar(); track usuario.id) {
-        <option [value]="usuario.id">{{ usuario.nombre }}</option>
+      @if (recurrencia !== 'unica') {
+        <mat-form-field appearance="outline">
+          <mat-label>Número de cuotas (vacío = indefinida, ej. administración)</mat-label>
+          <input matInput name="numeroCuotas" type="number" min="1" [(ngModel)]="numeroCuotas" placeholder="ej. 36 para un crédito" />
+        </mat-form-field>
       }
-    </select>
-  </label>
 
-  <label>
-    Recurrencia
-    <select name="recurrencia" [(ngModel)]="recurrencia">
-      <option value="mensual">Mensual</option>
-      <option value="unica">Única</option>
-      <option value="diaria">Diaria (solo para pruebas)</option>
-    </select>
-  </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha {{ recurrencia === 'unica' ? 'de vencimiento' : 'del primer vencimiento' }}</mat-label>
+        <input matInput name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
+      </mat-form-field>
 
-  @if (recurrencia === 'mensual') {
-    <label>
-      Día de vencimiento (1-31)
-      <input name="diaVencimiento" type="number" min="1" max="31" [(ngModel)]="diaVencimiento" />
-    </label>
-  }
-
-  @if (recurrencia !== 'unica') {
-    <label>
-      Número de cuotas (vacío = indefinida, ej. administración)
-      <input name="numeroCuotas" type="number" min="1" [(ngModel)]="numeroCuotas" placeholder="ej. 36 para un crédito" />
-    </label>
-  }
-
-  <label>
-    Fecha {{ recurrencia === 'unica' ? 'de vencimiento' : 'del primer vencimiento' }}
-    <input name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
-  </label>
-
-  <button type="submit" [disabled]="guardando()">Guardar</button>
-</form>
+      <div class="form-actions">
+        <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

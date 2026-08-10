@@ -1,9 +1,11 @@
-<div class="card" style="max-width:420px; margin: 3rem auto; text-align:center;">
-  <h2>Todavía no perteneces a ningún hogar</h2>
-  <p>
-    Si alguien te invitó, pídele que te reenvíe el link de invitación.
-    Si quieres empezar de cero, cierra sesión y crea una cuenta nueva
-    con un hogar propio.
-  </p>
-  <button (click)="cerrarSesion()">Cerrar sesión</button>
-</div>
+<mat-card class="auth-card-centered">
+  <mat-card-content>
+    <h2>Todavía no perteneces a ningún hogar</h2>
+    <p>
+      Si alguien te invitó, pídele que te reenvíe el link de invitación.
+      Si quieres empezar de cero, cierra sesión y crea una cuenta nueva
+      con un hogar propio.
+    </p>
+    <button mat-stroked-button (click)="cerrarSesion()">Cerrar sesión</button>
+  </mat-card-content>
+</mat-card>

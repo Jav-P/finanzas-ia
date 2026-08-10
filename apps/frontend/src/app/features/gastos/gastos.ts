@@ -3,6 +3,12 @@ import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import type {
   Categoria,
   CreateGastoItemDto,
@@ -24,7 +30,16 @@ interface ItemBorrador {
 
 @Component({
   selector: 'app-gastos',
-  imports: [FormsModule, DecimalPipe],
+  imports: [
+    FormsModule,
+    DecimalPipe,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './gastos.html',
 })
 export class Gastos implements OnInit {

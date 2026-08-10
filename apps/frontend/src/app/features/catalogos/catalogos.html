@@ -1,137 +1,163 @@
-<div class="card">
-  <h2>Categorías</h2>
-  <table>
-    @for (categoria of categorias(); track categoria.id) {
-      <tr>
-        @if (editandoId() === categoria.id) {
-          <td><input [(ngModel)]="nombreEdit" name="catNombreEdit" /></td>
-          <td>
-            <button (click)="guardarCategoria(categoria.id)">Guardar</button>
-            <button (click)="cancelarEdicion()">Cancelar</button>
-          </td>
-        } @else {
-          <td>{{ categoria.nombre }}</td>
-          <td>
-            <button (click)="editarCategoria(categoria.id)">Editar</button>
-            <button (click)="eliminarCategoria(categoria.id)">Eliminar</button>
-          </td>
-        }
-      </tr>
-    }
-  </table>
-  <form (ngSubmit)="crearCategoria()" style="flex-direction:row; align-items:end;">
-    <label style="flex:1">
-      Nueva categoría
-      <input name="nuevaCategoria" [(ngModel)]="nuevaCategoria" />
-    </label>
-    <button type="submit">Agregar</button>
-  </form>
-</div>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Categorías</h2>
+    <table>
+      @for (categoria of categorias(); track categoria.id) {
+        <tr>
+          @if (editandoId() === categoria.id) {
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput [(ngModel)]="nombreEdit" name="catNombreEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <button mat-stroked-button (click)="guardarCategoria(categoria.id)">Guardar</button>
+              <button mat-button (click)="cancelarEdicion()">Cancelar</button>
+            </td>
+          } @else {
+            <td>{{ categoria.nombre }}</td>
+            <td>
+              <button mat-button (click)="editarCategoria(categoria.id)">Editar</button>
+              <button mat-button color="warn" (click)="eliminarCategoria(categoria.id)">Eliminar</button>
+            </td>
+          }
+        </tr>
+      }
+    </table>
+    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearCategoria()">
+      <mat-form-field appearance="outline" style="flex:1;">
+        <mat-label>Nueva categoría</mat-label>
+        <input matInput name="nuevaCategoria" [(ngModel)]="nuevaCategoria" />
+      </mat-form-field>
+      <button mat-flat-button type="submit">Agregar</button>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-<div class="card">
-  <h2>Medios de pago</h2>
-  <table>
-    @for (medio of mediosPago(); track medio.id) {
-      <tr>
-        @if (editandoId() === medio.id) {
-          <td><input [(ngModel)]="nombreEdit" name="medioNombreEdit" /></td>
-          <td>
-            <select [(ngModel)]="tipoEdit" name="medioTipoEdit">
-              <option value="efectivo">Efectivo</option>
-              <option value="debito">Débito</option>
-              <option value="credito">Crédito</option>
-              <option value="transferencia">Transferencia</option>
-            </select>
-          </td>
-          <td>
-            <button (click)="guardarMedioPago(medio.id)">Guardar</button>
-            <button (click)="cancelarEdicion()">Cancelar</button>
-          </td>
-        } @else {
-          <td>{{ medio.nombre }}</td>
-          <td>{{ medio.tipo }}</td>
-          <td>
-            <button (click)="editarMedioPago(medio.id)">Editar</button>
-            <button (click)="eliminarMedioPago(medio.id)">Eliminar</button>
-          </td>
-        }
-      </tr>
-    }
-  </table>
-  <form (ngSubmit)="crearMedioPago()" style="flex-direction:row; align-items:end;">
-    <label style="flex:1">
-      Nombre
-      <input name="nuevoMedioPagoNombre" [(ngModel)]="nuevoMedioPagoNombre" placeholder="Tarjeta Falabella" />
-    </label>
-    <label>
-      Tipo
-      <select name="nuevoMedioPagoTipo" [(ngModel)]="nuevoMedioPagoTipo">
-        <option value="efectivo">Efectivo</option>
-        <option value="debito">Débito</option>
-        <option value="credito">Crédito</option>
-        <option value="transferencia">Transferencia</option>
-      </select>
-    </label>
-    <button type="submit">Agregar</button>
-  </form>
-</div>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Medios de pago</h2>
+    <table>
+      @for (medio of mediosPago(); track medio.id) {
+        <tr>
+          @if (editandoId() === medio.id) {
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput [(ngModel)]="nombreEdit" name="medioNombreEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <mat-select [(ngModel)]="tipoEdit" name="medioTipoEdit">
+                  <mat-option value="efectivo">Efectivo</mat-option>
+                  <mat-option value="debito">Débito</mat-option>
+                  <mat-option value="credito">Crédito</mat-option>
+                  <mat-option value="transferencia">Transferencia</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td>
+              <button mat-stroked-button (click)="guardarMedioPago(medio.id)">Guardar</button>
+              <button mat-button (click)="cancelarEdicion()">Cancelar</button>
+            </td>
+          } @else {
+            <td>{{ medio.nombre }}</td>
+            <td>{{ medio.tipo }}</td>
+            <td>
+              <button mat-button (click)="editarMedioPago(medio.id)">Editar</button>
+              <button mat-button color="warn" (click)="eliminarMedioPago(medio.id)">Eliminar</button>
+            </td>
+          }
+        </tr>
+      }
+    </table>
+    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearMedioPago()">
+      <mat-form-field appearance="outline" style="flex:1;">
+        <mat-label>Nombre</mat-label>
+        <input matInput name="nuevoMedioPagoNombre" [(ngModel)]="nuevoMedioPagoNombre" placeholder="Tarjeta Falabella" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select name="nuevoMedioPagoTipo" [(ngModel)]="nuevoMedioPagoTipo">
+          <mat-option value="efectivo">Efectivo</mat-option>
+          <mat-option value="debito">Débito</mat-option>
+          <mat-option value="credito">Crédito</mat-option>
+          <mat-option value="transferencia">Transferencia</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button type="submit">Agregar</button>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-<div class="card">
-  <h2>Lugares</h2>
-  <table>
-    @for (lugar of lugares(); track lugar.id) {
-      <tr>
-        @if (editandoId() === lugar.id) {
-          <td><input [(ngModel)]="nombreEdit" name="lugarNombreEdit" /></td>
-          <td>
-            <button (click)="guardarLugar(lugar.id)">Guardar</button>
-            <button (click)="cancelarEdicion()">Cancelar</button>
-          </td>
-        } @else {
-          <td>{{ lugar.nombre }}</td>
-          <td>
-            <button (click)="editarLugar(lugar.id)">Editar</button>
-            <button (click)="eliminarLugar(lugar.id)">Eliminar</button>
-          </td>
-        }
-      </tr>
-    }
-  </table>
-  <form (ngSubmit)="crearLugar()" style="flex-direction:row; align-items:end;">
-    <label style="flex:1">
-      Nuevo lugar
-      <input name="nuevoLugar" [(ngModel)]="nuevoLugar" />
-    </label>
-    <button type="submit">Agregar</button>
-  </form>
-</div>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Lugares</h2>
+    <table>
+      @for (lugar of lugares(); track lugar.id) {
+        <tr>
+          @if (editandoId() === lugar.id) {
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput [(ngModel)]="nombreEdit" name="lugarNombreEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <button mat-stroked-button (click)="guardarLugar(lugar.id)">Guardar</button>
+              <button mat-button (click)="cancelarEdicion()">Cancelar</button>
+            </td>
+          } @else {
+            <td>{{ lugar.nombre }}</td>
+            <td>
+              <button mat-button (click)="editarLugar(lugar.id)">Editar</button>
+              <button mat-button color="warn" (click)="eliminarLugar(lugar.id)">Eliminar</button>
+            </td>
+          }
+        </tr>
+      }
+    </table>
+    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearLugar()">
+      <mat-form-field appearance="outline" style="flex:1;">
+        <mat-label>Nuevo lugar</mat-label>
+        <input matInput name="nuevoLugar" [(ngModel)]="nuevoLugar" />
+      </mat-form-field>
+      <button mat-flat-button type="submit">Agregar</button>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-<div class="card">
-  <h2>Productos</h2>
-  <table>
-    @for (producto of productos(); track producto.id) {
-      <tr>
-        @if (editandoId() === producto.id) {
-          <td><input [(ngModel)]="nombreEdit" name="productoNombreEdit" /></td>
-          <td>
-            <button (click)="guardarProducto(producto.id)">Guardar</button>
-            <button (click)="cancelarEdicion()">Cancelar</button>
-          </td>
-        } @else {
-          <td>{{ producto.nombre }}</td>
-          <td>
-            <button (click)="editarProducto(producto.id)">Editar</button>
-            <button (click)="eliminarProducto(producto.id)">Eliminar</button>
-          </td>
-        }
-      </tr>
-    }
-  </table>
-  <form (ngSubmit)="crearProducto()" style="flex-direction:row; align-items:end;">
-    <label style="flex:1">
-      Nuevo producto
-      <input name="nuevoProducto" [(ngModel)]="nuevoProducto" />
-    </label>
-    <button type="submit">Agregar</button>
-  </form>
-</div>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Productos</h2>
+    <table>
+      @for (producto of productos(); track producto.id) {
+        <tr>
+          @if (editandoId() === producto.id) {
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput [(ngModel)]="nombreEdit" name="productoNombreEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <button mat-stroked-button (click)="guardarProducto(producto.id)">Guardar</button>
+              <button mat-button (click)="cancelarEdicion()">Cancelar</button>
+            </td>
+          } @else {
+            <td>{{ producto.nombre }}</td>
+            <td>
+              <button mat-button (click)="editarProducto(producto.id)">Editar</button>
+              <button mat-button color="warn" (click)="eliminarProducto(producto.id)">Eliminar</button>
+            </td>
+          }
+        </tr>
+      }
+    </table>
+    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearProducto()">
+      <mat-form-field appearance="outline" style="flex:1;">
+        <mat-label>Nuevo producto</mat-label>
+        <input matInput name="nuevoProducto" [(ngModel)]="nuevoProducto" />
+      </mat-form-field>
+      <button mat-flat-button type="submit">Agregar</button>
+    </form>
+  </mat-card-content>
+</mat-card>

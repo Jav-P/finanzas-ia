@@ -1,12 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 import type { InvitacionPublica } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 
 @Component({
   selector: 'app-invitacion-aceptar',
-  imports: [],
+  imports: [MatCardModule, MatButtonModule],
   templateUrl: './invitacion-aceptar.html',
 })
 export class InvitacionAceptar implements OnInit {

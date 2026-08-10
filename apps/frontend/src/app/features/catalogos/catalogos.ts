@@ -1,11 +1,23 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 import type { Categoria, Lugar, MedioPago, Producto, TipoMedioPago } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 
 @Component({
   selector: 'app-catalogos',
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+  ],
   templateUrl: './catalogos.html',
 })
 export class Catalogos implements OnInit {

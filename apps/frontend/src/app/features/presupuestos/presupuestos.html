@@ -1,54 +1,60 @@
-<div class="card">
-  <h2>Presupuesto vs. gastado</h2>
-  <label>
-    Período
-    <input type="month" [value]="periodo()" (change)="cambiarPeriodo($event)" />
-  </label>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Presupuesto vs. gastado</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>Período</mat-label>
+      <input matInput type="month" [value]="periodo()" (change)="cambiarPeriodo($event)" />
+    </mat-form-field>
 
-  <table>
-    <tr>
-      <th>Categoría</th>
-      <th>Presupuestado</th>
-      <th>Gastado</th>
-      <th>Diferencia</th>
-      <th></th>
-    </tr>
-    @for (item of resumen(); track item.categoriaId) {
+    <table>
       <tr>
-        <td>{{ item.categoriaNombre }}</td>
-        <td>{{ item.presupuestado | number: '1.0-0' }}</td>
-        <td>{{ item.gastado | number: '1.0-0' }}</td>
-        <td [style.color]="item.diferencia < 0 ? '#dc2626' : '#16a34a'">
-          {{ item.diferencia | number: '1.0-0' }}
-          {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
-        </td>
-        <td>
-          @if (presupuestoIdPorCategoria().has(item.categoriaId)) {
-            <button (click)="eliminarPresupuesto(item.categoriaId)">Eliminar</button>
-          }
-        </td>
+        <th>Categoría</th>
+        <th>Presupuestado</th>
+        <th>Gastado</th>
+        <th>Diferencia</th>
+        <th></th>
       </tr>
-    }
-  </table>
-</div>
+      @for (item of resumen(); track item.categoriaId) {
+        <tr>
+          <td>{{ item.categoriaNombre }}</td>
+          <td>{{ item.presupuestado | number: '1.0-0' }}</td>
+          <td>{{ item.gastado | number: '1.0-0' }}</td>
+          <td [style.color]="item.diferencia < 0 ? '#dc2626' : '#16a34a'">
+            {{ item.diferencia | number: '1.0-0' }}
+            {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
+          </td>
+          <td>
+            @if (presupuestoIdPorCategoria().has(item.categoriaId)) {
+              <button mat-button color="warn" (click)="eliminarPresupuesto(item.categoriaId)">Eliminar</button>
+            }
+          </td>
+        </tr>
+      }
+    </table>
+  </mat-card-content>
+</mat-card>
 
-<div class="card">
-  <h2>Definir presupuesto</h2>
-  <form (ngSubmit)="guardar()">
-    <label>
-      Categoría
-      <select name="categoriaId" [(ngModel)]="categoriaId" required>
-        @for (categoria of categorias(); track categoria.id) {
-          <option [value]="categoria.id">{{ categoria.nombre }}</option>
-        }
-      </select>
-    </label>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Definir presupuesto</h2>
+    <form class="form-grid" (ngSubmit)="guardar()">
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+          @for (categoria of categorias(); track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-    <label>
-      Monto presupuestado para {{ periodo() }}
-      <input name="montoPresupuestado" type="number" [(ngModel)]="montoPresupuestado" required />
-    </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Monto presupuestado para {{ periodo() }}</mat-label>
+        <input matInput name="montoPresupuestado" type="number" [(ngModel)]="montoPresupuestado" required />
+      </mat-form-field>
 
-    <button type="submit" [disabled]="guardando()">Guardar</button>
-  </form>
-</div>
+      <div class="form-actions">
+        <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { appRoutes } from './app.routes';
 import { serviceUnavailableInterceptor } from './core/service-unavailable.interceptor';
 import { authInterceptor } from './core/auth.interceptor';
@@ -13,5 +14,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
     provideHttpClient(withInterceptors([authInterceptor, serviceUnavailableInterceptor])),
+    provideAnimationsAsync(),
   ],
 };

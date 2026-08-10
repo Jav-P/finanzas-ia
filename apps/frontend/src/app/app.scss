@@ -2,52 +2,33 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 0.75rem 1.5rem;
-  background: white;
-  border-bottom: 1px solid #e2e4e9;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 
-  h1 {
+  .brand {
     font-size: 1.1rem;
-    margin: 0;
+    font-weight: 600;
   }
 
-  nav {
+  .topbar-nav {
     display: flex;
-    gap: 1rem;
-    flex: 1;
+    gap: 0.25rem;
 
-    a {
-      text-decoration: none;
-      color: #4b5160;
-      font-size: 0.9rem;
-
-      &.active {
-        color: #4f46e5;
-        font-weight: 600;
-      }
+    .active-link {
+      background: var(--mat-sys-secondary-container);
+      color: var(--mat-sys-on-secondary-container);
     }
   }
-}
 
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
+  .spacer {
+    flex: 1;
+  }
 
-.popup {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  max-width: 360px;
-  text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-
-  p {
-    margin: 0 0 1rem;
+  .user-name {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
   }
 }

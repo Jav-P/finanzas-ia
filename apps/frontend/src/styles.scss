@@ -1,12 +1,33 @@
-* {
-  box-sizing: border-box;
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
 }
 
 body {
+  height: 100%;
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: #f4f5f7;
-  color: #1f2430;
+  color-scheme: light;
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 main {
@@ -19,6 +40,11 @@ a {
   color: inherit;
 }
 
+.auth-link {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -27,25 +53,19 @@ table {
 th,
 td {
   text-align: left;
-  padding: 0.5rem;
-  border-bottom: 1px solid #e2e4e9;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 }
 
-button {
-  cursor: pointer;
-}
-
-.card {
-  background: white;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+th {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
 }
 
 .badge {
   display: inline-block;
-  padding: 0.15rem 0.5rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -68,25 +88,52 @@ button {
   background: #6b7280;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 480px;
-}
-
-label {
+.form-grid {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  max-width: 480px;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.file-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 1rem;
+}
+
+.error-text {
+  color: var(--mat-sys-error);
   font-size: 0.9rem;
 }
 
-input,
-select,
-textarea {
-  padding: 0.5rem;
-  border: 1px solid #cbd0d9;
-  border-radius: 4px;
-  font: inherit;
+.card-section {
+  margin-bottom: 1.5rem;
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 3rem auto;
+}
+
+.auth-card-centered {
+  max-width: 420px;
+  margin: 3rem auto;
+  text-align: center;
 }

@@ -1,34 +1,41 @@
-<div class="card">
-  <h2>Invitar a alguien a tu hogar</h2>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Invitar a alguien a tu hogar</h2>
 
-  <form (ngSubmit)="generar()">
-    <label>
-      <input type="radio" name="modo" value="link" [(ngModel)]="modo" /> Compartir un link yo mismo
-    </label>
-    <label>
-      <input type="radio" name="modo" value="email" [(ngModel)]="modo" /> Enviar por correo
-    </label>
+    <form class="form-grid" (ngSubmit)="generar()">
+      <mat-radio-group [(ngModel)]="modo" name="modo" style="display:flex; flex-direction:column; gap:0.5rem;">
+        <mat-radio-button value="link">Compartir un link yo mismo</mat-radio-button>
+        <mat-radio-button value="email">Enviar por correo</mat-radio-button>
+      </mat-radio-group>
 
-    @if (modo === 'email') {
-      <label>
-        Correo de la persona
-        <input name="email" type="email" [(ngModel)]="email" required />
-      </label>
-    }
-
-    <button type="submit" [disabled]="generando()">
-      {{ modo === 'email' ? 'Enviar invitación' : 'Generar link' }}
-    </button>
-  </form>
-
-  @if (resultado(); as inv) {
-    <div class="card" style="margin-top:1rem;">
-      @if (inv.emailEnviado) {
-        <p>Correo enviado a <strong>{{ inv.email }}</strong>.</p>
+      @if (modo === 'email') {
+        <mat-form-field appearance="outline">
+          <mat-label>Correo de la persona</mat-label>
+          <input matInput name="email" type="email" [(ngModel)]="email" required />
+        </mat-form-field>
       }
-      <p>Link de invitación (también puedes compartirlo a mano):</p>
-      <p style="word-break:break-all;"><code>{{ inv.link }}</code></p>
-      <button (click)="copiarLink()">{{ copiado() ? 'Copiado' : 'Copiar link' }}</button>
-    </div>
-  }
-</div>
+
+      <div class="form-actions">
+        <button mat-flat-button type="submit" [disabled]="generando()">
+          {{ modo === 'email' ? 'Enviar invitación' : 'Generar link' }}
+        </button>
+      </div>
+    </form>
+
+    @if (resultado(); as inv) {
+      <mat-card appearance="outlined" style="margin-top:1rem;">
+        <mat-card-content>
+          @if (inv.emailEnviado) {
+            <p>Correo enviado a <strong>{{ inv.email }}</strong>.</p>
+          }
+          <p>Link de invitación (también puedes compartirlo a mano):</p>
+          <p style="word-break:break-all;"><code>{{ inv.link }}</code></p>
+          <button mat-stroked-button (click)="copiarLink()">
+            <mat-icon>{{ copiado() ? 'check' : 'content_copy' }}</mat-icon>
+            {{ copiado() ? 'Copiado' : 'Copiar link' }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+  </mat-card-content>
+</mat-card>

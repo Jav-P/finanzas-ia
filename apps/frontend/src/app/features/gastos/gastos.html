@@ -1,155 +1,182 @@
-<div class="card">
-  <h2>Registrar gasto (mercado, recibos, otros)</h2>
-  <form (ngSubmit)="guardar()">
-    <label>
-      Descripción
-      <input name="descripcion" [(ngModel)]="descripcion" required />
-    </label>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Registrar gasto (mercado, recibos, otros)</h2>
+    <form class="form-grid" (ngSubmit)="guardar()">
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción</mat-label>
+        <input matInput name="descripcion" [(ngModel)]="descripcion" required />
+      </mat-form-field>
 
-    <label>
-      Categoría
-      <select name="categoriaId" [(ngModel)]="categoriaId" required>
-        @for (categoria of categorias(); track categoria.id) {
-          <option [value]="categoria.id">{{ categoria.nombre }}</option>
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+          @for (categoria of categorias(); track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Lugar de compra</mat-label>
+        <input matInput name="lugarNombre" [(ngModel)]="lugarNombre" list="lugares-datalist" placeholder="Éxito, D1..." />
+        <datalist id="lugares-datalist">
+          @for (lugar of lugares(); track lugar.id) {
+            <option [value]="lugar.nombre"></option>
+          }
+        </datalist>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Medio de pago</mat-label>
+        <mat-select name="medioPagoId" [(ngModel)]="medioPagoId">
+          <mat-option value="">Sin especificar</mat-option>
+          @for (medio of mediosPago(); track medio.id) {
+            <mat-option [value]="medio.id">{{ medio.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha</mat-label>
+        <input matInput name="fecha" type="date" [(ngModel)]="fecha" required />
+      </mat-form-field>
+
+      <fieldset style="border:none; padding:0; margin:0;">
+        <legend style="font-weight:600; margin-bottom:0.5rem;">Productos comprados</legend>
+        @for (item of items; track $index) {
+          <div class="form-row" style="margin-bottom:0.5rem;">
+            <mat-form-field appearance="outline" style="flex:2; min-width:160px;">
+              <mat-label>Producto</mat-label>
+              <input matInput [(ngModel)]="item.productoNombre" [name]="'producto' + $index" list="productos-datalist" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:100px;">
+              <mat-label>Cantidad</mat-label>
+              <input matInput type="number" [(ngModel)]="item.cantidad" [name]="'cantidad' + $index" min="0.001" step="0.001" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:120px;">
+              <mat-label>Precio unitario</mat-label>
+              <input matInput type="number" [(ngModel)]="item.precioUnitario" [name]="'precio' + $index" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:100px;">
+              <mat-label>Calificación</mat-label>
+              <mat-select [(ngModel)]="item.calificacion" [name]="'calificacion' + $index">
+                <mat-option [value]="null">—</mat-option>
+                @for (n of [1, 2, 3, 4, 5]; track n) {
+                  <mat-option [value]="n">{{ n }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="quitarItem($index)" aria-label="Quitar producto">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
         }
-      </select>
-    </label>
+        <datalist id="productos-datalist">
+          @for (producto of productos(); track producto.id) {
+            <option [value]="producto.nombre"></option>
+          }
+        </datalist>
+        <button mat-stroked-button type="button" (click)="agregarItem()">
+          <mat-icon>add</mat-icon>
+          Agregar producto
+        </button>
+      </fieldset>
 
-    <label>
-      Lugar de compra
-      <input name="lugarNombre" [(ngModel)]="lugarNombre" list="lugares-datalist" placeholder="Éxito, D1..." />
-      <datalist id="lugares-datalist">
-        @for (lugar of lugares(); track lugar.id) {
-          <option [value]="lugar.nombre"></option>
-        }
-      </datalist>
-    </label>
+      <p><strong>Total: {{ montoTotal | number: '1.0-0' }}</strong></p>
 
-    <label>
-      Medio de pago
-      <select name="medioPagoId" [(ngModel)]="medioPagoId">
-        <option value="">Sin especificar</option>
-        @for (medio of mediosPago(); track medio.id) {
-          <option [value]="medio.id">{{ medio.nombre }}</option>
-        }
-      </select>
-    </label>
+      <div class="form-actions">
+        <button mat-flat-button type="submit" [disabled]="guardando()">Guardar gasto</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-    <label>
-      Fecha
-      <input name="fecha" type="date" [(ngModel)]="fecha" required />
-    </label>
-
-    <fieldset>
-      <legend>Productos comprados</legend>
-      @for (item of items; track $index) {
-        <div style="display:flex; gap:0.5rem; align-items:end; margin-bottom:0.5rem;">
-          <label style="flex:2">
-            Producto
-            <input [(ngModel)]="item.productoNombre" [name]="'producto' + $index" list="productos-datalist" />
-          </label>
-          <label style="flex:1">
-            Cantidad
-            <input type="number" [(ngModel)]="item.cantidad" [name]="'cantidad' + $index" min="0.001" step="0.001" />
-          </label>
-          <label style="flex:1">
-            Precio unitario
-            <input type="number" [(ngModel)]="item.precioUnitario" [name]="'precio' + $index" />
-          </label>
-          <label style="flex:1">
-            Calificación
-            <select [(ngModel)]="item.calificacion" [name]="'calificacion' + $index">
-              <option [ngValue]="null">—</option>
-              @for (n of [1, 2, 3, 4, 5]; track n) {
-                <option [ngValue]="n">{{ n }}</option>
-              }
-            </select>
-          </label>
-          <button type="button" (click)="quitarItem($index)">Quitar</button>
-        </div>
-      }
-      <datalist id="productos-datalist">
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Comparar precios por producto</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>Producto</mat-label>
+      <mat-select (selectionChange)="verHistorico($event.value)">
         @for (producto of productos(); track producto.id) {
-          <option [value]="producto.nombre"></option>
+          <mat-option [value]="producto.id">{{ producto.nombre }}</mat-option>
         }
-      </datalist>
-      <button type="button" (click)="agregarItem()">+ Agregar producto</button>
-    </fieldset>
+      </mat-select>
+    </mat-form-field>
 
-    <p><strong>Total: {{ montoTotal | number: '1.0-0' }}</strong></p>
-
-    <button type="submit" [disabled]="guardando()">Guardar gasto</button>
-  </form>
-</div>
-
-<div class="card">
-  <h2>Comparar precios por producto</h2>
-  <select (change)="verHistorico($any($event.target).value)">
-    <option value="">Selecciona un producto</option>
-    @for (producto of productos(); track producto.id) {
-      <option [value]="producto.id">{{ producto.nombre }}</option>
+    @if (historico(); as h) {
+      <table>
+        <tr>
+          <th>Fecha</th>
+          <th>Lugar</th>
+          <th>Cantidad</th>
+          <th>Precio unitario</th>
+        </tr>
+        @for (item of h; track $index) {
+          <tr>
+            <td>{{ item.fecha }}</td>
+            <td>{{ item.lugarNombre ?? '—' }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ item.precioUnitario | number: '1.0-0' }}</td>
+          </tr>
+        }
+      </table>
+      @if (!h.length) {
+        <p>Sin compras registradas de este producto todavía.</p>
+      }
     }
-  </select>
+  </mat-card-content>
+</mat-card>
 
-  @if (historico(); as h) {
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Gastos recientes</h2>
     <table>
       <tr>
         <th>Fecha</th>
-        <th>Lugar</th>
-        <th>Cantidad</th>
-        <th>Precio unitario</th>
+        <th>Descripción</th>
+        <th>Monto</th>
+        <th>Items</th>
+        <th></th>
       </tr>
-      @for (item of h; track $index) {
+      @for (gasto of gastos(); track gasto.id) {
         <tr>
-          <td>{{ item.fecha }}</td>
-          <td>{{ item.lugarNombre ?? '—' }}</td>
-          <td>{{ item.cantidad }}</td>
-          <td>{{ item.precioUnitario | number: '1.0-0' }}</td>
+          @if (editandoId() === gasto.id) {
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput type="date" [(ngModel)]="fechaEdit" name="fechaGastoEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput [(ngModel)]="descripcionEdit" name="descripcionGastoEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput type="number" [(ngModel)]="montoTotalEdit" name="montoGastoEdit" />
+              </mat-form-field>
+            </td>
+            <td></td>
+            <td>
+              <button mat-stroked-button (click)="guardarEdicionGasto(gasto.id)">Guardar</button>
+              <button mat-button (click)="cancelarEdicionGasto()">Cancelar</button>
+            </td>
+          } @else {
+            <td>{{ gasto.fecha }}</td>
+            <td>{{ gasto.descripcion }}</td>
+            <td>{{ gasto.montoTotal | number: '1.0-0' }}</td>
+            <td>
+              @for (item of gasto.items; track item.id) {
+                <div>{{ nombreProducto(item.productoId) }}: {{ item.precioUnitario | number: '1.0-0' }}</div>
+              }
+            </td>
+            <td>
+              <button mat-button (click)="editarGasto(gasto)">Editar</button>
+              <button mat-button color="warn" (click)="eliminarGasto(gasto.id)">Eliminar</button>
+            </td>
+          }
         </tr>
       }
     </table>
-    @if (!h.length) {
-      <p>Sin compras registradas de este producto todavía.</p>
-    }
-  }
-</div>
-
-<div class="card">
-  <h2>Gastos recientes</h2>
-  <table>
-    <tr>
-      <th>Fecha</th>
-      <th>Descripción</th>
-      <th>Monto</th>
-      <th>Items</th>
-      <th></th>
-    </tr>
-    @for (gasto of gastos(); track gasto.id) {
-      <tr>
-        @if (editandoId() === gasto.id) {
-          <td><input type="date" [(ngModel)]="fechaEdit" name="fechaGastoEdit" /></td>
-          <td><input [(ngModel)]="descripcionEdit" name="descripcionGastoEdit" /></td>
-          <td><input type="number" [(ngModel)]="montoTotalEdit" name="montoGastoEdit" /></td>
-          <td></td>
-          <td>
-            <button (click)="guardarEdicionGasto(gasto.id)">Guardar</button>
-            <button (click)="cancelarEdicionGasto()">Cancelar</button>
-          </td>
-        } @else {
-          <td>{{ gasto.fecha }}</td>
-          <td>{{ gasto.descripcion }}</td>
-          <td>{{ gasto.montoTotal | number: '1.0-0' }}</td>
-          <td>
-            @for (item of gasto.items; track item.id) {
-              <div>{{ nombreProducto(item.productoId) }}: {{ item.precioUnitario | number: '1.0-0' }}</div>
-            }
-          </td>
-          <td>
-            <button (click)="editarGasto(gasto)">Editar</button>
-            <button (click)="eliminarGasto(gasto.id)">Eliminar</button>
-          </td>
-        }
-      </tr>
-    }
-  </table>
-</div>
+  </mat-card-content>
+</mat-card>

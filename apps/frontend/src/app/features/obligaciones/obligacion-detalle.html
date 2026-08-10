@@ -1,56 +1,67 @@
 @if (instancia(); as i) {
-  <button (click)="volver()">&larr; Volver</button>
+  <button mat-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+    Volver
+  </button>
 
-  <div class="card">
-    <div style="display:flex; justify-content: space-between; align-items:start;">
-      <div>
-        <h2>{{ i.obligacion.descripcion }}</h2>
-        <p>Categoría: {{ i.categoria.nombre }}</p>
-        <p>Monto: {{ i.monto | number: '1.0-0' }}</p>
-        <p>Vence: {{ i.fechaVencimiento }}</p>
-        @if (i.obligacion.numeroCuotas) {
-          <p>Cuotas: {{ i.obligacion.numeroCuotas }}</p>
-        }
-        <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
+  <mat-card class="card-section">
+    <mat-card-content>
+      <div style="display:flex; justify-content: space-between; align-items:start; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2>{{ i.obligacion.descripcion }}</h2>
+          <p>Categoría: {{ i.categoria.nombre }}</p>
+          <p>Monto: {{ i.monto | number: '1.0-0' }}</p>
+          <p>Vence: {{ i.fechaVencimiento }}</p>
+          @if (i.obligacion.numeroCuotas) {
+            <p>Cuotas: {{ i.obligacion.numeroCuotas }}</p>
+          }
+          <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <a mat-stroked-button [routerLink]="['/obligaciones', i.obligacion.id, 'editar']">Editar</a>
+          <button mat-stroked-button (click)="desactivarObligacion()">Desactivar</button>
+          <button mat-stroked-button color="warn" (click)="eliminarObligacion()">Eliminar</button>
+        </div>
       </div>
-      <div style="display:flex; gap:0.5rem;">
-        <a [routerLink]="['/obligaciones', i.obligacion.id, 'editar']"><button>Editar</button></a>
-        <button (click)="desactivarObligacion()">Desactivar</button>
-        <button (click)="eliminarObligacion()">Eliminar</button>
-      </div>
-    </div>
-  </div>
+    </mat-card-content>
+  </mat-card>
 
   @if (i.pago; as pago) {
-    <div class="card">
-      <h3>Comprobante</h3>
-      <p>Pagado el {{ pago.fechaPago }} · {{ pago.montoPagado | number: '1.0-0' }}</p>
-      <a [href]="pago.urlComprobante" target="_blank">Ver comprobante</a>
-      <div>
-        <button (click)="revertirPago()">Revertir pago</button>
-      </div>
-    </div>
+    <mat-card class="card-section">
+      <mat-card-content>
+        <h3>Comprobante</h3>
+        <p>Pagado el {{ pago.fechaPago }} · {{ pago.montoPagado | number: '1.0-0' }}</p>
+        <a class="auth-link" [href]="pago.urlComprobante" target="_blank">Ver comprobante</a>
+        <div style="margin-top:0.5rem;">
+          <button mat-stroked-button (click)="revertirPago()">Revertir pago</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
   } @else {
-    <div class="card">
-      <h3>Registrar pago</h3>
-      <form (ngSubmit)="registrarPago()">
-        <label>
-          Fecha de pago
-          <input name="fechaPago" type="date" [(ngModel)]="fechaPago" required />
-        </label>
-        <label>
-          Monto pagado
-          <input name="montoPagado" type="number" [(ngModel)]="montoPagado" required />
-        </label>
-        <label>
-          Comprobante (imagen o PDF)
-          <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoSeleccionado($event)" required />
-        </label>
-        @if (error()) {
-          <p style="color:#dc2626">{{ error() }}</p>
-        }
-        <button type="submit" [disabled]="guardando()">Registrar pago</button>
-      </form>
-    </div>
+    <mat-card class="card-section">
+      <mat-card-content>
+        <h3>Registrar pago</h3>
+        <form class="form-grid" (ngSubmit)="registrarPago()">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de pago</mat-label>
+            <input matInput name="fechaPago" type="date" [(ngModel)]="fechaPago" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Monto pagado</mat-label>
+            <input matInput name="montoPagado" type="number" [(ngModel)]="montoPagado" required />
+          </mat-form-field>
+          <label class="file-field">
+            Comprobante (imagen o PDF)
+            <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoSeleccionado($event)" required />
+          </label>
+          @if (error()) {
+            <p class="error-text">{{ error() }}</p>
+          }
+          <div class="form-actions">
+            <button mat-flat-button type="submit" [disabled]="guardando()">Registrar pago</button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
   }
 }

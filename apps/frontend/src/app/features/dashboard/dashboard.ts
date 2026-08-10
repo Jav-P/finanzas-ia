@@ -1,6 +1,9 @@
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import type { Balance, InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
@@ -19,7 +22,7 @@ function diasRestantes(fechaVencimiento: string): number {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {

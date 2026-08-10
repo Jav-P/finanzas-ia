@@ -1,30 +1,26 @@
 @if (session.usuario()?.hogarId) {
-  <header class="topbar">
-    <h1>Finanzas en pareja</h1>
+  <mat-toolbar class="topbar">
+    <span class="brand">Finanzas en pareja</span>
 
-    <nav>
-      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-      <a routerLink="/ingresos" routerLinkActive="active">Ingresos</a>
-      <a routerLink="/presupuestos" routerLinkActive="active">Presupuestos</a>
-      <a routerLink="/gastos" routerLinkActive="active">Mercado / gastos</a>
-      <a routerLink="/catalogos" routerLinkActive="active">Catálogos</a>
-      <a routerLink="/invitar" routerLinkActive="active">Invitar</a>
+    <nav class="topbar-nav">
+      <a mat-button routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
+      <a mat-button routerLink="/ingresos" routerLinkActive="active-link">Ingresos</a>
+      <a mat-button routerLink="/presupuestos" routerLinkActive="active-link">Presupuestos</a>
+      <a mat-button routerLink="/gastos" routerLinkActive="active-link">Mercado / gastos</a>
+      <a mat-button routerLink="/catalogos" routerLinkActive="active-link">Catálogos</a>
+      <a mat-button routerLink="/invitar" routerLinkActive="active-link">Invitar</a>
     </nav>
 
-    <span>{{ session.usuario()?.nombre }}</span>
-    <button (click)="cerrarSesion()">Cerrar sesión</button>
-  </header>
+    <span class="spacer"></span>
+
+    <span class="user-name">
+      <mat-icon>account_circle</mat-icon>
+      {{ session.usuario()?.nombre }}
+    </span>
+    <button mat-stroked-button (click)="cerrarSesion()">Cerrar sesión</button>
+  </mat-toolbar>
 }
 
 <main>
   <router-outlet />
 </main>
-
-@if (notification.mensaje(); as mensaje) {
-  <div class="popup-overlay" (click)="notification.cerrar()">
-    <div class="popup" (click)="$event.stopPropagation()">
-      <p>{{ mensaje }}</p>
-      <button (click)="notification.cerrar()">Cerrar</button>
-    </div>
-  </div>
-}

@@ -2,13 +2,27 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import type { InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 
 @Component({
   selector: 'app-obligacion-detalle',
-  imports: [FormsModule, DecimalPipe, RouterLink],
+  imports: [
+    FormsModule,
+    DecimalPipe,
+    RouterLink,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './obligacion-detalle.html',
 })
 export class ObligacionDetalle implements OnInit {

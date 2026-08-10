@@ -1,84 +1,98 @@
-<div class="card">
-  <h2>Ingresos registrados</h2>
-  <table>
-    <tr>
-      <th>Persona</th>
-      <th>Descripción</th>
-      <th>Monto</th>
-      <th>Periodicidad</th>
-      <th>Desde</th>
-      <th></th>
-    </tr>
-    @for (ingreso of ingresos(); track ingreso.id) {
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Ingresos registrados</h2>
+    <table>
       <tr>
-        @if (editandoId() === ingreso.id) {
-          <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
-          <td><input [(ngModel)]="descripcionEdit" name="descripcionEdit" /></td>
-          <td><input type="number" [(ngModel)]="montoEdit" name="montoEdit" /></td>
-          <td>{{ ingreso.periodicidad }}</td>
-          <td>{{ ingreso.fechaInicio }}</td>
-          <td>
-            <button (click)="guardarEdicion(ingreso.id)">Guardar</button>
-            <button (click)="cancelarEdicion()">Cancelar</button>
-          </td>
-        } @else {
-          <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
-          <td>{{ ingreso.descripcion }}</td>
-          <td>{{ ingreso.monto | number: '1.0-0' }}</td>
-          <td>{{ ingreso.periodicidad }}</td>
-          <td>{{ ingreso.fechaInicio }}</td>
-          <td>
-            <button (click)="editar(ingreso)">Editar</button>
-            <button (click)="eliminar(ingreso.id)">Eliminar</button>
-          </td>
-        }
+        <th>Persona</th>
+        <th>Descripción</th>
+        <th>Monto</th>
+        <th>Periodicidad</th>
+        <th>Desde</th>
+        <th></th>
       </tr>
-    }
-  </table>
-</div>
+      @for (ingreso of ingresos(); track ingreso.id) {
+        <tr>
+          @if (editandoId() === ingreso.id) {
+            <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput [(ngModel)]="descripcionEdit" name="descripcionEdit" />
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" style="width:100%;">
+                <input matInput type="number" [(ngModel)]="montoEdit" name="montoEdit" />
+              </mat-form-field>
+            </td>
+            <td>{{ ingreso.periodicidad }}</td>
+            <td>{{ ingreso.fechaInicio }}</td>
+            <td>
+              <button mat-stroked-button (click)="guardarEdicion(ingreso.id)">Guardar</button>
+              <button mat-button (click)="cancelarEdicion()">Cancelar</button>
+            </td>
+          } @else {
+            <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
+            <td>{{ ingreso.descripcion }}</td>
+            <td>{{ ingreso.monto | number: '1.0-0' }}</td>
+            <td>{{ ingreso.periodicidad }}</td>
+            <td>{{ ingreso.fechaInicio }}</td>
+            <td>
+              <button mat-button (click)="editar(ingreso)">Editar</button>
+              <button mat-button color="warn" (click)="eliminar(ingreso.id)">Eliminar</button>
+            </td>
+          }
+        </tr>
+      }
+    </table>
+  </mat-card-content>
+</mat-card>
 
-<div class="card">
-  <h2>Nuevo ingreso</h2>
-  <form (ngSubmit)="guardar()">
-    <label>
-      Persona
-      <select name="usuarioId" [(ngModel)]="usuarioId" required>
-        @for (usuario of session.miembrosHogar(); track usuario.id) {
-          <option [value]="usuario.id">{{ usuario.nombre }}</option>
-        }
-      </select>
-    </label>
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Nuevo ingreso</h2>
+    <form class="form-grid" (ngSubmit)="guardar()">
+      <mat-form-field appearance="outline">
+        <mat-label>Persona</mat-label>
+        <mat-select name="usuarioId" [(ngModel)]="usuarioId" required>
+          @for (usuario of session.miembrosHogar(); track usuario.id) {
+            <mat-option [value]="usuario.id">{{ usuario.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-    <label>
-      Descripción
-      <input name="descripcion" [(ngModel)]="descripcion" placeholder="Salario" required />
-    </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción</mat-label>
+        <input matInput name="descripcion" [(ngModel)]="descripcion" placeholder="Salario" required />
+      </mat-form-field>
 
-    <label>
-      Monto
-      <input name="monto" type="number" [(ngModel)]="monto" required />
-    </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Monto</mat-label>
+        <input matInput name="monto" type="number" [(ngModel)]="monto" required />
+      </mat-form-field>
 
-    <label>
-      Periodicidad
-      <select name="periodicidad" [(ngModel)]="periodicidad">
-        <option value="mensual">Mensual</option>
-        <option value="unica">Única</option>
-      </select>
-    </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Periodicidad</mat-label>
+        <mat-select name="periodicidad" [(ngModel)]="periodicidad">
+          <mat-option value="mensual">Mensual</mat-option>
+          <mat-option value="unica">Única</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    @if (periodicidad === 'mensual') {
-      <label>
-        Día de pago (1-31)
-        <input name="diaPago" type="number" min="1" max="31" [(ngModel)]="diaPago" />
-      </label>
-    }
+      @if (periodicidad === 'mensual') {
+        <mat-form-field appearance="outline">
+          <mat-label>Día de pago (1-31)</mat-label>
+          <input matInput name="diaPago" type="number" min="1" max="31" [(ngModel)]="diaPago" />
+        </mat-form-field>
+      }
 
-    <label>
-      Desde
-      <input name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
-    </label>
+      <mat-form-field appearance="outline">
+        <mat-label>Desde</mat-label>
+        <input matInput name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
+      </mat-form-field>
 
-    <button type="submit" [disabled]="guardando()">Guardar</button>
-  </form>
-</div>
+      <div class="form-actions">
+        <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

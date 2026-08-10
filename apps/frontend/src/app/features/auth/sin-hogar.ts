@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 import { SessionService } from '../../core/session.service';
 
 @Component({
   selector: 'app-sin-hogar',
-  imports: [],
+  imports: [MatCardModule, MatButtonModule],
   templateUrl: './sin-hogar.html',
 })
 export class SinHogar {

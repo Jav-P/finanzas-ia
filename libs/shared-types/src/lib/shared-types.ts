@@ -84,6 +84,8 @@ export interface Obligacion {
   activa: boolean;
   banco: string | null; // solo si es un credito
   tasaInteres: number | null; // tasa efectiva anual (%), solo si es un credito
+  saldoPendiente: number | null; // se actualiza a mano, no se calcula
+  saldoActualizadoEn: string | null;
   createdAt: string;
 }
 
@@ -133,9 +135,14 @@ export interface CreateObligacionDto {
   fechaInicio: string;
   banco?: string | null;
   tasaInteres?: number | null;
+  saldoPendiente?: number | null;
 }
 
 export type UpdateObligacionDto = Partial<CreateObligacionDto>;
+
+export interface ActualizarSaldoCreditoDto {
+  saldoPendiente: number;
+}
 
 export interface GenerarInstanciasResultado {
   obligacionesRevisadas: number;
@@ -155,6 +162,8 @@ export interface CreditoResumen {
   cuotasRestantes: number | null; // null = indefinida (sin numeroCuotas)
   proximaFechaVencimiento: string | null;
   activa: boolean;
+  saldoPendiente: number | null;
+  saldoActualizadoEn: string | null;
 }
 
 export interface RegistrarPagoDto {

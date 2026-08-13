@@ -9,6 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import type {
+  ActualizarSaldoCreditoDto,
   CreateObligacionDto,
   UpdateObligacionDto,
 } from '@finanzas-ia/shared-types';
@@ -55,6 +56,14 @@ export class ObligacionesController {
   @Patch(':id/desactivar')
   desactivar(@Param('id') id: string) {
     return this.obligaciones.desactivar(id);
+  }
+
+  @Patch(':id/saldo')
+  actualizarSaldo(@Param('id') id: string, @Body() dto: ActualizarSaldoCreditoDto) {
+    if (dto.saldoPendiente == null) {
+      throw new BadRequestException('saldoPendiente es requerido');
+    }
+    return this.obligaciones.actualizarSaldo(id, dto.saldoPendiente);
   }
 
   @Delete(':id')

@@ -19,6 +19,7 @@
           <th>Tasa E.A.</th>
           <th>Cuotas</th>
           <th>Próximo vencimiento</th>
+          <th>Saldo pendiente</th>
           <th>Estado</th>
         </tr>
         @for (credito of creditos(); track credito.obligacionId) {
@@ -37,6 +38,33 @@
               }
             </td>
             <td>{{ credito.proximaFechaVencimiento ?? '—' }}</td>
+            <td>
+              @if (editandoId() === credito.obligacionId) {
+                <div style="display:flex; gap:0.5rem; align-items:start;">
+                  <mat-form-field appearance="outline" style="width:140px;">
+                    <input matInput appMonto [(ngModel)]="saldoEdit" name="saldoEdit" />
+                  </mat-form-field>
+                  <button mat-icon-button (click)="guardarSaldo(credito.obligacionId)" [disabled]="guardando()" aria-label="Guardar">
+                    ✓
+                  </button>
+                  <button mat-icon-button (click)="cancelarEdicion()" aria-label="Cancelar">✕</button>
+                </div>
+              } @else {
+                <div>
+                  @if (credito.saldoPendiente != null) {
+                    <div>{{ credito.saldoPendiente | number: '1.0-0' }}</div>
+                    <div style="font-size:0.75rem; color:var(--mat-sys-on-surface-variant);">
+                      actualizado {{ credito.saldoActualizadoEn }}
+                    </div>
+                  } @else {
+                    <div style="color:var(--mat-sys-on-surface-variant);">Sin registrar</div>
+                  }
+                  <button mat-button (click)="editarSaldo(credito)">
+                    {{ credito.saldoPendiente != null ? 'Actualizar' : 'Registrar' }}
+                  </button>
+                </div>
+              }
+            </td>
             <td>
               <span class="badge" [class]="credito.activa ? 'pendiente' : 'pagado'">
                 {{ credito.activa ? 'activo' : 'terminado' }}

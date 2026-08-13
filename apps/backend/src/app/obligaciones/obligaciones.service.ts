@@ -55,6 +55,8 @@ export class ObligacionesService {
         fecha_inicio: dto.fechaInicio,
         banco: dto.banco ?? null,
         tasa_interes: dto.tasaInteres ?? null,
+        saldo_pendiente: dto.saldoPendiente ?? null,
+        saldo_actualizado_en: dto.saldoPendiente != null ? hoyIso() : null,
       })
       .select()
       .single();
@@ -104,10 +106,29 @@ export class ObligacionesService {
     if (dto.fechaInicio !== undefined) patch['fecha_inicio'] = dto.fechaInicio;
     if (dto.banco !== undefined) patch['banco'] = dto.banco;
     if (dto.tasaInteres !== undefined) patch['tasa_interes'] = dto.tasaInteres;
+    if (dto.saldoPendiente !== undefined) {
+      patch['saldo_pendiente'] = dto.saldoPendiente;
+      patch['saldo_actualizado_en'] = dto.saldoPendiente != null ? hoyIso() : null;
+    }
 
     const { data, error } = await this.supabase.client
       .from('obligaciones')
       .update(patch)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    throwIfError(error);
+    if (!data) throw new NotFoundException('Obligacion no encontrada');
+    return toObligacion(data);
+  }
+
+  // Actualizacion rapida del saldo pendiente de un credito (uso mensual,
+  // sin pasar por el formulario completo de editar obligacion).
+  async actualizarSaldo(id: string, saldoPendiente: number): Promise<Obligacion> {
+    const { data, error } = await this.supabase.client
+      .from('obligaciones')
+      .update({ saldo_pendiente: saldoPendiente, saldo_actualizado_en: hoyIso() })
       .eq('id', id)
       .select()
       .maybeSingle();
@@ -311,6 +332,8 @@ export class ObligacionesService {
         cuotasRestantes: obligacion.numeroCuotas != null ? obligacion.numeroCuotas - cuotasPagadas : null,
         proximaFechaVencimiento: proxima ? proxima.fecha_vencimiento : null,
         activa: obligacion.activa,
+        saldoPendiente: obligacion.saldoPendiente,
+        saldoActualizadoEn: obligacion.saldoActualizadoEn,
       };
     });
   }

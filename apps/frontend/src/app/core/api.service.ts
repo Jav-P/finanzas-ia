@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type {
+  ActualizarSaldoCreditoDto,
   Balance,
   Categoria,
   CompletarRegistroDto,
@@ -121,6 +122,10 @@ export class ApiService {
 
   creditos() {
     return this.http.get<CreditoResumen[]>(`${API_URL}/obligaciones/creditos`);
+  }
+
+  actualizarSaldoCredito(obligacionId: string, dto: ActualizarSaldoCreditoDto) {
+    return this.http.patch<Obligacion>(`${API_URL}/obligaciones/${obligacionId}/saldo`, dto);
   }
 
   // Instancias

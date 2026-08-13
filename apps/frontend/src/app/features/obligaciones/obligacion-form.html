@@ -74,6 +74,12 @@
           <mat-label>Tasa de interés efectiva anual (%)</mat-label>
           <input matInput name="tasaInteres" type="number" min="0" step="0.01" [(ngModel)]="tasaInteres" />
         </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Saldo pendiente hoy</mat-label>
+          <input matInput appMonto name="saldoPendiente" [(ngModel)]="saldoPendiente" />
+          <mat-hint>Lo que te muestra el banco. Lo actualizas tú cada mes; la app no lo calcula.</mat-hint>
+        </mat-form-field>
       }
 
       <div class="form-actions">

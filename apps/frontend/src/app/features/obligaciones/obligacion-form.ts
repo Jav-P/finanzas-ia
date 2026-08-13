@@ -50,6 +50,7 @@ export class ObligacionForm implements OnInit {
   protected esCredito = false;
   protected banco = '';
   protected tasaInteres: number | null = null;
+  protected saldoPendiente: number | null = null;
 
   ngOnInit(): void {
     this.api.categorias().subscribe((categorias) => {
@@ -72,6 +73,7 @@ export class ObligacionForm implements OnInit {
         this.esCredito = !!obligacion.banco;
         this.banco = obligacion.banco ?? '';
         this.tasaInteres = obligacion.tasaInteres;
+        this.saldoPendiente = obligacion.saldoPendiente;
       });
     }
   }
@@ -91,6 +93,7 @@ export class ObligacionForm implements OnInit {
       fechaInicio: dateToIso(this.fechaInicio)!,
       banco: this.esCredito ? this.banco || null : null,
       tasaInteres: this.esCredito ? this.tasaInteres : null,
+      saldoPendiente: this.esCredito ? this.saldoPendiente : null,
     };
 
     const id = this.obligacionId();

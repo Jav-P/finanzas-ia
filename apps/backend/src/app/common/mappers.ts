@@ -52,6 +52,8 @@ export function toObligacion(row: any): Obligacion {
     activa: row.activa,
     banco: row.banco,
     tasaInteres: row.tasa_interes,
+    saldoPendiente: row.saldo_pendiente,
+    saldoActualizadoEn: row.saldo_actualizado_en,
     createdAt: row.created_at,
   };
 }

@@ -24,13 +24,24 @@
         </tr>
       }
     </table>
-    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearCategoria()">
-      <mat-form-field appearance="outline" style="flex:1;">
-        <mat-label>Nueva categoría</mat-label>
-        <input matInput name="nuevaCategoria" [(ngModel)]="nuevaCategoria" />
-      </mat-form-field>
-      <button mat-flat-button type="submit">Agregar</button>
-    </form>
+
+    @if (!mostrarNuevaCategoria()) {
+      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevaCategoria.set(true)">
+        <mat-icon>add</mat-icon>
+        Nueva categoría
+      </button>
+    }
+
+    @if (mostrarNuevaCategoria()) {
+      <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearCategoria()">
+        <mat-form-field appearance="outline" style="flex:1;">
+          <mat-label>Nueva categoría</mat-label>
+          <input matInput name="nuevaCategoria" [(ngModel)]="nuevaCategoria" />
+        </mat-form-field>
+        <button mat-flat-button type="submit">Agregar</button>
+        <button mat-button type="button" (click)="mostrarNuevaCategoria.set(false)">Cancelar</button>
+      </form>
+    }
   </mat-card-content>
 </mat-card>
 
@@ -71,22 +82,33 @@
         </tr>
       }
     </table>
-    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearMedioPago()">
-      <mat-form-field appearance="outline" style="flex:1;">
-        <mat-label>Nombre</mat-label>
-        <input matInput name="nuevoMedioPagoNombre" [(ngModel)]="nuevoMedioPagoNombre" placeholder="Tarjeta Falabella" />
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Tipo</mat-label>
-        <mat-select name="nuevoMedioPagoTipo" [(ngModel)]="nuevoMedioPagoTipo">
-          <mat-option value="efectivo">Efectivo</mat-option>
-          <mat-option value="debito">Débito</mat-option>
-          <mat-option value="credito">Crédito</mat-option>
-          <mat-option value="transferencia">Transferencia</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-flat-button type="submit">Agregar</button>
-    </form>
+
+    @if (!mostrarNuevoMedioPago()) {
+      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevoMedioPago.set(true)">
+        <mat-icon>add</mat-icon>
+        Nuevo medio de pago
+      </button>
+    }
+
+    @if (mostrarNuevoMedioPago()) {
+      <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearMedioPago()">
+        <mat-form-field appearance="outline" style="flex:1;">
+          <mat-label>Nombre</mat-label>
+          <input matInput name="nuevoMedioPagoNombre" [(ngModel)]="nuevoMedioPagoNombre" placeholder="Tarjeta Falabella" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select name="nuevoMedioPagoTipo" [(ngModel)]="nuevoMedioPagoTipo">
+            <mat-option value="efectivo">Efectivo</mat-option>
+            <mat-option value="debito">Débito</mat-option>
+            <mat-option value="credito">Crédito</mat-option>
+            <mat-option value="transferencia">Transferencia</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button type="submit">Agregar</button>
+        <button mat-button type="button" (click)="mostrarNuevoMedioPago.set(false)">Cancelar</button>
+      </form>
+    }
   </mat-card-content>
 </mat-card>
 
@@ -116,13 +138,24 @@
         </tr>
       }
     </table>
-    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearLugar()">
-      <mat-form-field appearance="outline" style="flex:1;">
-        <mat-label>Nuevo lugar</mat-label>
-        <input matInput name="nuevoLugar" [(ngModel)]="nuevoLugar" />
-      </mat-form-field>
-      <button mat-flat-button type="submit">Agregar</button>
-    </form>
+
+    @if (!mostrarNuevoLugar()) {
+      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevoLugar.set(true)">
+        <mat-icon>add</mat-icon>
+        Nuevo lugar
+      </button>
+    }
+
+    @if (mostrarNuevoLugar()) {
+      <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearLugar()">
+        <mat-form-field appearance="outline" style="flex:1;">
+          <mat-label>Nuevo lugar</mat-label>
+          <input matInput name="nuevoLugar" [(ngModel)]="nuevoLugar" />
+        </mat-form-field>
+        <button mat-flat-button type="submit">Agregar</button>
+        <button mat-button type="button" (click)="mostrarNuevoLugar.set(false)">Cancelar</button>
+      </form>
+    }
   </mat-card-content>
 </mat-card>
 
@@ -152,12 +185,23 @@
         </tr>
       }
     </table>
-    <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearProducto()">
-      <mat-form-field appearance="outline" style="flex:1;">
-        <mat-label>Nuevo producto</mat-label>
-        <input matInput name="nuevoProducto" [(ngModel)]="nuevoProducto" />
-      </mat-form-field>
-      <button mat-flat-button type="submit">Agregar</button>
-    </form>
+
+    @if (!mostrarNuevoProducto()) {
+      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevoProducto.set(true)">
+        <mat-icon>add</mat-icon>
+        Nuevo producto
+      </button>
+    }
+
+    @if (mostrarNuevoProducto()) {
+      <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearProducto()">
+        <mat-form-field appearance="outline" style="flex:1;">
+          <mat-label>Nuevo producto</mat-label>
+          <input matInput name="nuevoProducto" [(ngModel)]="nuevoProducto" />
+        </mat-form-field>
+        <button mat-flat-button type="submit">Agregar</button>
+        <button mat-button type="button" (click)="mostrarNuevoProducto.set(false)">Cancelar</button>
+      </form>
+    }
   </mat-card-content>
 </mat-card>

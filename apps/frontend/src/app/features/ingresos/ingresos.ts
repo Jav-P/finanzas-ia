@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatIconModule } from '@angular/material/icon';
 import type { Ingreso, Recurrencia } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
@@ -24,6 +25,7 @@ import { dateToIso } from '../../core/date-utils';
     MatSelectModule,
     MatButtonModule,
     MatDatepickerModule,
+    MatIconModule,
     MontoInputDirective,
   ],
   templateUrl: './ingresos.html',
@@ -34,6 +36,7 @@ export class Ingresos implements OnInit {
 
   protected readonly ingresos = signal<Ingreso[]>([]);
   protected readonly guardando = signal(false);
+  protected readonly mostrarForm = signal(false);
 
   protected usuarioId = '';
   protected descripcion = '';
@@ -81,6 +84,7 @@ export class Ingresos implements OnInit {
         this.descripcion = '';
         this.monto = null;
         this.guardando.set(false);
+        this.mostrarForm.set(false);
         this.cargar();
       });
   }

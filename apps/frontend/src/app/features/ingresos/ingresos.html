@@ -49,7 +49,17 @@
 
 <mat-card class="card-section">
   <mat-card-content>
-    <h2>Nuevo ingreso</h2>
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <h2 style="margin:0;">Nuevo ingreso</h2>
+      @if (!mostrarForm()) {
+        <button mat-stroked-button (click)="mostrarForm.set(true)">
+          <mat-icon>add</mat-icon>
+          Nuevo ingreso
+        </button>
+      }
+    </div>
+
+    @if (mostrarForm()) {
     <form class="form-grid" (ngSubmit)="guardar()">
       <mat-form-field appearance="outline">
         <mat-label>Persona</mat-label>
@@ -94,7 +104,9 @@
 
       <div class="form-actions">
         <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+        <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
       </div>
     </form>
+    }
   </mat-card-content>
 </mat-card>

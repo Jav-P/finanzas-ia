@@ -36,25 +36,37 @@
 
 <mat-card class="card-section">
   <mat-card-content>
-    <h2>Definir presupuesto</h2>
-    <form class="form-grid" (ngSubmit)="guardar()">
-      <mat-form-field appearance="outline">
-        <mat-label>Categoría</mat-label>
-        <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
-          @for (categoria of categorias(); track categoria.id) {
-            <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <h2 style="margin:0;">Definir presupuesto</h2>
+      @if (!mostrarForm()) {
+        <button mat-stroked-button (click)="mostrarForm.set(true)">
+          <mat-icon>add</mat-icon>
+          Definir presupuesto
+        </button>
+      }
+    </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Monto presupuestado para {{ periodo() }}</mat-label>
-        <input matInput appMonto name="montoPresupuestado" [(ngModel)]="montoPresupuestado" required />
-      </mat-form-field>
+    @if (mostrarForm()) {
+      <form class="form-grid" (ngSubmit)="guardar()">
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+            @for (categoria of categorias(); track categoria.id) {
+              <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-      <div class="form-actions">
-        <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
-      </div>
-    </form>
+        <mat-form-field appearance="outline">
+          <mat-label>Monto presupuestado para {{ periodo() }}</mat-label>
+          <input matInput appMonto name="montoPresupuestado" [(ngModel)]="montoPresupuestado" required />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+          <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
+        </div>
+      </form>
+    }
   </mat-card-content>
 </mat-card>

@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import type { Categoria, Lugar, MedioPago, Producto, TipoMedioPago } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 
@@ -17,6 +18,7 @@ import { ApiService } from '../../core/api.service';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './catalogos.html',
 })
@@ -31,6 +33,11 @@ export class Catalogos implements OnInit {
   protected editandoId = signal<string | null>(null);
   protected nombreEdit = '';
   protected tipoEdit: TipoMedioPago = 'efectivo';
+
+  protected readonly mostrarNuevaCategoria = signal(false);
+  protected readonly mostrarNuevoMedioPago = signal(false);
+  protected readonly mostrarNuevoLugar = signal(false);
+  protected readonly mostrarNuevoProducto = signal(false);
 
   protected nuevaCategoria = '';
   protected nuevoMedioPagoNombre = '';
@@ -54,6 +61,7 @@ export class Catalogos implements OnInit {
     if (!this.nuevaCategoria.trim()) return;
     this.api.crearCategoria({ nombre: this.nuevaCategoria.trim() }).subscribe(() => {
       this.nuevaCategoria = '';
+      this.mostrarNuevaCategoria.set(false);
       this.api.categorias().subscribe((c) => this.categorias.set(c));
     });
   }
@@ -86,6 +94,7 @@ export class Catalogos implements OnInit {
       })
       .subscribe(() => {
         this.nuevoMedioPagoNombre = '';
+        this.mostrarNuevoMedioPago.set(false);
         this.api.mediosPago().subscribe((m) => this.mediosPago.set(m));
       });
   }
@@ -115,6 +124,7 @@ export class Catalogos implements OnInit {
     if (!this.nuevoLugar.trim()) return;
     this.api.crearLugar({ nombre: this.nuevoLugar.trim() }).subscribe(() => {
       this.nuevoLugar = '';
+      this.mostrarNuevoLugar.set(false);
       this.api.lugares().subscribe((l) => this.lugares.set(l));
     });
   }
@@ -142,6 +152,7 @@ export class Catalogos implements OnInit {
     if (!this.nuevoProducto.trim()) return;
     this.api.crearProducto({ nombre: this.nuevoProducto.trim() }).subscribe(() => {
       this.nuevoProducto = '';
+      this.mostrarNuevoProducto.set(false);
       this.api.productos().subscribe((p) => this.productos.set(p));
     });
   }

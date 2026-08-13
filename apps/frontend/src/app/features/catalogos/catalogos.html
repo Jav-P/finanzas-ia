@@ -1,6 +1,14 @@
 <mat-card class="card-section">
   <mat-card-content>
-    <h2>Categorías</h2>
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <h2 style="margin:0;">Categorías</h2>
+      @if (!mostrarNuevaCategoria()) {
+        <button mat-stroked-button (click)="mostrarNuevaCategoria.set(true)">
+          <mat-icon>add</mat-icon>
+          Nueva categoría
+        </button>
+      }
+    </div>
     <table>
       @for (categoria of categorias(); track categoria.id) {
         <tr>
@@ -25,13 +33,6 @@
       }
     </table>
 
-    @if (!mostrarNuevaCategoria()) {
-      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevaCategoria.set(true)">
-        <mat-icon>add</mat-icon>
-        Nueva categoría
-      </button>
-    }
-
     @if (mostrarNuevaCategoria()) {
       <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearCategoria()">
         <mat-form-field appearance="outline" style="flex:1;">
@@ -47,7 +48,15 @@
 
 <mat-card class="card-section">
   <mat-card-content>
-    <h2>Medios de pago</h2>
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <h2 style="margin:0;">Medios de pago</h2>
+      @if (!mostrarNuevoMedioPago()) {
+        <button mat-stroked-button (click)="mostrarNuevoMedioPago.set(true)">
+          <mat-icon>add</mat-icon>
+          Nuevo medio de pago
+        </button>
+      }
+    </div>
     <table>
       @for (medio of mediosPago(); track medio.id) {
         <tr>
@@ -83,13 +92,6 @@
       }
     </table>
 
-    @if (!mostrarNuevoMedioPago()) {
-      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevoMedioPago.set(true)">
-        <mat-icon>add</mat-icon>
-        Nuevo medio de pago
-      </button>
-    }
-
     @if (mostrarNuevoMedioPago()) {
       <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearMedioPago()">
         <mat-form-field appearance="outline" style="flex:1;">
@@ -114,7 +116,15 @@
 
 <mat-card class="card-section">
   <mat-card-content>
-    <h2>Lugares</h2>
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <h2 style="margin:0;">Lugares</h2>
+      @if (!mostrarNuevoLugar()) {
+        <button mat-stroked-button (click)="mostrarNuevoLugar.set(true)">
+          <mat-icon>add</mat-icon>
+          Nuevo lugar
+        </button>
+      }
+    </div>
     <table>
       @for (lugar of lugares(); track lugar.id) {
         <tr>
@@ -139,13 +149,6 @@
       }
     </table>
 
-    @if (!mostrarNuevoLugar()) {
-      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevoLugar.set(true)">
-        <mat-icon>add</mat-icon>
-        Nuevo lugar
-      </button>
-    }
-
     @if (mostrarNuevoLugar()) {
       <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearLugar()">
         <mat-form-field appearance="outline" style="flex:1;">
@@ -161,7 +164,15 @@
 
 <mat-card class="card-section">
   <mat-card-content>
-    <h2>Productos</h2>
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <h2 style="margin:0;">Productos</h2>
+      @if (!mostrarNuevoProducto()) {
+        <button mat-stroked-button (click)="mostrarNuevoProducto.set(true)">
+          <mat-icon>add</mat-icon>
+          Nuevo producto
+        </button>
+      }
+    </div>
     <table>
       @for (producto of productos(); track producto.id) {
         <tr>
@@ -185,13 +196,6 @@
         </tr>
       }
     </table>
-
-    @if (!mostrarNuevoProducto()) {
-      <button mat-stroked-button style="margin-top:0.75rem;" (click)="mostrarNuevoProducto.set(true)">
-        <mat-icon>add</mat-icon>
-        Nuevo producto
-      </button>
-    }
 
     @if (mostrarNuevoProducto()) {
       <form class="form-row" style="align-items:flex-start; margin-top:0.75rem;" (ngSubmit)="crearProducto()">

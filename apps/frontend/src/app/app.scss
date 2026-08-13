@@ -9,6 +9,12 @@
   .brand {
     font-size: 1.1rem;
     font-weight: 600;
+
+    .hogar-nombre {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--mat-sys-on-surface-variant);
+    }
   }
 
   .topbar-nav {

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
 import { firstValueFrom } from 'rxjs';
-import type { CompletarRegistroDto, Usuario } from '@finanzas-ia/shared-types';
+import type { CompletarRegistroDto, Hogar, Usuario } from '@finanzas-ia/shared-types';
 import { supabase } from './supabase-client';
 import { ApiService } from './api.service';
 
@@ -17,6 +17,7 @@ export class SessionService {
   // Miembros del hogar actual (incluye a quien esta logueado); vacio
   // mientras no tenga hogar.
   readonly miembrosHogar = signal<Usuario[]>([]);
+  readonly hogar = signal<Hogar | null>(null);
   // true apenas se resolvio sesion + usuario por primera vez (los
   // guards de rutas esperan esto antes de decidir).
   readonly listo = signal(false);
@@ -42,10 +43,15 @@ export class SessionService {
     const usuario = await firstValueFrom(this.api.usuarioYo());
     this.usuario.set(usuario);
     if (usuario?.hogarId) {
-      const miembros = await firstValueFrom(this.api.usuarios());
+      const [miembros, hogar] = await Promise.all([
+        firstValueFrom(this.api.usuarios()),
+        firstValueFrom(this.api.hogarActual()),
+      ]);
       this.miembrosHogar.set(miembros);
+      this.hogar.set(hogar);
     } else {
       this.miembrosHogar.set([]);
+      this.hogar.set(null);
     }
   }
 

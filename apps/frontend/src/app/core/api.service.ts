@@ -4,6 +4,7 @@ import type {
   ActualizarSaldoCreditoDto,
   Balance,
   Categoria,
+  Hogar,
   CompletarRegistroDto,
   CompletarRegistroResultado,
   CreateCategoriaDto,
@@ -76,6 +77,10 @@ export class ApiService {
   // Usuarios (del hogar actual)
   usuarios() {
     return this.http.get<Usuario[]>(`${API_URL}/usuarios`);
+  }
+
+  hogarActual() {
+    return this.http.get<Hogar>(`${API_URL}/hogares/mio`);
   }
 
   // Categorias

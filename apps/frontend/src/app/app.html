@@ -1,6 +1,11 @@
 @if (session.usuario()?.hogarId) {
   <mat-toolbar class="topbar">
-    <span class="brand">Finanzas en pareja</span>
+    <span class="brand">
+      Finanzas en pareja
+      @if (session.hogar(); as hogar) {
+        <span class="hogar-nombre">· {{ hogar.nombre }}</span>
+      }
+    </span>
 
     <nav class="topbar-nav">
       <a mat-button routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>

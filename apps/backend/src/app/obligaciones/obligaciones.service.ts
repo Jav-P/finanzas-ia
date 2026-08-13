@@ -120,7 +120,36 @@ export class ObligacionesService {
 
     throwIfError(error);
     if (!data) throw new NotFoundException('Obligacion no encontrada');
+
+    // La(s) instancia(s) ya generadas no se recalculan solas: el monto y
+    // la fecha de vencimiento se copian al crearse (para no alterar el
+    // historial de cuotas ya pasadas). Pero si esta obligacion todavia
+    // tiene una unica instancia sin pagar (tipicamente: se acaba de crear
+    // y el usuario esta corrigiendo un error de fecha/monto), la
+    // sincronizamos con el nuevo valor para que el cambio se vea reflejado.
+    if (dto.fechaInicio !== undefined || dto.monto !== undefined) {
+      await this.sincronizarInstanciaUnicaPendiente(toObligacion(data));
+    }
+
     return toObligacion(data);
+  }
+
+  private async sincronizarInstanciaUnicaPendiente(obligacion: Obligacion): Promise<void> {
+    const { data: instancias, error } = await this.supabase.client
+      .from('obligacion_instancias')
+      .select('*')
+      .eq('obligacion_id', obligacion.id);
+    throwIfError(error);
+    if (!instancias || instancias.length !== 1 || instancias[0].estado !== 'pendiente') return;
+
+    const periodo =
+      obligacion.recurrencia === 'diaria' ? obligacion.fechaInicio : firstDayOfMonth(obligacion.fechaInicio);
+
+    const { error: updateError } = await this.supabase.client
+      .from('obligacion_instancias')
+      .update({ periodo, fecha_vencimiento: obligacion.fechaInicio, monto: obligacion.monto })
+      .eq('id', instancias[0].id);
+    throwIfError(updateError);
   }
 
   // Actualizacion rapida del saldo pendiente de un credito (uso mensual,

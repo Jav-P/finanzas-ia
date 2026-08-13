@@ -14,18 +14,53 @@ Monorepo Nx con Angular + NestJS + Supabase.
 
 ## Desarrollo local
 
+Necesitas 3 piezas corriendo a la vez: Supabase (base de datos + auth + storage), el backend y el frontend.
+
+### 1. Instalar dependencias (una sola vez)
+
 ```bash
 npm install
+cp .env.example .env   # completar ANTHROPIC_API_KEY si vas a probar OCR; el resto ya trae valores de desarrollo local
+```
 
-# Base de datos local (requiere Docker Desktop corriendo)
+### 2. Levantar Supabase local (requiere Docker Desktop corriendo)
+
+```bash
 npx supabase start
+```
 
-# Frontend
-npx nx serve frontend
+Si agregaste una migración nueva y quieres partir de una base limpia (esto borra los datos):
 
-# Backend
+```bash
+npx supabase db reset
+```
+
+`supabase stop` + `supabase start` reutiliza el volumen existente y **no** reaplica migraciones nuevas — para eso hace falta `db reset`.
+
+### 3. Levantar el backend
+
+```bash
 npx nx serve backend
 ```
+
+Queda en `http://localhost:3010/api`.
+
+### 4. Levantar el frontend
+
+```bash
+npx nx serve frontend
+```
+
+Queda en `http://localhost:4210`.
+
+### URLs útiles en desarrollo
+
+| Servicio | URL |
+| --- | --- |
+| Frontend | http://localhost:4210 |
+| Backend API | http://localhost:3010/api |
+| Supabase Studio (ver/editar tablas a mano) | http://localhost:54323 |
+| Mailpit (bandeja de correos de prueba) | http://localhost:54324 |
 
 ## Comandos útiles
 

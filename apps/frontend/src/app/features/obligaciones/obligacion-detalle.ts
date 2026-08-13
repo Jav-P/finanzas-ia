@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import type { InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
+import { MontoInputDirective } from '../../core/monto-input.directive';
 
 @Component({
   selector: 'app-obligacion-detalle',
@@ -22,6 +23,7 @@ import { SessionService } from '../../core/session.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MontoInputDirective,
   ],
   templateUrl: './obligacion-detalle.html',
 })

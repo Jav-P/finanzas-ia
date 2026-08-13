@@ -55,7 +55,7 @@
             </mat-form-field>
             <mat-form-field appearance="outline" style="flex:1; min-width:120px;">
               <mat-label>Precio unitario</mat-label>
-              <input matInput type="number" [(ngModel)]="item.precioUnitario" [name]="'precio' + $index" />
+              <input matInput appMonto [(ngModel)]="item.precioUnitario" [name]="'precio' + $index" />
             </mat-form-field>
             <mat-form-field appearance="outline" style="flex:1; min-width:100px;">
               <mat-label>Calificación</mat-label>
@@ -153,7 +153,7 @@
             </td>
             <td>
               <mat-form-field appearance="outline" style="width:100%;">
-                <input matInput type="number" [(ngModel)]="montoTotalEdit" name="montoGastoEdit" />
+                <input matInput appMonto [(ngModel)]="montoTotalEdit" name="montoGastoEdit" />
               </mat-form-field>
             </td>
             <td></td>

@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import type { Categoria, PresupuestoResumenItem } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
+import { MontoInputDirective } from '../../core/monto-input.directive';
 
 function periodoActual(): string {
   const hoy = new Date();
@@ -24,6 +25,7 @@ function periodoActual(): string {
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MontoInputDirective,
   ],
   templateUrl: './presupuestos.html',
 })

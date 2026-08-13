@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import type { Ingreso, Recurrencia } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
+import { MontoInputDirective } from '../../core/monto-input.directive';
 
 @Component({
   selector: 'app-ingresos',
@@ -20,6 +21,7 @@ import { SessionService } from '../../core/session.service';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MontoInputDirective,
   ],
   templateUrl: './ingresos.html',
 })

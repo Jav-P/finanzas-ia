@@ -21,7 +21,7 @@
             </td>
             <td>
               <mat-form-field appearance="outline" style="width:100%;">
-                <input matInput type="number" [(ngModel)]="montoEdit" name="montoEdit" />
+                <input matInput appMonto [(ngModel)]="montoEdit" name="montoEdit" />
               </mat-form-field>
             </td>
             <td>{{ ingreso.periodicidad }}</td>
@@ -67,7 +67,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Monto</mat-label>
-        <input matInput name="monto" type="number" [(ngModel)]="monto" required />
+        <input matInput appMonto name="monto" [(ngModel)]="monto" required />
       </mat-form-field>
 
       <mat-form-field appearance="outline">

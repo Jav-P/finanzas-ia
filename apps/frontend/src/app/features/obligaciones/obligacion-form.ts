@@ -10,6 +10,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import type { Categoria, RecurrenciaObligacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
+import { MontoInputDirective } from '../../core/monto-input.directive';
 
 @Component({
   selector: 'app-obligacion-form',
@@ -21,6 +22,7 @@ import { SessionService } from '../../core/session.service';
     MatSelectModule,
     MatButtonModule,
     MatCheckboxModule,
+    MontoInputDirective,
   ],
   templateUrl: './obligacion-form.html',
 })

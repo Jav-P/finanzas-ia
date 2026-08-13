@@ -66,6 +66,12 @@ export class Dashboard implements OnInit {
     if (otro) this.viendoUsuarioId.set(otro.id);
   }
 
+  nombreResponsable(instancia: InstanciaConDetalle): string {
+    const id = instancia.obligacion.usuarioResponsableId;
+    if (!id) return 'Compartida';
+    return this.session.miembrosHogar().find((u) => u.id === id)?.nombre ?? '—';
+  }
+
   semaforo(instancia: InstanciaConDetalle): 'pendiente' | 'proximo' | 'vencido' | 'pagado' {
     if (instancia.estado === 'pagado') return 'pagado';
     if (instancia.estado === 'vencido') return 'vencido';

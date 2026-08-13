@@ -61,11 +61,23 @@
     }
 
     <table>
+      @if (instancias().length) {
+        <tr>
+          <th>Estado</th>
+          <th>Descripción</th>
+          <th>Categoría</th>
+          <th>Responsable</th>
+          <th>Vence</th>
+          <th>Monto</th>
+          <th></th>
+        </tr>
+      }
       @for (instancia of instancias(); track instancia.id) {
         <tr>
           <td><span class="badge" [class]="semaforo(instancia)">{{ semaforo(instancia) }}</span></td>
           <td>{{ instancia.obligacion.descripcion }}</td>
           <td>{{ instancia.categoria.nombre }}</td>
+          <td>{{ nombreResponsable(instancia) }}</td>
           <td>{{ instancia.fechaVencimiento }}</td>
           <td>{{ instancia.monto | number: '1.0-0' }}</td>
           <td><a class="auth-link" [routerLink]="['/obligaciones', instancia.id]">Ver</a></td>

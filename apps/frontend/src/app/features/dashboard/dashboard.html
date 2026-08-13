@@ -2,11 +2,6 @@
   <mat-card class="card-section">
     <mat-card-content>
       <h2>Balance de {{ b.periodo }}</h2>
-      <p>
-        Ingresos: {{ b.ingresos | number: '1.0-0' }} · Obligaciones: {{ b.obligaciones | number: '1.0-0' }} ·
-        Gastos: {{ b.gastos | number: '1.0-0' }}
-      </p>
-      <p><strong>Saldo consolidado: {{ b.saldo | number: '1.0-0' }}</strong></p>
       <table>
         <tr>
           <th>Persona</th>
@@ -24,6 +19,13 @@
             <td>{{ persona.saldo | number: '1.0-0' }}</td>
           </tr>
         }
+        <tr style="font-weight:600;">
+          <td>Total hogar</td>
+          <td>{{ b.ingresos | number: '1.0-0' }}</td>
+          <td>{{ b.obligaciones | number: '1.0-0' }}</td>
+          <td>{{ b.gastos | number: '1.0-0' }}</td>
+          <td>{{ b.saldo | number: '1.0-0' }}</td>
+        </tr>
       </table>
     </mat-card-content>
   </mat-card>
@@ -32,11 +34,8 @@
 <mat-card class="card-section">
   <mat-card-content>
     <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-      <h2 style="margin:0;">Mis obligaciones</h2>
+      <h2 style="margin:0;">Obligaciones</h2>
       <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-        @if (otroUsuario(); as otro) {
-          <button mat-stroked-button (click)="verOtro()">Ver las de {{ otro.nombre }}</button>
-        }
         <button
           mat-stroked-button
           (click)="generarInstancias()"
@@ -51,6 +50,17 @@
         </a>
       </div>
     </div>
+
+    <mat-button-toggle-group
+      style="margin: 0.75rem 0;"
+      [value]="viendoUsuarioId()"
+      (change)="viendoUsuarioId.set($event.value)"
+    >
+      <mat-button-toggle [value]="todas">Todas</mat-button-toggle>
+      @for (miembro of session.miembrosHogar(); track miembro.id) {
+        <mat-button-toggle [value]="miembro.id">{{ miembro.nombre }}</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
 
     @if (mensajeGeneracion(); as msg) {
       <p><em>{{ msg }}</em></p>

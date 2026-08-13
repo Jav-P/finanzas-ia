@@ -1,12 +1,15 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import type { Balance, InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
+
+const TODAS = 'todas' as const;
 
 function periodoActual(): string {
   const hoy = new Date();
@@ -22,7 +25,7 @@ function diasRestantes(fechaVencimiento: string): number {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, DecimalPipe, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, DecimalPipe, MatCardModule, MatButtonModule, MatButtonToggleModule, MatIconModule],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
@@ -31,13 +34,11 @@ export class Dashboard implements OnInit {
 
   protected readonly balance = signal<Balance | null>(null);
   protected readonly instancias = signal<InstanciaConDetalle[]>([]);
-  protected readonly viendoUsuarioId = signal<string | null>(null);
+  protected readonly viendoUsuarioId = signal<string | typeof TODAS | null>(null);
   protected readonly generando = signal(false);
   protected readonly mensajeGeneracion = signal<string | null>(null);
 
-  protected readonly otroUsuario = computed(() =>
-    this.session.miembrosHogar().find((u) => u.id !== this.viendoUsuarioId()),
-  );
+  protected readonly todas = TODAS;
 
   constructor() {
     effect(() => {
@@ -48,9 +49,9 @@ export class Dashboard implements OnInit {
     });
 
     effect(() => {
-      const usuarioId = this.viendoUsuarioId();
-      if (usuarioId) {
-        this.cargarInstancias(usuarioId);
+      const filtro = this.viendoUsuarioId();
+      if (filtro) {
+        this.cargarInstancias(filtro === TODAS ? undefined : filtro);
       }
     });
   }
@@ -59,11 +60,6 @@ export class Dashboard implements OnInit {
     this.api.balance(periodoActual()).subscribe((balance) => {
       this.balance.set(balance);
     });
-  }
-
-  verOtro(): void {
-    const otro = this.otroUsuario();
-    if (otro) this.viendoUsuarioId.set(otro.id);
   }
 
   nombreResponsable(instancia: InstanciaConDetalle): string {
@@ -89,12 +85,12 @@ export class Dashboard implements OnInit {
       this.mensajeGeneracion.set(
         `${resultado.instanciasCreadas} instancia(s) nueva(s) (de ${resultado.obligacionesRevisadas} obligaciones revisadas)`,
       );
-      const usuarioId = this.viendoUsuarioId();
-      if (usuarioId) this.cargarInstancias(usuarioId);
+      const filtro = this.viendoUsuarioId();
+      if (filtro) this.cargarInstancias(filtro === TODAS ? undefined : filtro);
     });
   }
 
-  private cargarInstancias(usuarioId: string): void {
+  private cargarInstancias(usuarioId?: string): void {
     this.api.instancias(usuarioId).subscribe((instancias) => {
       this.instancias.set(instancias);
     });

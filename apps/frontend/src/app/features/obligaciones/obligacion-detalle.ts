@@ -7,10 +7,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import type { InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
+import { dateToIso } from '../../core/date-utils';
 
 @Component({
   selector: 'app-obligacion-detalle',
@@ -23,6 +25,7 @@ import { MontoInputDirective } from '../../core/monto-input.directive';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatDatepickerModule,
     MontoInputDirective,
   ],
   templateUrl: './obligacion-detalle.html',
@@ -37,7 +40,7 @@ export class ObligacionDetalle implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  protected fechaPago = new Date().toISOString().slice(0, 10);
+  protected fechaPago: Date | null = new Date();
   protected montoPagado: number | null = null;
   protected archivo: File | null = null;
 
@@ -54,14 +57,15 @@ export class ObligacionDetalle implements OnInit {
   registrarPago(): void {
     const instancia = this.instancia();
     const usuarioId = this.session.usuario()?.id;
-    if (!instancia || !usuarioId || !this.archivo || !this.montoPagado) return;
+    const fechaPago = dateToIso(this.fechaPago);
+    if (!instancia || !usuarioId || !this.archivo || !this.montoPagado || !fechaPago) return;
 
     this.guardando.set(true);
     this.error.set(null);
     this.api
       .registrarPago(
         instancia.id,
-        { usuarioPagoId: usuarioId, fechaPago: this.fechaPago, montoPagado: this.montoPagado },
+        { usuarioPagoId: usuarioId, fechaPago, montoPagado: this.montoPagado },
         this.archivo,
       )
       .subscribe({

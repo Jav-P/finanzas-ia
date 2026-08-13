@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import type {
   Categoria,
   CreateGastoItemDto,
@@ -21,6 +22,7 @@ import type {
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
+import { dateToIso, isoToDate } from '../../core/date-utils';
 
 interface ItemBorrador {
   productoNombre: string;
@@ -40,6 +42,7 @@ interface ItemBorrador {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatDatepickerModule,
     MontoInputDirective,
   ],
   templateUrl: './gastos.html',
@@ -61,13 +64,13 @@ export class Gastos implements OnInit {
   protected categoriaId = '';
   protected lugarNombre = '';
   protected medioPagoId = '';
-  protected fecha = new Date().toISOString().slice(0, 10);
+  protected fecha: Date | null = new Date();
   protected items: ItemBorrador[] = [];
 
   protected readonly editandoId = signal<string | null>(null);
   protected descripcionEdit = '';
   protected montoTotalEdit: number | null = null;
-  protected fechaEdit = '';
+  protected fechaEdit: Date | null = null;
 
   ngOnInit(): void {
     forkJoin({
@@ -110,7 +113,8 @@ export class Gastos implements OnInit {
 
   async guardar(): Promise<void> {
     const usuarioId = this.session.usuario()?.id;
-    if (!usuarioId || !this.categoriaId || !this.fecha || !this.items.length) return;
+    const fecha = dateToIso(this.fecha);
+    if (!usuarioId || !this.categoriaId || !fecha || !this.items.length) return;
 
     this.guardando.set(true);
 
@@ -125,7 +129,7 @@ export class Gastos implements OnInit {
         medioPagoId: this.medioPagoId || null,
         descripcion: this.descripcion,
         montoTotal: this.montoTotal,
-        fecha: this.fecha,
+        fecha,
         items: itemsDto,
       })
       .subscribe(() => {
@@ -176,7 +180,7 @@ export class Gastos implements OnInit {
     this.editandoId.set(gasto.id);
     this.descripcionEdit = gasto.descripcion;
     this.montoTotalEdit = gasto.montoTotal;
-    this.fechaEdit = gasto.fecha;
+    this.fechaEdit = isoToDate(gasto.fecha);
   }
 
   cancelarEdicionGasto(): void {
@@ -184,12 +188,13 @@ export class Gastos implements OnInit {
   }
 
   guardarEdicionGasto(id: string): void {
-    if (!this.descripcionEdit || !this.montoTotalEdit || !this.fechaEdit) return;
+    const fecha = dateToIso(this.fechaEdit);
+    if (!this.descripcionEdit || !this.montoTotalEdit || !fecha) return;
     this.api
       .editarGasto(id, {
         descripcion: this.descripcionEdit,
         montoTotal: this.montoTotalEdit,
-        fecha: this.fechaEdit,
+        fecha,
       })
       .subscribe(() => {
         this.editandoId.set(null);

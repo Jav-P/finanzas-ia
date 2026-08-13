@@ -7,10 +7,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import type { Categoria, RecurrenciaObligacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
+import { dateToIso, isoToDate } from '../../core/date-utils';
 
 @Component({
   selector: 'app-obligacion-form',
@@ -22,6 +24,7 @@ import { MontoInputDirective } from '../../core/monto-input.directive';
     MatSelectModule,
     MatButtonModule,
     MatCheckboxModule,
+    MatDatepickerModule,
     MontoInputDirective,
   ],
   templateUrl: './obligacion-form.html',
@@ -43,7 +46,7 @@ export class ObligacionForm implements OnInit {
   protected recurrencia: RecurrenciaObligacion = 'mensual';
   protected diaVencimiento: number | null = null;
   protected numeroCuotas: number | null = null;
-  protected fechaInicio = '';
+  protected fechaInicio: Date | null = null;
   protected esCredito = false;
   protected banco = '';
   protected tasaInteres: number | null = null;
@@ -65,7 +68,7 @@ export class ObligacionForm implements OnInit {
         this.recurrencia = obligacion.recurrencia;
         this.diaVencimiento = obligacion.diaVencimiento;
         this.numeroCuotas = obligacion.numeroCuotas;
-        this.fechaInicio = obligacion.fechaInicio;
+        this.fechaInicio = isoToDate(obligacion.fechaInicio);
         this.esCredito = !!obligacion.banco;
         this.banco = obligacion.banco ?? '';
         this.tasaInteres = obligacion.tasaInteres;
@@ -85,7 +88,7 @@ export class ObligacionForm implements OnInit {
       recurrencia: this.recurrencia,
       diaVencimiento: this.recurrencia === 'mensual' ? this.diaVencimiento : null,
       numeroCuotas: this.recurrencia !== 'unica' ? this.numeroCuotas : null,
-      fechaInicio: this.fechaInicio,
+      fechaInicio: dateToIso(this.fechaInicio)!,
       banco: this.esCredito ? this.banco || null : null,
       tasaInteres: this.esCredito ? this.tasaInteres : null,
     };

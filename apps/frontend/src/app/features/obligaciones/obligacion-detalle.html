@@ -50,7 +50,9 @@
         <form class="form-grid" (ngSubmit)="registrarPago()">
           <mat-form-field appearance="outline">
             <mat-label>Fecha de pago</mat-label>
-            <input matInput name="fechaPago" type="date" [(ngModel)]="fechaPago" required />
+            <input matInput [matDatepicker]="pickerFechaPago" name="fechaPago" [(ngModel)]="fechaPago" required />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFechaPago"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFechaPago></mat-datepicker>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Monto pagado</mat-label>

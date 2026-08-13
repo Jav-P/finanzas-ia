@@ -87,7 +87,9 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Desde</mat-label>
-        <input matInput name="fechaInicio" type="date" [(ngModel)]="fechaInicio" required />
+        <input matInput [matDatepicker]="pickerFechaInicio" name="fechaInicio" [(ngModel)]="fechaInicio" required />
+        <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFechaInicio></mat-datepicker>
       </mat-form-field>
 
       <div class="form-actions">

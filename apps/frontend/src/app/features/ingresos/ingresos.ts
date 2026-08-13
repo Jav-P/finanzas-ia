@@ -6,10 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import type { Ingreso, Recurrencia } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
+import { dateToIso } from '../../core/date-utils';
 
 @Component({
   selector: 'app-ingresos',
@@ -21,6 +23,7 @@ import { MontoInputDirective } from '../../core/monto-input.directive';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatDatepickerModule,
     MontoInputDirective,
   ],
   templateUrl: './ingresos.html',
@@ -37,7 +40,7 @@ export class Ingresos implements OnInit {
   protected monto: number | null = null;
   protected periodicidad: Recurrencia = 'mensual';
   protected diaPago: number | null = null;
-  protected fechaInicio = new Date().toISOString().slice(0, 10);
+  protected fechaInicio: Date | null = new Date();
 
   protected readonly editandoId = signal<string | null>(null);
   protected descripcionEdit = '';
@@ -61,7 +64,8 @@ export class Ingresos implements OnInit {
   }
 
   guardar(): void {
-    if (!this.usuarioId || !this.descripcion || !this.monto || !this.fechaInicio) return;
+    const fechaInicio = dateToIso(this.fechaInicio);
+    if (!this.usuarioId || !this.descripcion || !this.monto || !fechaInicio) return;
 
     this.guardando.set(true);
     this.api
@@ -71,7 +75,7 @@ export class Ingresos implements OnInit {
         monto: this.monto,
         periodicidad: this.periodicidad,
         diaPago: this.periodicidad === 'mensual' ? this.diaPago : null,
-        fechaInicio: this.fechaInicio,
+        fechaInicio,
       })
       .subscribe(() => {
         this.descripcion = '';

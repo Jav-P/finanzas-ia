@@ -1,26 +1,47 @@
-<mat-card class="auth-card">
-  <mat-card-content>
-    <h2>Iniciar sesión</h2>
-    <form class="form-grid" (ngSubmit)="ingresar()">
-      <mat-form-field appearance="outline">
-        <mat-label>Correo</mat-label>
-        <input matInput name="email" type="email" [(ngModel)]="email" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Contraseña</mat-label>
-        <input matInput name="password" type="password" [(ngModel)]="password" required />
-      </mat-form-field>
-
-      @if (error()) {
-        <p class="error-text">{{ error() }}</p>
-      }
-
-      <div class="form-actions">
-        <button mat-flat-button type="submit" [disabled]="cargando()">Entrar</button>
+<div class="auth-shell">
+  <mat-card class="auth-card">
+    <mat-card-content>
+      <div class="auth-brand">
+        <div class="auth-brand-icon">
+          <mat-icon>savings</mat-icon>
+        </div>
+        <span>Finanzas en pareja</span>
       </div>
-    </form>
 
-    <p>¿No tienes cuenta? <a class="auth-link" routerLink="/registro">Regístrate</a></p>
-  </mat-card-content>
-</mat-card>
+      <h2 style="text-align:center;">Iniciar sesión</h2>
+
+      <form class="form-grid" (ngSubmit)="ingresar()">
+        <mat-form-field appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput name="email" type="email" [(ngModel)]="email" required />
+          <mat-icon matPrefix>mail_outline</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input matInput name="password" [type]="mostrarPassword() ? 'text' : 'password'" [(ngModel)]="password" required />
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="mostrarPassword.set(!mostrarPassword())"
+            [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <mat-icon>{{ mostrarPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+
+        <div class="form-actions">
+          <button mat-flat-button type="submit" [disabled]="cargando()" style="width:100%;">Entrar</button>
+        </div>
+      </form>
+
+      <p style="text-align:center;">¿No tienes cuenta? <a class="auth-link" routerLink="/registro">Regístrate</a></p>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -137,3 +137,51 @@ th {
   margin: 3rem auto;
   text-align: center;
 }
+
+.auth-shell {
+  min-height: calc(100vh - 3rem);
+  margin: -1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
+
+  .auth-card {
+    margin: 0;
+    width: 100%;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+    border-radius: 16px;
+  }
+}
+
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+
+  span {
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.95rem;
+  }
+}
+
+.auth-brand-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}

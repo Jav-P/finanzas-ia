@@ -5,11 +5,20 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { SessionService } from '../../core/session.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './login.html',
 })
 export class Login {
@@ -20,6 +29,7 @@ export class Login {
   protected password = '';
   protected readonly cargando = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly mostrarPassword = signal(false);
 
   async ingresar(): Promise<void> {
     if (!this.email || !this.password) return;

@@ -35,3 +35,23 @@ export const hogarGuard: CanActivateFn = () => {
     }),
   );
 };
+
+// Para /login y /registro: si ya hay sesion activa, no tiene sentido
+// mostrar el formulario de nuevo (y ademas ahi es donde se veia la
+// barra superior "fantasma" con datos de la sesion previa). Redirige
+// a donde corresponda segun el estado de esa sesion.
+export const soloInvitadoGuard: CanActivateFn = () => {
+  const session = inject(SessionService);
+  const router = inject(Router);
+
+  return esperarListo(session).pipe(
+    map(() => {
+      if (!session.session()) return true;
+      if (session.usuario()?.hogarId) return router.parseUrl('/dashboard');
+      if (session.usuario()) return router.parseUrl('/sin-hogar');
+      // Sesion valida pero registro (fila en `usuarios`) sin completar
+      // todavia: se deja seguir en /login o /registro.
+      return true;
+    }),
+  );
+};

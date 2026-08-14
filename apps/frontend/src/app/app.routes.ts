@@ -12,12 +12,12 @@ import { Registro } from './features/auth/registro';
 import { InvitacionAceptar } from './features/auth/invitacion-aceptar';
 import { SinHogar } from './features/auth/sin-hogar';
 import { Invitaciones } from './features/invitaciones/invitaciones';
-import { authGuard, hogarGuard } from './core/auth.guard';
+import { authGuard, hogarGuard, soloInvitadoGuard } from './core/auth.guard';
 
 export const appRoutes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-  { path: 'login', component: Login },
-  { path: 'registro', component: Registro },
+  { path: 'login', component: Login, canActivate: [soloInvitadoGuard] },
+  { path: 'registro', component: Registro, canActivate: [soloInvitadoGuard] },
   { path: 'sin-hogar', component: SinHogar, canActivate: [authGuard] },
   { path: 'invitacion/:token', component: InvitacionAceptar, canActivate: [authGuard] },
   { path: 'invitar', component: Invitaciones, canActivate: [hogarGuard] },

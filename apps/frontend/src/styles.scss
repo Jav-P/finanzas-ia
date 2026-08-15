@@ -139,8 +139,9 @@ th {
 }
 
 .auth-shell {
-  min-height: calc(100vh - 3rem);
-  margin: -1.5rem;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
   padding: 1.5rem;
   display: flex;
   align-items: center;

@@ -1,17 +1,68 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import type { CompletarRegistroDto, CompletarRegistroResultado } from '@finanzas-ia/shared-types';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import type { Session } from '@supabase/supabase-js';
+import type {
+  CompletarRegistroDto,
+  CompletarRegistroResultado,
+  SesionAuth,
+} from '@finanzas-ia/shared-types';
+import { SupabaseService } from '../supabase/supabase.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { HogaresService } from '../hogares/hogares.service';
 import { InvitacionesService } from '../invitaciones/invitaciones.service';
 import type { RequestUsuario } from './auth.guard';
 
+function toSesionAuth(session: Session): SesionAuth {
+  return {
+    accessToken: session.access_token,
+    refreshToken: session.refresh_token,
+    expiresAt: session.expires_at ?? Math.floor(Date.now() / 1000) + (session.expires_in ?? 3600),
+  };
+}
+
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
+    private readonly supabase: SupabaseService,
     private readonly usuarios: UsuariosService,
     private readonly hogares: HogaresService,
     private readonly invitaciones: InvitacionesService,
   ) {}
+
+  async signup(email: string, password: string): Promise<SesionAuth> {
+    const { data, error } = await this.supabase.authClient.auth.signUp({ email, password });
+    if (error) throw new BadRequestException(error.message);
+    if (!data.session) {
+      throw new BadRequestException('No se pudo iniciar sesion tras el registro');
+    }
+    return toSesionAuth(data.session);
+  }
+
+  async login(email: string, password: string): Promise<SesionAuth> {
+    const { data, error } = await this.supabase.authClient.auth.signInWithPassword({ email, password });
+    if (error || !data.session) throw new UnauthorizedException('Correo o contraseña incorrectos');
+    return toSesionAuth(data.session);
+  }
+
+  async refrescar(refreshToken: string): Promise<SesionAuth> {
+    const { data, error } = await this.supabase.authClient.auth.refreshSession({
+      refresh_token: refreshToken,
+    });
+    if (error || !data.session) throw new UnauthorizedException('No se pudo renovar la sesion');
+    return toSesionAuth(data.session);
+  }
+
+  // Revoca el token en GoTrue (mejor esfuerzo: si falla, el front igual
+  // borra la sesion local, asi que no hace falta relanzar el error).
+  async logout(accessToken?: string): Promise<void> {
+    if (!accessToken) return;
+    try {
+      await this.supabase.client.auth.admin.signOut(accessToken);
+    } catch (error) {
+      this.logger.warn('No se pudo revocar el token en logout', error instanceof Error ? error.stack : error);
+    }
+  }
 
   async completarRegistro(
     usuarioActual: RequestUsuario,

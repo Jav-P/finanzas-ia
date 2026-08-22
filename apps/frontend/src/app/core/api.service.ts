@@ -7,6 +7,9 @@ import type {
   Hogar,
   CompletarRegistroDto,
   CompletarRegistroResultado,
+  CredencialesDto,
+  RefrescarSesionDto,
+  SesionAuth,
   CreateCategoriaDto,
   CreateGastoDto,
   CreateIngresoDto,
@@ -49,7 +52,24 @@ import { API_URL } from './config';
 export class ApiService {
   private readonly http = inject(HttpClient);
 
-  // Auth / invitaciones
+  // Auth / invitaciones. Todo lo que toca a Supabase Auth (signup/login/
+  // refresh/logout) pasa por el backend, nunca directo desde el front.
+  signup(dto: CredencialesDto) {
+    return this.http.post<SesionAuth>(`${API_URL}/auth/signup`, dto);
+  }
+
+  login(dto: CredencialesDto) {
+    return this.http.post<SesionAuth>(`${API_URL}/auth/login`, dto);
+  }
+
+  refrescarSesion(dto: RefrescarSesionDto) {
+    return this.http.post<SesionAuth>(`${API_URL}/auth/refrescar`, dto);
+  }
+
+  logout(accessToken: string) {
+    return this.http.post<void>(`${API_URL}/auth/logout`, { accessToken });
+  }
+
   usuarioYo() {
     return this.http.get<Usuario | null>(`${API_URL}/usuarios/yo`);
   }

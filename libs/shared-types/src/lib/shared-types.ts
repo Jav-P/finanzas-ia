@@ -23,6 +23,23 @@ export interface Usuario {
 
 // --- Auth / invitaciones ---
 
+// El front nunca habla con Supabase Auth directo: todo signUp/signIn/
+// refresh pasa por estos endpoints del backend.
+export interface CredencialesDto {
+  email: string;
+  password: string;
+}
+
+export interface RefrescarSesionDto {
+  refreshToken: string;
+}
+
+export interface SesionAuth {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number; // epoch seconds (UTC)
+}
+
 export interface CompletarRegistroDto {
   nombre: string;
   nombreHogar?: string; // requerido si no viene invitacionToken

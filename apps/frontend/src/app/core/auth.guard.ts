@@ -17,7 +17,7 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return esperarListo(session).pipe(
-    map(() => (session.session() ? true : router.parseUrl('/login'))),
+    map(() => (session.sesion() ? true : router.parseUrl('/login'))),
   );
 };
 
@@ -28,7 +28,7 @@ export const hogarGuard: CanActivateFn = () => {
 
   return esperarListo(session).pipe(
     map(() => {
-      if (!session.session()) return router.parseUrl('/login');
+      if (!session.sesion()) return router.parseUrl('/login');
       if (!session.usuario()) return router.parseUrl('/registro');
       if (!session.usuario()?.hogarId) return router.parseUrl('/sin-hogar');
       return true;
@@ -46,7 +46,7 @@ export const soloInvitadoGuard: CanActivateFn = () => {
 
   return esperarListo(session).pipe(
     map(() => {
-      if (!session.session()) return true;
+      if (!session.sesion()) return true;
       if (session.usuario()?.hogarId) return router.parseUrl('/dashboard');
       if (session.usuario()) return router.parseUrl('/sin-hogar');
       // Sesion valida pero registro (fila en `usuarios`) sin completar

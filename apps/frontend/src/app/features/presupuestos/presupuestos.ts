@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import type { Categoria, PresupuestoResumenItem } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
@@ -27,6 +28,7 @@ function periodoActual(): string {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatCheckboxModule,
     MontoInputDirective,
   ],
   templateUrl: './presupuestos.html',
@@ -38,11 +40,11 @@ export class Presupuestos implements OnInit {
   protected readonly resumen = signal<PresupuestoResumenItem[]>([]);
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly guardando = signal(false);
-  protected readonly presupuestoIdPorCategoria = signal<Map<string, string>>(new Map());
   protected readonly mostrarForm = signal(false);
 
   protected categoriaId = '';
   protected montoPresupuestado: number | null = null;
+  protected esFijo = false;
 
   ngOnInit(): void {
     this.api.categorias().subscribe((categorias) => {
@@ -66,26 +68,23 @@ export class Presupuestos implements OnInit {
         categoriaId: this.categoriaId,
         periodo: this.periodo(),
         montoPresupuestado: this.montoPresupuestado,
+        esFijo: this.esFijo,
       })
       .subscribe(() => {
         this.montoPresupuestado = null;
+        this.esFijo = false;
         this.guardando.set(false);
         this.mostrarForm.set(false);
         this.cargar();
       });
   }
 
-  eliminarPresupuesto(categoriaId: string): void {
-    const id = this.presupuestoIdPorCategoria().get(categoriaId);
-    if (!id) return;
-    this.api.eliminarPresupuesto(id).subscribe(() => this.cargar());
+  eliminarPresupuesto(presupuestoId: string | null): void {
+    if (!presupuestoId) return;
+    this.api.eliminarPresupuesto(presupuestoId).subscribe(() => this.cargar());
   }
 
   private cargar(): void {
     this.api.presupuestosResumen(this.periodo()).subscribe((resumen) => this.resumen.set(resumen));
-
-    this.api.presupuestos(this.periodo()).subscribe((presupuestos) => {
-      this.presupuestoIdPorCategoria.set(new Map(presupuestos.map((p) => [p.categoriaId, p.id])));
-    });
   }
 }

@@ -24,7 +24,12 @@
       </tr>
       @for (item of resumen(); track item.categoriaId) {
         <tr>
-          <td>{{ item.categoriaNombre }}</td>
+          <td>
+            {{ item.categoriaNombre }}
+            @if (item.esFijo) {
+              <span class="badge pendiente" style="margin-left:0.4rem;">fijo</span>
+            }
+          </td>
           <td>{{ item.presupuestado | number: '1.0-0' }}</td>
           <td>{{ item.gastado | number: '1.0-0' }}</td>
           <td [style.color]="item.diferencia < 0 ? 'var(--danger)' : 'var(--cyan)'">
@@ -32,8 +37,10 @@
             {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
           </td>
           <td>
-            @if (presupuestoIdPorCategoria().has(item.categoriaId)) {
-              <button mat-button color="warn" (click)="eliminarPresupuesto(item.categoriaId)">Eliminar</button>
+            @if (item.presupuestoId) {
+              <button mat-button color="warn" (click)="eliminarPresupuesto(item.presupuestoId)">
+                {{ item.esFijo ? 'Quitar fijo' : 'Eliminar' }}
+              </button>
             }
           </td>
         </tr>
@@ -60,6 +67,13 @@
           <mat-label>Monto presupuestado para {{ periodo() }}</mat-label>
           <input matInput appMonto name="montoPresupuestado" [(ngModel)]="montoPresupuestado" required />
         </mat-form-field>
+
+        <mat-checkbox name="esFijo" [(ngModel)]="esFijo">Repetir todos los meses (fijo)</mat-checkbox>
+        <p style="font-size:0.8rem; color:var(--text-dim); margin:0;">
+          Ideal para presupuestos que no cambian, como el mercado: lo defines una vez y aplica cada
+          mes hasta que lo edites o lo quites. Si ya tienes uno fijo para esta categoría, esto
+          actualiza su monto. Si no marcas esta opción, solo aplica al período de arriba.
+        </p>
 
         <div class="form-actions">
           <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>

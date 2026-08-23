@@ -24,7 +24,38 @@ export class PresupuestosService {
     return (data ?? []).map(toPresupuesto);
   }
 
+  async findTodosDelHogar(hogarId: string): Promise<Presupuesto[]> {
+    const { data, error } = await this.supabase.client
+      .from('presupuestos')
+      .select('*')
+      .eq('hogar_id', hogarId);
+
+    throwIfError(error);
+    return (data ?? []).map(toPresupuesto);
+  }
+
+  // Si dto.esFijo, actualiza el monto del fijo que ya exista para esa
+  // categoria (conserva su periodo original) en vez de crear uno
+  // nuevo; asi solo hay un fijo activo por categoria a la vez. Si no
+  // hay uno todavia, o si no es fijo, se crea/actualiza el presupuesto
+  // puntual de ese mes exacto (comportamiento de siempre).
   async upsert(hogarId: string, dto: CreatePresupuestoDto): Promise<Presupuesto> {
+    const esFijo = dto.esFijo ?? false;
+
+    if (esFijo) {
+      const fijoExistente = await this.buscarFijo(hogarId, dto.categoriaId);
+      if (fijoExistente) {
+        const { data, error } = await this.supabase.client
+          .from('presupuestos')
+          .update({ monto_presupuestado: dto.montoPresupuestado })
+          .eq('id', fijoExistente.id)
+          .select()
+          .single();
+        throwIfError(error);
+        return toPresupuesto(data);
+      }
+    }
+
     const { data, error } = await this.supabase.client
       .from('presupuestos')
       .upsert(
@@ -33,6 +64,7 @@ export class PresupuestosService {
           categoria_id: dto.categoriaId,
           periodo: periodStart(dto.periodo),
           monto_presupuestado: dto.montoPresupuestado,
+          es_fijo: esFijo,
         },
         { onConflict: 'hogar_id,categoria_id,periodo' },
       )
@@ -52,8 +84,8 @@ export class PresupuestosService {
     const inicio = periodStart(periodo);
     const fin = periodEnd(periodo);
 
-    const [presupuestoRows, gastoRows, categoriaRows] = await Promise.all([
-      this.findByHogarYPeriodo(hogarId, periodo),
+    const [presupuestos, gastoRows, categoriaRows] = await Promise.all([
+      this.findTodosDelHogar(hogarId),
       this.fetchGastosDelPeriodo(hogarId, inicio, fin),
       this.fetchCategorias(hogarId),
     ]);
@@ -66,13 +98,27 @@ export class PresupuestosService {
       gastadoPorCategoria.set(gasto.categoria_id, acumulado + Number(gasto.monto_total));
     }
 
+    // Por categoria: un presupuesto puntual para este mes exacto gana
+    // sobre uno fijo (permite "este mes en particular quiero mas para
+    // mercado" sin tocar el fijo). Si no hay uno puntual, se usa el
+    // fijo de esa categoria (aplica desde que se creo en adelante).
+    const presupuestoPorCategoria = new Map<string, Presupuesto>();
+    for (const p of presupuestos) {
+      if (p.periodo === inicio) presupuestoPorCategoria.set(p.categoriaId, p);
+    }
+    for (const p of presupuestos) {
+      if (!p.esFijo || p.periodo > inicio) continue;
+      if (presupuestoPorCategoria.get(p.categoriaId)?.periodo === inicio) continue;
+      presupuestoPorCategoria.set(p.categoriaId, p);
+    }
+
     const categoriaIds = new Set<string>([
-      ...presupuestoRows.map((p) => p.categoriaId),
+      ...presupuestoPorCategoria.keys(),
       ...gastadoPorCategoria.keys(),
     ]);
 
     return Array.from(categoriaIds).map((categoriaId) => {
-      const presupuesto = presupuestoRows.find((p) => p.categoriaId === categoriaId);
+      const presupuesto = presupuestoPorCategoria.get(categoriaId);
       const presupuestado = presupuesto?.montoPresupuestado ?? 0;
       const gastado = gastadoPorCategoria.get(categoriaId) ?? 0;
 
@@ -82,8 +128,22 @@ export class PresupuestosService {
         presupuestado,
         gastado,
         diferencia: presupuestado - gastado,
+        esFijo: presupuesto?.esFijo ?? false,
+        presupuestoId: presupuesto?.id ?? null,
       };
     });
+  }
+
+  private async buscarFijo(hogarId: string, categoriaId: string): Promise<Presupuesto | null> {
+    const { data, error } = await this.supabase.client
+      .from('presupuestos')
+      .select('*')
+      .eq('hogar_id', hogarId)
+      .eq('categoria_id', categoriaId)
+      .eq('es_fijo', true)
+      .maybeSingle();
+    throwIfError(error);
+    return data ? toPresupuesto(data) : null;
   }
 
   private async fetchGastosDelPeriodo(hogarId: string, inicio: string, fin: string) {

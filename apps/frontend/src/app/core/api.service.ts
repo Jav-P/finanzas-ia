@@ -206,10 +206,6 @@ export class ApiService {
     });
   }
 
-  presupuestos(periodo: string) {
-    return this.http.get<Presupuesto[]>(`${API_URL}/presupuestos`, { params: { periodo } });
-  }
-
   guardarPresupuesto(dto: CreatePresupuestoDto) {
     return this.http.post<Presupuesto>(`${API_URL}/presupuestos`, dto);
   }

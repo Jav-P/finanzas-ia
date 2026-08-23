@@ -161,6 +161,7 @@ export function toPresupuesto(row: any): Presupuesto {
     categoriaId: row.categoria_id,
     periodo: row.periodo,
     montoPresupuestado: row.monto_presupuestado,
+    esFijo: row.es_fijo,
     createdAt: row.created_at,
   };
 }

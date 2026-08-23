@@ -334,6 +334,7 @@ export interface Presupuesto {
   categoriaId: string;
   periodo: string;
   montoPresupuestado: number;
+  esFijo: boolean; // true = se repite todos los meses desde `periodo` en adelante
   createdAt: string;
 }
 
@@ -341,6 +342,7 @@ export interface CreatePresupuestoDto {
   categoriaId: string;
   periodo: string;
   montoPresupuestado: number;
+  esFijo?: boolean;
 }
 
 export interface PresupuestoResumenItem {
@@ -349,6 +351,10 @@ export interface PresupuestoResumenItem {
   presupuestado: number;
   gastado: number;
   diferencia: number; // presupuestado - gastado (negativo = te pasaste)
+  esFijo: boolean;
+  // id del presupuesto que efectivamente aplica a este mes (exacto o
+  // heredado de uno fijo); null si la categoria no tiene presupuesto.
+  presupuestoId: string | null;
 }
 
 export interface HistoricoPrecioItem {

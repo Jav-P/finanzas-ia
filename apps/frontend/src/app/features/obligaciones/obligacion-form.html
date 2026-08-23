@@ -2,84 +2,104 @@
   <mat-card-content>
     <h2>{{ obligacionId() ? 'Editar obligación' : 'Nueva obligación' }}</h2>
 
-    <form class="form-grid" (ngSubmit)="guardar()">
-      <mat-form-field appearance="outline">
-        <mat-label>Descripción</mat-label>
-        <input matInput name="descripcion" [(ngModel)]="descripcion" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Monto</mat-label>
-        <input matInput appMonto name="monto" [(ngModel)]="monto" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Categoría</mat-label>
-        <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
-          @for (categoria of categorias(); track categoria.id) {
-            <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Responsable</mat-label>
-        <mat-select name="usuarioResponsableId" [(ngModel)]="usuarioResponsableId">
-          <mat-option value="">Compartida</mat-option>
-          @for (usuario of session.miembrosHogar(); track usuario.id) {
-            <mat-option [value]="usuario.id">{{ usuario.nombre }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Recurrencia</mat-label>
-        <mat-select name="recurrencia" [(ngModel)]="recurrencia">
-          <mat-option value="mensual">Mensual</mat-option>
-          <mat-option value="unica">Única</mat-option>
-          <mat-option value="diaria">Diaria (solo para pruebas)</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      @if (recurrencia === 'mensual') {
-        <mat-form-field appearance="outline">
-          <mat-label>Día de vencimiento (1-31)</mat-label>
-          <input matInput name="diaVencimiento" type="number" min="1" max="31" [(ngModel)]="diaVencimiento" />
+    <form class="form-grid" style="max-width: 640px;" (ngSubmit)="guardar()">
+      <div class="form-row">
+        <mat-form-field appearance="outline" style="flex: 2; min-width: 220px;">
+          <mat-label>Descripción</mat-label>
+          <input matInput name="descripcion" [(ngModel)]="descripcion" required />
         </mat-form-field>
-      }
 
-      @if (recurrencia !== 'unica') {
-        <mat-form-field appearance="outline">
-          <mat-label>Número de cuotas (vacío = indefinida, ej. administración)</mat-label>
-          <input matInput name="numeroCuotas" type="number" min="1" [(ngModel)]="numeroCuotas" placeholder="ej. 36 para un crédito" />
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 160px;">
+          <mat-label>Monto</mat-label>
+          <mat-icon matPrefix>attach_money</mat-icon>
+          <input matInput appMonto name="monto" [(ngModel)]="monto" required />
         </mat-form-field>
-      }
+      </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha {{ recurrencia === 'unica' ? 'de vencimiento' : 'del primer vencimiento' }}</mat-label>
-        <input matInput [matDatepicker]="pickerFechaInicio" name="fechaInicio" [(ngModel)]="fechaInicio" required />
-        <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
-        <mat-datepicker #pickerFechaInicio></mat-datepicker>
-      </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+          <mat-label>Categoría</mat-label>
+          <mat-icon matPrefix>sell</mat-icon>
+          <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+            @for (categoria of categorias(); track categoria.id) {
+              <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-      <mat-checkbox name="esCredito" [(ngModel)]="esCredito">Es un crédito bancario</mat-checkbox>
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+          <mat-label>Responsable</mat-label>
+          <mat-icon matPrefix>person_outline</mat-icon>
+          <mat-select name="usuarioResponsableId" [(ngModel)]="usuarioResponsableId">
+            <mat-option value="">Compartida</mat-option>
+            @for (usuario of session.miembrosHogar(); track usuario.id) {
+              <mat-option [value]="usuario.id">{{ usuario.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+          <mat-label>Recurrencia</mat-label>
+          <mat-icon matPrefix>repeat</mat-icon>
+          <mat-select name="recurrencia" [(ngModel)]="recurrencia">
+            <mat-option value="mensual">Mensual</mat-option>
+            <mat-option value="unica">Única</mat-option>
+            <mat-option value="diaria">Diaria (solo para pruebas)</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (recurrencia === 'mensual') {
+          <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+            <mat-label>Día de vencimiento</mat-label>
+            <input matInput name="diaVencimiento" type="number" min="1" max="31" [(ngModel)]="diaVencimiento" />
+          </mat-form-field>
+        }
+      </div>
+
+      <div class="form-row">
+        @if (recurrencia !== 'unica') {
+          <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+            <mat-label>Número de cuotas</mat-label>
+            <input matInput name="numeroCuotas" type="number" min="1" [(ngModel)]="numeroCuotas" placeholder="Vacío = indefinida" />
+            <mat-hint>Vacío = indefinida (ej. mercado)</mat-hint>
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+          <mat-label>{{ recurrencia === 'unica' ? 'Fecha de vencimiento' : 'Primer vencimiento' }}</mat-label>
+          <input matInput [matDatepicker]="pickerFechaInicio" name="fechaInicio" [(ngModel)]="fechaInicio" required />
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFechaInicio></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <mat-checkbox name="esCredito" style="margin-top: 0.5rem;" [(ngModel)]="esCredito">Es un crédito bancario</mat-checkbox>
 
       @if (esCredito) {
-        <mat-form-field appearance="outline">
-          <mat-label>Banco</mat-label>
-          <input matInput name="banco" [(ngModel)]="banco" placeholder="ej. Bancolombia" />
-        </mat-form-field>
+        <div class="form-subsection">
+          <p class="form-subsection__title">Datos del crédito</p>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Tasa de interés efectiva anual (%)</mat-label>
-          <input matInput name="tasaInteres" type="number" min="0" step="0.01" [(ngModel)]="tasaInteres" />
-        </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+              <mat-label>Banco</mat-label>
+              <input matInput name="banco" [(ngModel)]="banco" placeholder="ej. Bancolombia" />
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Saldo pendiente hoy</mat-label>
-          <input matInput appMonto name="saldoPendiente" [(ngModel)]="saldoPendiente" />
-          <mat-hint>Lo que te muestra el banco. Lo actualizas tú cada mes; la app no lo calcula.</mat-hint>
-        </mat-form-field>
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
+              <mat-label>Tasa de interés E.A. (%)</mat-label>
+              <input matInput name="tasaInteres" type="number" min="0" step="0.01" [(ngModel)]="tasaInteres" />
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Saldo pendiente hoy</mat-label>
+            <mat-icon matPrefix>account_balance</mat-icon>
+            <input matInput appMonto name="saldoPendiente" [(ngModel)]="saldoPendiente" />
+            <mat-hint>Lo que te muestra el banco. Lo actualizas tú cada mes; la app no lo calcula.</mat-hint>
+          </mat-form-field>
+        </div>
       }
 
       <div class="form-actions">

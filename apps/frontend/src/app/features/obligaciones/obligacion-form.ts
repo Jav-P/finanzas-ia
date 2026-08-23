@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatIconModule } from '@angular/material/icon';
 import type { Categoria, RecurrenciaObligacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
@@ -25,6 +26,7 @@ import { dateToIso, isoToDate } from '../../core/date-utils';
     MatButtonModule,
     MatCheckboxModule,
     MatDatepickerModule,
+    MatIconModule,
     MontoInputDirective,
   ],
   templateUrl: './obligacion-form.html',

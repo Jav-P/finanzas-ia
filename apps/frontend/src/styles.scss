@@ -217,6 +217,26 @@ th.sortable:hover {
   margin-top: 0.5rem;
 }
 
+.form-subsection {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(138, 77, 255, 0.06);
+  padding: 1rem 1rem 0.25rem;
+  margin: 0.25rem 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-subsection__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .file-field {
   display: flex;
   flex-direction: column;

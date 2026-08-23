@@ -16,3 +16,9 @@ export function addMeses(periodo: string, meses: number): string {
   const fecha = new Date(year, month - 1 + meses, 1);
   return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
 }
+
+// 'YYYY-MM' -> "agosto de 2026", para mensajes en texto (recomendaciones).
+export function periodLabel(periodo: string): string {
+  const [year, month] = periodo.split('-').map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+}

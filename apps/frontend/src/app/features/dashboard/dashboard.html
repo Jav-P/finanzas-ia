@@ -82,6 +82,23 @@
   </div>
 }
 
+@if (recomendaciones().length) {
+  <div class="section-head">
+    <h2>Recomendaciones</h2>
+  </div>
+  <div class="recomendaciones-list">
+    @for (r of recomendaciones(); track r.id) {
+      <div class="recomendacion" [class]="r.severidad">
+        <mat-icon>{{ iconoSeveridad(r.severidad) }}</mat-icon>
+        <div class="recomendacion-texto">
+          <div class="recomendacion-titulo">{{ r.titulo }}</div>
+          <div class="recomendacion-detalle">{{ r.detalle }}</div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
 <div class="section-head">
   <h2>Obligaciones</h2>
   <button

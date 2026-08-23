@@ -33,6 +33,7 @@ import type {
   Presupuesto,
   PresupuestoResumenItem,
   Producto,
+  Recomendacion,
   RegistrarPagoDto,
   UpdateCategoriaDto,
   UpdateGastoDto,
@@ -197,6 +198,10 @@ export class ApiService {
 
   balance(periodo: string) {
     return this.http.get<Balance>(`${API_URL}/balance`, { params: { periodo } });
+  }
+
+  recomendaciones(periodo: string) {
+    return this.http.get<Recomendacion[]>(`${API_URL}/recomendaciones`, { params: { periodo } });
   }
 
   // Presupuestos

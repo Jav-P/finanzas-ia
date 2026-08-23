@@ -11,6 +11,7 @@ import { InstanciasModule } from './instancias/instancias.module';
 import { IngresosModule } from './ingresos/ingresos.module';
 import { BalanceModule } from './balance/balance.module';
 import { PresupuestosModule } from './presupuestos/presupuestos.module';
+import { RecomendacionesModule } from './recomendaciones/recomendaciones.module';
 import { MediosPagoModule } from './medios-pago/medios-pago.module';
 import { LugaresModule } from './lugares/lugares.module';
 import { ProductosModule } from './productos/productos.module';
@@ -37,6 +38,7 @@ import { MailModule } from './mail/mail.module';
     IngresosModule,
     BalanceModule,
     PresupuestosModule,
+    RecomendacionesModule,
     MediosPagoModule,
     LugaresModule,
     ProductosModule,

@@ -9,5 +9,6 @@ import { BalanceService } from './balance.service';
   imports: [SupabaseModule, UsuariosModule, PresupuestosModule],
   controllers: [BalanceController],
   providers: [BalanceService],
+  exports: [BalanceService],
 })
 export class BalanceModule {}

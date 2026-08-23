@@ -8,5 +8,6 @@ import { InstanciasSchedulerService } from './instancias-scheduler.service';
   imports: [SupabaseModule],
   controllers: [ObligacionesController],
   providers: [ObligacionesService, InstanciasSchedulerService],
+  exports: [ObligacionesService],
 })
 export class ObligacionesModule {}

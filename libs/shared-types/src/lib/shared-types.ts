@@ -386,6 +386,17 @@ export interface HistoricoPrecioItem {
   precioUnitario: number;
 }
 
+// --- Recomendaciones (motor de reglas sobre el balance/plan del mes) ---
+
+export type SeveridadRecomendacion = 'critico' | 'alerta' | 'info';
+
+export interface Recomendacion {
+  id: string;
+  severidad: SeveridadRecomendacion;
+  titulo: string;
+  detalle: string;
+}
+
 // --- OCR (Claude API) ---
 // Resultados "borrador": no se guardan solos, el usuario los revisa y
 // confirma antes de persistirlos via los endpoints normales (POST

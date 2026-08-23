@@ -230,17 +230,25 @@ export interface Balance {
   obligaciones: number;
   gastos: number;
   saldo: number;
-  // Cuanto de los presupuestos del mes ya se "usa": el gasto real donde
-  // ya se registro, o el monto presupuestado como simulacion mientras
-  // no se registre un gasto real en esa categoria.
+  // El sueldo de "periodo" se cobra a fin de mes y cubre las
+  // obligaciones y presupuestos del mes SIGUIENTE (los vencimientos caen
+  // apenas despues del pago). Por eso presupuestado/obligacionesProyectadas
+  // no son de "periodo" sino de periodoObligacionesProyectadas.
+  periodoObligacionesProyectadas: string;
+  // Cuanto de los presupuestos de periodoObligacionesProyectadas ya se
+  // "usa": el gasto real donde ya se registro, o el monto presupuestado
+  // como simulacion mientras no se registre un gasto real en esa
+  // categoria.
   presupuestado: number;
-  // Total de obligaciones fijas activas que aplican a este periodo,
-  // simulado al 100% (monto completo de la plantilla), sin depender de
-  // que ya exista una instancia generada para el mes.
+  // Total de obligaciones fijas activas que aplican a
+  // periodoObligacionesProyectadas, simulado al 100% (monto completo de
+  // la plantilla), sin depender de que ya exista una instancia generada
+  // para ese mes.
   obligacionesProyectadas: number;
-  // ingresos - obligacionesProyectadas - presupuestado: lo que queda
-  // proyectado para el mes si todo (fijos, variables y presupuestos) se
-  // cumple al 100%, y por lo tanto lo que se podria destinar a abonar
+  // ingresos (de "periodo") - obligacionesProyectadas - presupuestado
+  // (de periodoObligacionesProyectadas): lo que queda del sueldo de este
+  // periodo despues de cubrir, al 100%, las obligaciones y presupuestos
+  // del mes siguiente, y por lo tanto lo que se podria destinar a abonar
   // creditos/tarjetas.
   disponibleParaCreditos: number;
   porUsuario: BalancePersona[];

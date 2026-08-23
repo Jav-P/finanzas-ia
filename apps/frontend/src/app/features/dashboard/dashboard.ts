@@ -13,6 +13,11 @@ function periodoActual(): string {
   return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
 }
 
+function nombreMes(periodo: string): string {
+  const [year, month] = periodo.split('-').map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+}
+
 function diasRestantes(fechaVencimiento: string): number {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
@@ -101,6 +106,10 @@ export class Dashboard implements OnInit {
     }
     if (dias === 0) return 'Vence hoy';
     return `Vence en ${dias} día${dias === 1 ? '' : 's'}`;
+  }
+
+  nombreMes(periodo: string): string {
+    return nombreMes(periodo);
   }
 
   inicialesDe(nombre: string): string {

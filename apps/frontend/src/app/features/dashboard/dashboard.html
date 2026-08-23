@@ -44,18 +44,21 @@
     <div class="plan-head">
       <h2>Plan del mes</h2>
       <span class="hint-text plan-hint">
-        Simula que todo se cumple al 100%: las obligaciones fijas activas de este mes cuentan
-        completas (aunque su cuota todavía no se haya generado) y cada presupuesto usa el gasto real
-        si ya lo registraste, o el monto presupuestado mientras tanto.
+        El sueldo de {{ nombreMes(b.periodo) }} cubre las obligaciones y presupuestos de
+        {{ nombreMes(b.periodoObligacionesProyectadas) }} (los vencimientos caen justo después del
+        pago). Se simula que todo se cumple al 100%: las obligaciones fijas activas de
+        {{ nombreMes(b.periodoObligacionesProyectadas) }} cuentan completas (aunque su cuota todavía
+        no se haya generado) y cada presupuesto usa el gasto real si ya lo registraste, o el monto
+        presupuestado mientras tanto.
       </span>
     </div>
     <div class="plan-lines">
       <div class="plan-line">
-        <span>Ingresos</span>
+        <span>Ingresos de {{ nombreMes(b.periodo) }}</span>
         <b class="mono">{{ b.ingresos | number: '1.0-0' }}</b>
       </div>
       <div class="plan-line negative">
-        <span>− Obligaciones fijas (100%)</span>
+        <span>− Obligaciones fijas de {{ nombreMes(b.periodoObligacionesProyectadas) }} (100%)</span>
         <b class="mono">{{ b.obligacionesProyectadas | number: '1.0-0' }}</b>
       </div>
       <div class="plan-line plan-subtotal">
@@ -63,7 +66,10 @@
         <b class="mono">{{ (b.ingresos - b.obligacionesProyectadas) | number: '1.0-0' }}</b>
       </div>
       <div class="plan-line negative">
-        <span>− Presupuestos (real donde ya hay gasto, simulado en lo demás)</span>
+        <span>
+          − Presupuestos de {{ nombreMes(b.periodoObligacionesProyectadas) }} (real donde ya hay
+          gasto, simulado en lo demás)
+        </span>
         <b class="mono">{{ b.presupuestado | number: '1.0-0' }}</b>
       </div>
     </div>

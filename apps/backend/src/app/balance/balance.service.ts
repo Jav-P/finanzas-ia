@@ -19,13 +19,21 @@ export class BalanceService {
     const inicio = periodStart(periodo);
     const fin = periodEnd(periodo);
 
+    // El sueldo se paga a fin de mes y con eso se cubren las obligaciones
+    // y presupuestos del mes SIGUIENTE (los vencimientos caen apenas
+    // despues del pago). Por eso el plan proyectado no compara ingresos
+    // de este periodo contra sus propias obligaciones/presupuestos, sino
+    // contra los del periodo siguiente: es lo que ese sueldo realmente
+    // tiene que cubrir.
+    const periodoSiguiente = addMeses(periodo, 1);
+
     const usuarios = await this.usuarios.findByHogar(hogarId);
 
     const [ingresoRows, obligacionRows, gastoRows, resumenPresupuestos] = await Promise.all([
       this.fetchIngresos(hogarId),
       this.fetchObligaciones(hogarId),
       this.fetchGastos(hogarId, inicio, fin),
-      this.presupuestos.resumen(hogarId, periodo),
+      this.presupuestos.resumen(hogarId, periodoSiguiente),
     ]);
 
     const obligacionIds = obligacionRows.map((o: any) => o.id);
@@ -93,25 +101,11 @@ export class BalanceService {
     //
     // Para creditos/obligaciones YA existentes que se registran en la app
     // con "fecha del primer vencimiento" = el proximo pago (comun cuando
-    // el dia de pago del mes ya paso), fechaInicio cae en el mes
-    // siguiente aunque la obligacion ya se este pagando todos los meses.
-    // Por eso se admite hasta 1 mes de adelanto: si fechaInicio es como
-    // mucho el mes siguiente al periodo consultado, igual se simula como
-    // gasto fijo de este mes (evita subestimar creditos recien cargados).
-    const mesesDeAdelanto = 1;
-    const limiteMensual = periodEnd(addMeses(periodo, mesesDeAdelanto));
-
-    const obligacionesProyectadas = obligacionRows.reduce((sum: number, row: any) => {
-      const obligacion = toObligacion(row);
-      if (!obligacion.activa) return sum;
-      if (obligacion.recurrencia === 'mensual' && obligacion.fechaInicio <= limiteMensual) {
-        return sum + Number(obligacion.monto);
-      }
-      if (obligacion.recurrencia === 'unica' && obligacion.fechaInicio >= inicio && obligacion.fechaInicio <= fin) {
-        return sum + Number(obligacion.monto);
-      }
-      return sum;
-    }, 0);
+    // el dia de pago del mes ya paso), fechaInicio cae un mes despues de
+    // lo que "deberia" aunque la obligacion ya se este pagando todos los
+    // meses. Por eso se admite hasta 1 mes de adelanto sobre el periodo
+    // objetivo (evita subestimar creditos recien cargados).
+    const obligacionesProyectadas = this.proyectarObligaciones(obligacionRows, periodoSiguiente);
 
     const disponibleParaCreditos = totales.ingresos - obligacionesProyectadas - presupuestado;
 
@@ -122,10 +116,34 @@ export class BalanceService {
       gastos: totales.gastos,
       saldo: totales.ingresos - totales.obligaciones - totales.gastos,
       presupuestado,
+      periodoObligacionesProyectadas: periodoSiguiente,
       obligacionesProyectadas,
       disponibleParaCreditos,
       porUsuario,
     };
+  }
+
+  private proyectarObligaciones(obligacionRows: any[], periodoObjetivo: string): number {
+    const inicioObjetivo = periodStart(periodoObjetivo);
+    const finObjetivo = periodEnd(periodoObjetivo);
+    const mesesDeAdelanto = 1;
+    const limiteMensual = periodEnd(addMeses(periodoObjetivo, mesesDeAdelanto));
+
+    return obligacionRows.reduce((sum: number, row: any) => {
+      const obligacion = toObligacion(row);
+      if (!obligacion.activa) return sum;
+      if (obligacion.recurrencia === 'mensual' && obligacion.fechaInicio <= limiteMensual) {
+        return sum + Number(obligacion.monto);
+      }
+      if (
+        obligacion.recurrencia === 'unica' &&
+        obligacion.fechaInicio >= inicioObjetivo &&
+        obligacion.fechaInicio <= finObjetivo
+      ) {
+        return sum + Number(obligacion.monto);
+      }
+      return sum;
+    }, 0);
   }
 
   private aplicaEnPeriodo(ingresoRow: any, inicio: string, fin: string): boolean {

@@ -5,7 +5,7 @@ import { UsuariosService } from '../usuarios/usuarios.service';
 import { PresupuestosService } from '../presupuestos/presupuestos.service';
 import { toObligacion } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
-import { periodEnd, periodStart } from '../common/period';
+import { addMeses, periodEnd, periodStart } from '../common/period';
 
 @Injectable()
 export class BalanceService {
@@ -90,10 +90,21 @@ export class BalanceService {
     // periodo, exista o no la instancia. Las unicas siguen viniendo de su
     // instancia real (ya se genera de inmediato al crearlas) y las diarias
     // (solo para pruebas) no se proyectan.
+    //
+    // Para creditos/obligaciones YA existentes que se registran en la app
+    // con "fecha del primer vencimiento" = el proximo pago (comun cuando
+    // el dia de pago del mes ya paso), fechaInicio cae en el mes
+    // siguiente aunque la obligacion ya se este pagando todos los meses.
+    // Por eso se admite hasta 1 mes de adelanto: si fechaInicio es como
+    // mucho el mes siguiente al periodo consultado, igual se simula como
+    // gasto fijo de este mes (evita subestimar creditos recien cargados).
+    const mesesDeAdelanto = 1;
+    const limiteMensual = periodEnd(addMeses(periodo, mesesDeAdelanto));
+
     const obligacionesProyectadas = obligacionRows.reduce((sum: number, row: any) => {
       const obligacion = toObligacion(row);
       if (!obligacion.activa) return sum;
-      if (obligacion.recurrencia === 'mensual' && obligacion.fechaInicio <= fin) {
+      if (obligacion.recurrencia === 'mensual' && obligacion.fechaInicio <= limiteMensual) {
         return sum + Number(obligacion.monto);
       }
       if (obligacion.recurrencia === 'unica' && obligacion.fechaInicio >= inicio && obligacion.fechaInicio <= fin) {

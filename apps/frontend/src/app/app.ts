@@ -1,14 +1,12 @@
 import { Component, effect, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SessionService } from './core/session.service';
 import { NotificationService } from './core/notification.service';
 
 @Component({
-  imports: [RouterModule, MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [RouterModule, MatIconModule],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -32,5 +30,15 @@ export class App {
   async cerrarSesion(): Promise<void> {
     await this.session.cerrarSesion();
     this.router.navigateByUrl('/login');
+  }
+
+  protected iniciales(): string {
+    const nombre = this.session.usuario()?.nombre?.trim();
+    if (!nombre) return '?';
+    return nombre
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((parte) => parte[0]?.toUpperCase() ?? '')
+      .join('');
   }
 }

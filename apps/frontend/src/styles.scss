@@ -9,31 +9,108 @@ html {
   height: 100%;
   @include mat.theme((
     color: (
+      theme-type: dark,
       primary: mat.$violet-palette,
       tertiary: mat.$magenta-palette,
     ),
-    typography: Roboto,
+    typography: Inter,
     density: 0,
   ));
+}
+
+// Brand tokens + hard overrides of the M3 system tokens generated above.
+// Angular Material exposes every color as a plain CSS custom property
+// (`--mat-sys-*`), so instead of fighting the generated tonal palette we
+// redeclare the ones that matter with exact brand hex. `:root` outranks the
+// `html { }` selector the mixin writes into, so these always win.
+:root {
+  --bg: #08070c;
+  --panel: #130f1e;
+  --panel-raised: #1a1530;
+  --panel-hover: #211a3a;
+  --line: rgba(237, 235, 245, 0.08);
+  --line-strong: #362d52;
+  --text: #edebf5;
+  --text-dim: #9c94b8;
+  --text-faint: #635c7f;
+  --cyan: #33e6e0;
+  --violet: #8a4dff;
+  --violet-deep: #6229a6;
+  --magenta: #ef4ee3;
+  --danger: #ff5a7a;
+  --radius: 14px;
+  --radius-sm: 9px;
+
+  --mat-sys-primary: var(--violet);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--panel-raised);
+  --mat-sys-on-primary-container: var(--text);
+
+  --mat-sys-secondary: var(--cyan);
+  --mat-sys-on-secondary: #06201f;
+  --mat-sys-secondary-container: rgba(51, 230, 224, 0.14);
+  --mat-sys-on-secondary-container: var(--cyan);
+
+  --mat-sys-tertiary: var(--magenta);
+  --mat-sys-on-tertiary: #2a0a28;
+  --mat-sys-tertiary-container: rgba(239, 78, 227, 0.14);
+  --mat-sys-on-tertiary-container: var(--magenta);
+
+  --mat-sys-error: var(--danger);
+  --mat-sys-on-error: #2a0410;
+  --mat-sys-error-container: rgba(255, 90, 122, 0.14);
+  --mat-sys-on-error-container: var(--danger);
+
+  --mat-sys-surface: var(--bg);
+  --mat-sys-surface-dim: #050409;
+  --mat-sys-surface-bright: var(--panel-raised);
+  --mat-sys-surface-container-lowest: #050409;
+  --mat-sys-surface-container-low: var(--bg);
+  --mat-sys-surface-container: var(--panel);
+  --mat-sys-surface-container-high: var(--panel-raised);
+  --mat-sys-surface-container-highest: #221a3c;
+  --mat-sys-on-surface: var(--text);
+  --mat-sys-on-surface-variant: var(--text-dim);
+  --mat-sys-inverse-surface: var(--text);
+  --mat-sys-inverse-on-surface: var(--bg);
+
+  --mat-sys-outline: var(--line-strong);
+  --mat-sys-outline-variant: var(--line);
+  --mat-sys-background: var(--bg);
+  --mat-sys-on-background: var(--text);
 }
 
 body {
   height: 100%;
   margin: 0;
-  color-scheme: light;
-  background-color: var(--mat-sys-surface-container-low);
-  color: var(--mat-sys-on-surface);
+  color-scheme: dark;
+  background-color: var(--bg);
+  color: var(--text);
   font: var(--mat-sys-body-medium);
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
   box-sizing: border-box;
 }
 
+h1, h2, h3 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mono,
+td.mono,
+.mono-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 main {
-  max-width: 960px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 2.5rem 3rem;
 }
 
 a {
@@ -41,51 +118,82 @@ a {
 }
 
 .auth-link {
-  color: var(--mat-sys-primary);
-  font-weight: 500;
+  color: var(--cyan);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
 }
 
 th,
 td {
   text-align: left;
-  padding: 0.6rem 0.5rem;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  padding: 0.7rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
 }
 
 th {
   font-weight: 600;
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.85rem;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+th.sortable:hover {
+  color: var(--text);
 }
 
 .badge {
-  display: inline-block;
-  padding: 0.15rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: white;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .badge.pendiente {
-  background: #16a34a;
+  background: rgba(51, 230, 224, 0.12);
+  color: var(--cyan);
 }
 
 .badge.proximo {
-  background: #d97706;
+  background: rgba(138, 77, 255, 0.16);
+  color: #b79bff;
 }
 
 .badge.vencido {
-  background: #dc2626;
+  background: rgba(239, 78, 227, 0.16);
+  color: var(--magenta);
 }
 
 .badge.pagado {
-  background: #6b7280;
+  background: rgba(237, 235, 245, 0.08);
+  color: var(--text-faint);
 }
 
 .form-grid {
@@ -119,12 +227,58 @@ th {
 }
 
 .error-text {
-  color: var(--mat-sys-error);
+  color: var(--danger);
   font-size: 0.9rem;
 }
 
 .card-section {
   margin-bottom: 1.5rem;
+  background: var(--panel) !important;
+  border: 1px solid var(--line);
+  border-radius: var(--radius) !important;
+}
+
+// Lightweight custom button system used by the bespoke screens (dashboard,
+// auth). Coexists with mat-button elsewhere in the app, which already
+// inherits the brand colors through the --mat-sys-* overrides above.
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.05rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: 0.15s ease;
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, var(--cyan), var(--violet) 60%, var(--magenta));
+  color: #0a0810;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--text-dim);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
 }
 
 .auth-card {
@@ -146,13 +300,28 @@ th {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
+  background: var(--bg);
 
-  .auth-card {
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(600px 500px at 18% 20%, rgba(51, 230, 224, 0.16), transparent 60%),
+      radial-gradient(700px 600px at 82% 28%, rgba(138, 77, 255, 0.2), transparent 60%),
+      radial-gradient(650px 550px at 55% 92%, rgba(239, 78, 227, 0.14), transparent 60%);
+  }
+
+  .auth-card,
+  .auth-card-centered {
+    position: relative;
     margin: 0;
     width: 100%;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
-    border-radius: 16px;
+    background: var(--panel);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+    border-radius: 18px !important;
+    border: 1px solid var(--line-strong);
   }
 }
 
@@ -160,29 +329,30 @@ th {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.7rem;
   margin-bottom: 1.25rem;
 
   span {
     font-weight: 600;
-    color: var(--mat-sys-on-surface-variant);
-    font-size: 0.95rem;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    font-size: 1.05rem;
   }
 }
 
 .auth-brand-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
+  background: linear-gradient(135deg, var(--cyan), var(--violet) 55%, var(--magenta));
 
   mat-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+    color: #0a0810;
   }
 }

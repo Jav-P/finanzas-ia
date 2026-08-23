@@ -27,7 +27,7 @@
           <td>{{ item.categoriaNombre }}</td>
           <td>{{ item.presupuestado | number: '1.0-0' }}</td>
           <td>{{ item.gastado | number: '1.0-0' }}</td>
-          <td [style.color]="item.diferencia < 0 ? '#dc2626' : '#16a34a'">
+          <td [style.color]="item.diferencia < 0 ? 'var(--danger)' : 'var(--cyan)'">
             {{ item.diferencia | number: '1.0-0' }}
             {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
           </td>

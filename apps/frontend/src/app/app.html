@@ -1,32 +1,65 @@
 @if (session.usuario()?.hogarId) {
-  <mat-toolbar class="topbar">
-    <span class="brand">
-      Finanzas en pareja
-      @if (session.hogar(); as hogar) {
-        <span class="hogar-nombre">· {{ hogar.nombre }}</span>
-      }
-    </span>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FP</div>
+        <div class="brand-text">
+          <strong>Finanzas en pareja</strong>
+          @if (session.hogar(); as hogar) {
+            <small>{{ hogar.nombre }}</small>
+          }
+        </div>
+      </div>
 
-    <nav class="topbar-nav">
-      <a mat-button routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
-      <a mat-button routerLink="/ingresos" routerLinkActive="active-link">Ingresos</a>
-      <a mat-button routerLink="/presupuestos" routerLinkActive="active-link">Presupuestos</a>
-      <a mat-button routerLink="/creditos" routerLinkActive="active-link">Créditos</a>
-      <a mat-button routerLink="/gastos" routerLinkActive="active-link">Mercado / gastos</a>
-      <a mat-button routerLink="/catalogos" routerLinkActive="active-link">Catálogos</a>
-      <a mat-button routerLink="/invitar" routerLinkActive="active-link">Invitar</a>
-    </nav>
+      <nav class="nav">
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+          <mat-icon>space_dashboard</mat-icon>
+          <span class="label">Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/ingresos" routerLinkActive="active">
+          <mat-icon>trending_up</mat-icon>
+          <span class="label">Ingresos</span>
+        </a>
+        <a class="nav-item" routerLink="/presupuestos" routerLinkActive="active">
+          <mat-icon>pie_chart</mat-icon>
+          <span class="label">Presupuestos</span>
+        </a>
+        <a class="nav-item" routerLink="/creditos" routerLinkActive="active">
+          <mat-icon>credit_card</mat-icon>
+          <span class="label">Créditos</span>
+        </a>
+        <a class="nav-item" routerLink="/gastos" routerLinkActive="active">
+          <mat-icon>shopping_cart</mat-icon>
+          <span class="label">Mercado / gastos</span>
+        </a>
+        <a class="nav-item" routerLink="/catalogos" routerLinkActive="active">
+          <mat-icon>sell</mat-icon>
+          <span class="label">Catálogos</span>
+        </a>
+        <a class="nav-item" routerLink="/invitar" routerLinkActive="active">
+          <mat-icon>person_add</mat-icon>
+          <span class="label">Invitar</span>
+        </a>
+      </nav>
 
-    <span class="spacer"></span>
+      <div class="sidebar-foot">
+        <div class="who" [title]="session.usuario()?.nombre ?? ''">
+          <div class="who-avatar">{{ iniciales() }}</div>
+          <strong class="label">{{ session.usuario()?.nombre }}</strong>
+        </div>
+        <button class="signout" (click)="cerrarSesion()" [title]="'Cerrar sesión'">
+          <mat-icon>logout</mat-icon>
+          <span class="label">Cerrar sesión</span>
+        </button>
+      </div>
+    </aside>
 
-    <span class="user-name">
-      <mat-icon>account_circle</mat-icon>
-      {{ session.usuario()?.nombre }}
-    </span>
-    <button mat-stroked-button (click)="cerrarSesion()">Cerrar sesión</button>
-  </mat-toolbar>
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <main>
+    <router-outlet />
+  </main>
 }
-
-<main>
-  <router-outlet />
-</main>

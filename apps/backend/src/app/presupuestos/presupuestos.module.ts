@@ -7,5 +7,6 @@ import { PresupuestosService } from './presupuestos.service';
   imports: [SupabaseModule],
   controllers: [PresupuestosController],
   providers: [PresupuestosService],
+  exports: [PresupuestosService],
 })
 export class PresupuestosModule {}

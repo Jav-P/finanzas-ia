@@ -230,6 +230,14 @@ export interface Balance {
   obligaciones: number;
   gastos: number;
   saldo: number;
+  // Cuanto de los presupuestos del mes ya se "usa": el gasto real donde
+  // ya se registro, o el monto presupuestado como simulacion mientras
+  // no se registre un gasto real en esa categoria.
+  presupuestado: number;
+  // ingresos - obligaciones - presupuestado: lo que queda proyectado
+  // para el mes despues de obligaciones fijas y presupuestos, y por lo
+  // tanto lo que se podria destinar a abonar creditos/tarjetas.
+  disponibleParaCreditos: number;
   porUsuario: BalancePersona[];
 }
 

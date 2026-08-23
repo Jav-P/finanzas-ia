@@ -39,6 +39,40 @@
       </div>
     }
   </div>
+
+  <div class="plan-card">
+    <div class="plan-head">
+      <h2>Plan del mes</h2>
+      <span class="hint-text plan-hint">
+        Mientras no registres un gasto real en una categoría presupuestada, se simula como si ya se
+        hubiera gastado lo presupuestado, para no inflar lo disponible.
+      </span>
+    </div>
+    <div class="plan-lines">
+      <div class="plan-line">
+        <span>Ingresos</span>
+        <b class="mono">{{ b.ingresos | number: '1.0-0' }}</b>
+      </div>
+      <div class="plan-line negative">
+        <span>− Obligaciones fijas</span>
+        <b class="mono">{{ b.obligaciones | number: '1.0-0' }}</b>
+      </div>
+      <div class="plan-line plan-subtotal">
+        <span>= Saldo tras obligaciones</span>
+        <b class="mono">{{ (b.ingresos - b.obligaciones) | number: '1.0-0' }}</b>
+      </div>
+      <div class="plan-line negative">
+        <span>− Presupuestos (real donde ya hay gasto, simulado en lo demás)</span>
+        <b class="mono">{{ b.presupuestado | number: '1.0-0' }}</b>
+      </div>
+    </div>
+    <div class="plan-result">
+      <span>Disponible proyectado para abonar a créditos/tarjetas</span>
+      <b class="mono" [class.positive]="b.disponibleParaCreditos >= 0" [class.negative]="b.disponibleParaCreditos < 0">
+        {{ b.disponibleParaCreditos | number: '1.0-0' }}
+      </b>
+    </div>
+  </div>
 }
 
 <div class="section-head">

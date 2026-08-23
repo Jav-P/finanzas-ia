@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Balance, BalancePersona } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
+import { PresupuestosService } from '../presupuestos/presupuestos.service';
 import { toObligacion } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 import { periodEnd, periodStart } from '../common/period';
@@ -11,6 +12,7 @@ export class BalanceService {
   constructor(
     private readonly supabase: SupabaseService,
     private readonly usuarios: UsuariosService,
+    private readonly presupuestos: PresupuestosService,
   ) {}
 
   async calcular(hogarId: string, periodo: string): Promise<Balance> {
@@ -19,10 +21,11 @@ export class BalanceService {
 
     const usuarios = await this.usuarios.findByHogar(hogarId);
 
-    const [ingresoRows, obligacionRows, gastoRows] = await Promise.all([
+    const [ingresoRows, obligacionRows, gastoRows, resumenPresupuestos] = await Promise.all([
       this.fetchIngresos(hogarId),
       this.fetchObligaciones(hogarId),
       this.fetchGastos(hogarId, inicio, fin),
+      this.presupuestos.resumen(hogarId, periodo),
     ]);
 
     const obligacionIds = obligacionRows.map((o: any) => o.id);
@@ -69,12 +72,25 @@ export class BalanceService {
       { ingresos: 0, obligaciones: 0, gastos: 0 },
     );
 
+    // Mientras una categoria presupuestada no tenga gasto real registrado
+    // este mes, se simula como si ya se hubiera gastado lo presupuestado
+    // (asi el "disponible para creditos" no queda inflado con dinero que
+    // en la practica ya esta destinado al mercado, etc.). En cuanto se
+    // registre un gasto real, este reemplaza a la simulacion.
+    const presupuestado = resumenPresupuestos.reduce(
+      (sum, item) => sum + (item.gastado > 0 ? item.gastado : item.presupuestado),
+      0,
+    );
+    const disponibleParaCreditos = totales.ingresos - totales.obligaciones - presupuestado;
+
     return {
       periodo,
       ingresos: totales.ingresos,
       obligaciones: totales.obligaciones,
       gastos: totales.gastos,
       saldo: totales.ingresos - totales.obligaciones - totales.gastos,
+      presupuestado,
+      disponibleParaCreditos,
       porUsuario,
     };
   }

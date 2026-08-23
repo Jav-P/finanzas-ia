@@ -234,9 +234,14 @@ export interface Balance {
   // ya se registro, o el monto presupuestado como simulacion mientras
   // no se registre un gasto real en esa categoria.
   presupuestado: number;
-  // ingresos - obligaciones - presupuestado: lo que queda proyectado
-  // para el mes despues de obligaciones fijas y presupuestos, y por lo
-  // tanto lo que se podria destinar a abonar creditos/tarjetas.
+  // Total de obligaciones fijas activas que aplican a este periodo,
+  // simulado al 100% (monto completo de la plantilla), sin depender de
+  // que ya exista una instancia generada para el mes.
+  obligacionesProyectadas: number;
+  // ingresos - obligacionesProyectadas - presupuestado: lo que queda
+  // proyectado para el mes si todo (fijos, variables y presupuestos) se
+  // cumple al 100%, y por lo tanto lo que se podria destinar a abonar
+  // creditos/tarjetas.
   disponibleParaCreditos: number;
   porUsuario: BalancePersona[];
 }

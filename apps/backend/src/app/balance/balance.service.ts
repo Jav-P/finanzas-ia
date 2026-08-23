@@ -81,7 +81,28 @@ export class BalanceService {
       (sum, item) => sum + (item.gastado > 0 ? item.gastado : item.presupuestado),
       0,
     );
-    const disponibleParaCreditos = totales.ingresos - totales.obligaciones - presupuestado;
+
+    // "obligaciones" (arriba) depende de que ya exista una instancia
+    // generada para el periodo, lo cual no siempre paso todavia (el cron
+    // corre una vez al dia y puede no haber alcanzado a crear la cuota de
+    // este mes). Para el plan proyectado no queremos depender de eso: una
+    // obligacion mensual activa cuenta su monto completo apenas aplica al
+    // periodo, exista o no la instancia. Las unicas siguen viniendo de su
+    // instancia real (ya se genera de inmediato al crearlas) y las diarias
+    // (solo para pruebas) no se proyectan.
+    const obligacionesProyectadas = obligacionRows.reduce((sum: number, row: any) => {
+      const obligacion = toObligacion(row);
+      if (!obligacion.activa) return sum;
+      if (obligacion.recurrencia === 'mensual' && obligacion.fechaInicio <= fin) {
+        return sum + Number(obligacion.monto);
+      }
+      if (obligacion.recurrencia === 'unica' && obligacion.fechaInicio >= inicio && obligacion.fechaInicio <= fin) {
+        return sum + Number(obligacion.monto);
+      }
+      return sum;
+    }, 0);
+
+    const disponibleParaCreditos = totales.ingresos - obligacionesProyectadas - presupuestado;
 
     return {
       periodo,
@@ -90,6 +111,7 @@ export class BalanceService {
       gastos: totales.gastos,
       saldo: totales.ingresos - totales.obligaciones - totales.gastos,
       presupuestado,
+      obligacionesProyectadas,
       disponibleParaCreditos,
       porUsuario,
     };

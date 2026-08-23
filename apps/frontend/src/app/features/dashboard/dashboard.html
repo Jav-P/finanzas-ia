@@ -44,8 +44,9 @@
     <div class="plan-head">
       <h2>Plan del mes</h2>
       <span class="hint-text plan-hint">
-        Mientras no registres un gasto real en una categoría presupuestada, se simula como si ya se
-        hubiera gastado lo presupuestado, para no inflar lo disponible.
+        Simula que todo se cumple al 100%: las obligaciones fijas activas de este mes cuentan
+        completas (aunque su cuota todavía no se haya generado) y cada presupuesto usa el gasto real
+        si ya lo registraste, o el monto presupuestado mientras tanto.
       </span>
     </div>
     <div class="plan-lines">
@@ -54,12 +55,12 @@
         <b class="mono">{{ b.ingresos | number: '1.0-0' }}</b>
       </div>
       <div class="plan-line negative">
-        <span>− Obligaciones fijas</span>
-        <b class="mono">{{ b.obligaciones | number: '1.0-0' }}</b>
+        <span>− Obligaciones fijas (100%)</span>
+        <b class="mono">{{ b.obligacionesProyectadas | number: '1.0-0' }}</b>
       </div>
       <div class="plan-line plan-subtotal">
         <span>= Saldo tras obligaciones</span>
-        <b class="mono">{{ (b.ingresos - b.obligaciones) | number: '1.0-0' }}</b>
+        <b class="mono">{{ (b.ingresos - b.obligacionesProyectadas) | number: '1.0-0' }}</b>
       </div>
       <div class="plan-line negative">
         <span>− Presupuestos (real donde ya hay gasto, simulado en lo demás)</span>

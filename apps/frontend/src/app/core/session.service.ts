@@ -40,7 +40,15 @@ export class SessionService {
   readonly listo = signal(false);
 
   constructor() {
-    this.iniciar();
+    // Se difiere al siguiente microtask: si hay una sesion guardada,
+    // iniciar() dispara un HTTP request casi de inmediato (sin pasar
+    // por un await real antes), y authInterceptor vuelve a pedir
+    // SessionService via inject() para leer el token. Si eso pasa
+    // todavia dentro del constructor, Angular lo ve como una
+    // dependencia circular (NG0200) porque este servicio aun no
+    // termino de construirse. Con el microtask, el constructor ya
+    // devolvio el control al injector antes de que se dispare nada.
+    queueMicrotask(() => this.iniciar());
   }
 
   private async iniciar(): Promise<void> {

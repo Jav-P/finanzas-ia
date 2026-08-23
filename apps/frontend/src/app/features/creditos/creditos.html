@@ -12,17 +12,19 @@
     @if (creditos().length) {
       <table>
         <tr>
-          <th>Banco</th>
-          <th>Descripción</th>
-          <th>Categoría</th>
-          <th>Cuota</th>
-          <th>Tasa E.A.</th>
-          <th>Cuotas</th>
-          <th>Próximo vencimiento</th>
-          <th>Saldo pendiente</th>
+          <th class="sortable" (click)="ordenarPor('banco')">Banco {{ indicadorOrden('banco') }}</th>
+          <th class="sortable" (click)="ordenarPor('descripcion')">Descripción {{ indicadorOrden('descripcion') }}</th>
+          <th class="sortable" (click)="ordenarPor('categoria')">Categoría {{ indicadorOrden('categoria') }}</th>
+          <th class="sortable" (click)="ordenarPor('montoCuota')">Cuota {{ indicadorOrden('montoCuota') }}</th>
+          <th class="sortable" (click)="ordenarPor('tasaInteres')">Tasa E.A. {{ indicadorOrden('tasaInteres') }}</th>
+          <th class="sortable" (click)="ordenarPor('cuotasRestantes')">Cuotas {{ indicadorOrden('cuotasRestantes') }}</th>
+          <th class="sortable" (click)="ordenarPor('proximaFechaVencimiento')">
+            Próximo vencimiento {{ indicadorOrden('proximaFechaVencimiento') }}
+          </th>
+          <th class="sortable" (click)="ordenarPor('saldoPendiente')">Saldo pendiente {{ indicadorOrden('saldoPendiente') }}</th>
           <th>Estado</th>
         </tr>
-        @for (credito of creditos(); track credito.obligacionId) {
+        @for (credito of creditosOrdenados(); track credito.obligacionId) {
           <tr>
             <td>{{ credito.banco }}</td>
             <td>{{ credito.descripcion }}</td>

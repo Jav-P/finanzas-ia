@@ -41,6 +41,7 @@ export class Presupuestos implements OnInit {
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly guardando = signal(false);
   protected readonly mostrarForm = signal(false);
+  protected readonly editando = signal(false);
 
   protected categoriaId = '';
   protected montoPresupuestado: number | null = null;
@@ -59,6 +60,27 @@ export class Presupuestos implements OnInit {
     this.cargar();
   }
 
+  nuevoPresupuesto(): void {
+    this.categoriaId = this.categorias()[0]?.id ?? '';
+    this.montoPresupuestado = null;
+    this.esFijo = false;
+    this.editando.set(false);
+    this.mostrarForm.set(true);
+  }
+
+  editarPresupuesto(item: PresupuestoResumenItem): void {
+    this.categoriaId = item.categoriaId;
+    this.montoPresupuestado = item.presupuestado;
+    this.esFijo = item.esFijo;
+    this.editando.set(true);
+    this.mostrarForm.set(true);
+  }
+
+  cancelar(): void {
+    this.editando.set(false);
+    this.mostrarForm.set(false);
+  }
+
   guardar(): void {
     if (!this.categoriaId || this.montoPresupuestado == null) return;
 
@@ -74,6 +96,7 @@ export class Presupuestos implements OnInit {
         this.montoPresupuestado = null;
         this.esFijo = false;
         this.guardando.set(false);
+        this.editando.set(false);
         this.mostrarForm.set(false);
         this.cargar();
       });

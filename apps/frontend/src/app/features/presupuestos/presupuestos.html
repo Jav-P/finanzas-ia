@@ -3,7 +3,7 @@
     <div style="display:flex; justify-content: space-between; align-items:center;">
       <h2 style="margin:0;">Presupuesto vs. gastado</h2>
       @if (!mostrarForm()) {
-        <button mat-stroked-button (click)="mostrarForm.set(true)">
+        <button mat-stroked-button (click)="nuevoPresupuesto()">
           <mat-icon>add</mat-icon>
           Definir presupuesto
         </button>
@@ -38,6 +38,7 @@
           </td>
           <td>
             @if (item.presupuestoId) {
+              <button mat-button (click)="editarPresupuesto(item)">Editar</button>
               <button mat-button color="warn" (click)="eliminarPresupuesto(item.presupuestoId)">
                 {{ item.esFijo ? 'Quitar fijo' : 'Eliminar' }}
               </button>
@@ -52,15 +53,18 @@
 @if (mostrarForm()) {
   <mat-card class="card-section">
     <mat-card-content>
-      <h2>Definir presupuesto</h2>
+      <h2>{{ editando() ? 'Editar presupuesto' : 'Definir presupuesto' }}</h2>
       <form class="form-grid" (ngSubmit)="guardar()">
         <mat-form-field appearance="outline">
           <mat-label>Categoría</mat-label>
-          <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+          <mat-select name="categoriaId" [(ngModel)]="categoriaId" [disabled]="editando()" required>
             @for (categoria of categorias(); track categoria.id) {
               <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
             }
           </mat-select>
+          @if (editando()) {
+            <mat-hint>Para presupuestar otra categoría, cancela y crea una nueva.</mat-hint>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -76,8 +80,10 @@
         </p>
 
         <div class="form-actions">
-          <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
-          <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
+          <button mat-flat-button type="submit" [disabled]="guardando()">
+            {{ editando() ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button mat-button type="button" (click)="cancelar()">Cancelar</button>
         </div>
       </form>
     </mat-card-content>

@@ -19,8 +19,20 @@ export class ClaudeService {
   //
   // Cualquier falla (key faltante, red, rate limit, respuesta rara)
   // se traduce siempre al mismo error de cara al usuario: el detalle
-  // real solo queda en el log del servidor.
+  // real solo queda en el log del servidor. La falta de API key es un
+  // estado ESPERADO mientras no se configure (no un bug), asi que se
+  // registra aparte y mas discreto (warn, sin stack) en vez de como
+  // error; los fallos reales (red, rate limit, respuesta rara) si
+  // quedan como error con el detalle completo.
   async extraerJson<T>(file: Express.Multer.File, instrucciones: string): Promise<T> {
+    if (!this.config.get<string>('ANTHROPIC_API_KEY')) {
+      this.logger.warn(
+        'Se intento usar OCR (Claude) pero ANTHROPIC_API_KEY no esta configurada; ' +
+          'la funcion queda deshabilitada hasta que se agregue la key en el .env.',
+      );
+      throw new ServiceUnavailableException(MENSAJE_NO_DISPONIBLE);
+    }
+
     try {
       const documento = this.toContentBlock(file);
 

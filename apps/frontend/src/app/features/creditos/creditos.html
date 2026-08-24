@@ -1,3 +1,37 @@
+@if (chartSaldos(); as config) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Saldo pendiente por crédito</h2>
+      <div class="chart-box">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (chartTasas(); as config) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Tasa de interés por crédito</h2>
+      <p class="chart-hint">De mayor a menor: el primero es el que más te conviene priorizar abonar (método avalancha).</p>
+      <div class="chart-box">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (chartCuotas(); as config) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Cuotas pagadas vs. restantes</h2>
+      <div class="chart-box">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
 <mat-card class="card-section">
   <mat-card-content>
     <h2>Mis créditos</h2>

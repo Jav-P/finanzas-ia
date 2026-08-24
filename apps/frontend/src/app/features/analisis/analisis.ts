@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -41,6 +42,7 @@ function nombreMes(periodo: string): string {
 })
 export class Analisis implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly router = inject(Router);
 
   protected readonly periodo = signal(periodoActual());
   protected readonly balance = signal<Balance | null>(null);
@@ -96,9 +98,26 @@ export class Analisis implements OnInit {
           y: { stacked: true, ticks: { color: TEXT_DIM }, grid: { display: false } },
         },
         plugins: { legend: { labels: { color: TEXT_DIM } } },
+        onHover: (event, elements) => {
+          const target = event.native?.target as HTMLElement | undefined;
+          if (!target) return;
+          const categoria = elements[0] ? categorias[elements[0].index] : undefined;
+          target.style.cursor = categoria && this.esCategoriaCreditos(categoria) ? 'pointer' : 'default';
+        },
+        onClick: (_event, elements) => {
+          const categoria = elements[0] ? categorias[elements[0].index] : undefined;
+          if (categoria && this.esCategoriaCreditos(categoria)) {
+            this.router.navigateByUrl('/creditos');
+          }
+        },
       },
     };
   });
+
+  private esCategoriaCreditos(categoria: CategoriaCosto): boolean {
+    const nombre = categoria.categoriaNombre.toLowerCase().replace('é', 'e');
+    return nombre.startsWith('credit');
+  }
 
   // Plan del mes: una sola barra (el sueldo) dividida en lo que se va a
   // obligaciones fijas del mes siguiente, presupuestos de este mes, y lo

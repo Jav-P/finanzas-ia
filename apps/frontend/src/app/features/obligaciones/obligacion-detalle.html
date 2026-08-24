@@ -32,21 +32,41 @@
     </mat-card-content>
   </mat-card>
 
-  @if (i.pago; as pago) {
+  @if (i.pagos.length) {
     <mat-card class="card-section">
       <mat-card-content>
-        <h3>Comprobante</h3>
-        <p>Pagado el {{ pago.fechaPago }} · {{ pago.montoPagado | number: '1.0-0' }}</p>
-        <a class="auth-link" [href]="pago.urlComprobante" target="_blank">Ver comprobante</a>
-        <div style="margin-top:0.5rem;">
-          <button mat-stroked-button (click)="revertirPago()">Revertir pago</button>
+        <h3>Comprobantes</h3>
+        <p style="color:var(--text-dim);">
+          Pagado {{ i.totalPagado | number: '1.0-0' }} de {{ i.monto | number: '1.0-0' }}
+          @if (i.saldoPendienteDePago > 0) {
+            · faltan {{ i.saldoPendienteDePago | number: '1.0-0' }}
+          }
+        </p>
+        <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.5rem;">
+          @for (pago of i.pagos; track pago.id) {
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; border:1px solid var(--line); border-radius:var(--radius-sm); padding:0.6rem 0.9rem;">
+              <div>
+                <div>{{ pago.montoPagado | number: '1.0-0' }} · {{ pago.fechaPago }}</div>
+                <a class="auth-link" [href]="pago.urlComprobante" target="_blank">Ver comprobante</a>
+              </div>
+              <button mat-button color="warn" (click)="revertirPago(pago.id)">Quitar</button>
+            </div>
+          }
         </div>
       </mat-card-content>
     </mat-card>
-  } @else {
+  }
+
+  @if (i.saldoPendienteDePago > 0) {
     <mat-card class="card-section">
       <mat-card-content>
-        <h3>Registrar pago</h3>
+        <h3>{{ i.pagos.length ? 'Registrar otro comprobante' : 'Registrar pago' }}</h3>
+        @if (i.pagos.length) {
+          <p style="color:var(--text-dim);">
+            Puedes dividir el pago en varios comprobantes; entre todos no pueden sumar más de
+            {{ i.saldoPendienteDePago | number: '1.0-0' }} (lo que falta).
+          </p>
+        }
         <form class="form-grid" (ngSubmit)="registrarPago()">
           <mat-form-field appearance="outline">
             <mat-label>Fecha de pago</mat-label>
@@ -57,7 +77,13 @@
           <mat-form-field appearance="outline">
             <mat-label>Monto pagado</mat-label>
             <input matInput appMonto name="montoPagado" [(ngModel)]="montoPagado" required />
+            <mat-hint>Máximo {{ i.saldoPendienteDePago | number: '1.0-0' }}</mat-hint>
           </mat-form-field>
+          @if (excedeSaldo()) {
+            <p class="error-text">
+              Ese monto supera lo que falta por pagar ({{ i.saldoPendienteDePago | number: '1.0-0' }}).
+            </p>
+          }
           <label class="file-field">
             Comprobante (imagen o PDF)
             <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoSeleccionado($event)" required />
@@ -66,7 +92,7 @@
             <p class="error-text">{{ error() }}</p>
           }
           <div class="form-actions">
-            <button mat-flat-button type="submit" [disabled]="guardando()">Registrar pago</button>
+            <button mat-flat-button type="submit" [disabled]="guardando() || excedeSaldo()">Registrar pago</button>
           </div>
         </form>
       </mat-card-content>

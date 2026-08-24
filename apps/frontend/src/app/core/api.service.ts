@@ -33,6 +33,7 @@ import type {
   Lugar,
   MedioPago,
   Obligacion,
+  Pago,
   Presupuesto,
   PresupuestoResumenItem,
   Producto,
@@ -175,11 +176,11 @@ export class ApiService {
     form.set('fechaPago', dto.fechaPago);
     form.set('montoPagado', String(dto.montoPagado));
     form.set('comprobante', comprobante);
-    return this.http.post(`${API_URL}/instancias/${instanciaId}/pago`, form);
+    return this.http.post<Pago>(`${API_URL}/instancias/${instanciaId}/pago`, form);
   }
 
-  revertirPago(instanciaId: string) {
-    return this.http.delete<void>(`${API_URL}/instancias/${instanciaId}/pago`);
+  revertirPago(instanciaId: string, pagoId: string) {
+    return this.http.delete<void>(`${API_URL}/instancias/${instanciaId}/pago/${pagoId}`);
   }
 
   // OCR (Claude): lee un comprobante/factura y devuelve un borrador de

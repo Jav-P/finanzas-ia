@@ -38,45 +38,102 @@
         <form class="form-grid" (ngSubmit)="registrarPago()">
           <mat-form-field appearance="outline">
             <mat-label>Obligación</mat-label>
-            <mat-select name="instanciaId" [(ngModel)]="instanciaId" required>
+            <mat-select
+              name="instanciaId"
+              [ngModel]="instanciaId()"
+              (ngModelChange)="seleccionarInstancia($event)"
+              required
+            >
               @for (i of pendientes(); track i.id) {
-                <mat-option [value]="i.id">
-                  {{ i.obligacion.descripcion }} · {{ i.monto | number: '1.0-0' }} · vence {{ i.fechaVencimiento }}
-                </mat-option>
+                <mat-option [value]="i.id">{{ i.obligacion.descripcion }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
-          <label class="file-field">
-            Comprobante (imagen o PDF)
-            <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoObligacion($event)" required />
-          </label>
+          @if (instanciaSeleccionada(); as sel) {
+            <div class="detalle-obligacion">
+              <div class="detalle-linea">
+                <span>Monto total</span>
+                <b class="mono">{{ sel.monto | number: '1.0-0' }}</b>
+              </div>
+              @if (sel.totalPagado > 0) {
+                <div class="detalle-linea">
+                  <span>Ya pagado</span>
+                  <b class="mono">{{ sel.totalPagado | number: '1.0-0' }}</b>
+                </div>
+              }
+              <div class="detalle-linea detalle-linea--destacada">
+                <span>Falta por pagar</span>
+                <b class="mono">{{ sel.saldoPendienteDePago | number: '1.0-0' }}</b>
+              </div>
+              <div class="detalle-linea">
+                <span>Vence</span>
+                <span>{{ sel.fechaVencimiento }}</span>
+              </div>
+            </div>
 
-          @if (leyendoComprobante()) {
-            <div class="ocr-status">
-              <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
-              Leyendo el comprobante...
+            <mat-button-toggle-group
+              name="tipoPago"
+              [value]="tipoPago()"
+              (change)="elegirTipoPago($event.value)"
+              class="tipo-pago-toggle"
+            >
+              <mat-button-toggle value="completo">Pago completo</mat-button-toggle>
+              <mat-button-toggle value="parcial">Pago parcial</mat-button-toggle>
+            </mat-button-toggle-group>
+            @if (tipoPago() === 'parcial') {
+              <p class="form-hint">
+                Puedes dividir el pago en varios comprobantes; entre todos no pueden sumar más de
+                {{ sel.saldoPendienteDePago | number: '1.0-0' }}.
+              </p>
+            }
+
+            <label class="file-field">
+              Comprobante (imagen o PDF)
+              <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoObligacion($event)" required />
+            </label>
+
+            @if (leyendoComprobante()) {
+              <div class="ocr-status">
+                <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+                Leyendo el comprobante...
+              </div>
+            }
+            @if (ocrFallo()) {
+              <p class="hint-text">No pudimos leer el comprobante automáticamente. Completa los datos a mano.</p>
+            }
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de pago</mat-label>
+              <input matInput [matDatepicker]="pickerFechaPago" name="fechaPago" [(ngModel)]="fechaPago" required />
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFechaPago"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFechaPago></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Monto pagado</mat-label>
+              <input
+                matInput
+                appMonto
+                name="montoPagado"
+                [(ngModel)]="montoPagado"
+                [readonly]="tipoPago() === 'completo'"
+                required
+              />
+              @if (tipoPago() === 'parcial') {
+                <mat-hint>Máximo {{ sel.saldoPendienteDePago | number: '1.0-0' }}</mat-hint>
+              }
+            </mat-form-field>
+            @if (excedeSaldo()) {
+              <p class="error-text">
+                Ese monto supera lo que falta por pagar ({{ sel.saldoPendienteDePago | number: '1.0-0' }}).
+              </p>
+            }
+
+            <div class="form-actions">
+              <button mat-flat-button type="submit" [disabled]="guardando() || excedeSaldo()">Registrar pago</button>
             </div>
           }
-          @if (ocrFallo()) {
-            <p class="hint-text">No pudimos leer el comprobante automáticamente. Completa los datos a mano.</p>
-          }
-
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de pago</mat-label>
-            <input matInput [matDatepicker]="pickerFechaPago" name="fechaPago" [(ngModel)]="fechaPago" required />
-            <mat-datepicker-toggle matIconSuffix [for]="pickerFechaPago"></mat-datepicker-toggle>
-            <mat-datepicker #pickerFechaPago></mat-datepicker>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Monto pagado</mat-label>
-            <input matInput appMonto name="montoPagado" [(ngModel)]="montoPagado" required />
-          </mat-form-field>
-
-          <div class="form-actions">
-            <button mat-flat-button type="submit" [disabled]="guardando()">Registrar pago</button>
-          </div>
         </form>
       }
     </mat-card-content>

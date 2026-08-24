@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   EstadoInstancia,
   InstanciaConDetalle,
+  Obligacion,
   Pago,
   RegistrarPagoDto,
 } from '@finanzas-ia/shared-types';
@@ -57,7 +58,7 @@ export class InstanciasService {
 
     const obligacionesById = new Map(obligacionRows.map((o) => [o.id, toObligacion(o)]));
     const categoriasById = new Map(categoriaRows.map((c) => [c.id, toCategoria(c)]));
-    const pagosByInstancia = new Map(pagoRows.map((p) => [p.instancia_id, toPago(p)]));
+    const pagosByInstancia = this.agruparPagos(pagoRows);
 
     const enriched = instancias.map((row) =>
       this.enrich(row, obligacionesById, categoriasById, pagosByInstancia),
@@ -90,13 +91,10 @@ export class InstanciasService {
 
     const obligacionesById = new Map([[obligacionRow.id, toObligacion(obligacionRow)]]);
     const categoriasById = new Map(categoriaRows.map((c) => [c.id, toCategoria(c)]));
-    const pagosByInstancia = new Map(pagoRows.map((p) => [p.instancia_id, toPago(p)]));
+    const pagosByInstancia = this.agruparPagos(pagoRows);
 
     const enriched = this.enrich(instanciaRow, obligacionesById, categoriasById, pagosByInstancia);
-
-    if (enriched.pago) {
-      enriched.pago = await this.withSignedUrl(enriched.pago);
-    }
+    enriched.pagos = await Promise.all(enriched.pagos.map((p) => this.withSignedUrl(p)));
 
     return enriched;
   }
@@ -108,11 +106,21 @@ export class InstanciasService {
   ): Promise<Pago> {
     const { data: instanciaRow, error } = await this.supabase.client
       .from('obligacion_instancias')
-      .select('id')
+      .select('id, monto')
       .eq('id', instanciaId)
       .maybeSingle();
     throwIfError(error);
     if (!instanciaRow) throw new NotFoundException('Instancia no encontrada');
+
+    const yaPagado = await this.totalPagado(instanciaId);
+    const restante = Number(instanciaRow.monto) - yaPagado;
+
+    if (dto.montoPagado > restante + 0.01) {
+      throw new BadRequestException(
+        `El monto pagado (${dto.montoPagado}) supera lo que falta por pagar de esta obligación (${restante}). ` +
+          'Si vas a dividir el pago en varios comprobantes, entre todos no pueden sumar más del total.',
+      );
+    }
 
     const path = `${instanciaId}/${Date.now()}-${file.originalname}`;
     const { error: uploadError } = await this.supabase.client.storage
@@ -133,30 +141,32 @@ export class InstanciasService {
       .single();
     throwIfError(pagoError);
 
-    const { error: updateError } = await this.supabase.client
-      .from('obligacion_instancias')
-      .update({ estado: 'pagado' })
-      .eq('id', instanciaId);
-    throwIfError(updateError);
+    const nuevoTotal = yaPagado + dto.montoPagado;
+    if (nuevoTotal >= Number(instanciaRow.monto) - 0.01) {
+      const { error: updateError } = await this.supabase.client
+        .from('obligacion_instancias')
+        .update({ estado: 'pagado' })
+        .eq('id', instanciaId);
+      throwIfError(updateError);
+    }
 
     return this.withSignedUrl(toPago(pagoRow));
   }
 
-  // Elimina el pago registrado (y su comprobante en Storage) y devuelve
-  // la instancia a estado pendiente/vencido.
-  async revertirPago(instanciaId: string): Promise<void> {
+  // Elimina un comprobante puntual (y su archivo en Storage). Si la
+  // instancia estaba marcada pagado (porque este comprobante era el que
+  // completaba el total), vuelve a pendiente.
+  async revertirPago(instanciaId: string, pagoId: string): Promise<void> {
     const { data: pagoRow, error } = await this.supabase.client
       .from('pagos')
       .select('*')
+      .eq('id', pagoId)
       .eq('instancia_id', instanciaId)
       .maybeSingle();
     throwIfError(error);
-    if (!pagoRow) throw new NotFoundException('Esta instancia no tiene un pago registrado');
+    if (!pagoRow) throw new NotFoundException('Ese comprobante no existe para esta instancia');
 
-    const { error: deleteError } = await this.supabase.client
-      .from('pagos')
-      .delete()
-      .eq('instancia_id', instanciaId);
+    const { error: deleteError } = await this.supabase.client.from('pagos').delete().eq('id', pagoId);
     throwIfError(deleteError);
 
     if (pagoRow.url_comprobante) {
@@ -170,6 +180,11 @@ export class InstanciasService {
     throwIfError(updateError);
   }
 
+  private async totalPagado(instanciaId: string): Promise<number> {
+    const pagos = await this.fetchPagos([instanciaId]);
+    return pagos.reduce((sum, p) => sum + Number(p.monto_pagado), 0);
+  }
+
   private async withSignedUrl(pago: Pago): Promise<Pago> {
     const { data, error } = await this.supabase.client.storage
       .from(BUCKET)
@@ -180,9 +195,9 @@ export class InstanciasService {
 
   private enrich(
     instanciaRow: any,
-    obligacionesById: Map<string, ReturnType<typeof toObligacion>>,
+    obligacionesById: Map<string, Obligacion>,
     categoriasById: Map<string, ReturnType<typeof toCategoria>>,
-    pagosByInstancia: Map<string, Pago>,
+    pagosByInstancia: Map<string, Pago[]>,
   ): InstanciaConDetalle {
     const instancia = toInstancia(instanciaRow);
     const obligacion = obligacionesById.get(instancia.obligacionId);
@@ -193,14 +208,27 @@ export class InstanciasService {
     if (!categoria) {
       throw new NotFoundException(`Categoria ${obligacion.categoriaId} no encontrada`);
     }
-    const pago = pagosByInstancia.get(instancia.id) ?? null;
+    const pagos = pagosByInstancia.get(instancia.id) ?? [];
+    const totalPagado = pagos.reduce((sum, p) => sum + p.montoPagado, 0);
+    const saldoPendienteDePago = Math.max(0, instancia.monto - totalPagado);
 
     const estado: EstadoInstancia =
       instancia.estado === 'pendiente' && instancia.fechaVencimiento < today()
         ? 'vencido'
         : instancia.estado;
 
-    return { ...instancia, estado, obligacion, categoria, pago };
+    return { ...instancia, estado, obligacion, categoria, pagos, totalPagado, saldoPendienteDePago };
+  }
+
+  private agruparPagos(pagoRows: any[]): Map<string, Pago[]> {
+    const mapa = new Map<string, Pago[]>();
+    for (const row of pagoRows) {
+      const pago = toPago(row);
+      const lista = mapa.get(pago.instanciaId) ?? [];
+      lista.push(pago);
+      mapa.set(pago.instanciaId, lista);
+    }
+    return mapa;
   }
 
   private async fetchCategorias(hogarId: string) {

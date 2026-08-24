@@ -71,6 +71,55 @@
   }
 }
 
+.form-hint {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin: -0.25rem 0 0.25rem;
+}
+
+.detalle-obligacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: var(--panel-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.detalle-linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+
+  b {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+.detalle-linea--destacada {
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--line-strong);
+
+  span:first-child {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  b {
+    color: var(--cyan);
+    font-size: 1.05rem;
+  }
+}
+
+.tipo-pago-toggle {
+  margin-bottom: 0.25rem;
+}
+
 .ocr-status {
   display: flex;
   align-items: center;

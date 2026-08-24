@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -54,11 +55,21 @@ export class ObligacionDetalle implements OnInit {
     this.archivo = input.files?.[0] ?? null;
   }
 
+  // El monto no puede superar lo que falta por pagar: se puede dividir
+  // el pago en varios comprobantes, pero entre todos no deben sumar
+  // más que el total de la obligación.
+  excedeSaldo(): boolean {
+    const instancia = this.instancia();
+    if (!instancia || this.montoPagado == null) return false;
+    return this.montoPagado > instancia.saldoPendienteDePago;
+  }
+
   registrarPago(): void {
     const instancia = this.instancia();
     const usuarioId = this.session.usuario()?.id;
     const fechaPago = dateToIso(this.fechaPago);
     if (!instancia || !usuarioId || !this.archivo || !this.montoPagado || !fechaPago) return;
+    if (this.excedeSaldo()) return;
 
     this.guardando.set(true);
     this.error.set(null);
@@ -70,9 +81,9 @@ export class ObligacionDetalle implements OnInit {
       )
       .subscribe({
         next: () => this.cargar(instancia.id),
-        error: () => {
+        error: (err: HttpErrorResponse) => {
           this.guardando.set(false);
-          this.error.set('No se pudo registrar el pago.');
+          this.error.set(err.error?.message ?? 'No se pudo registrar el pago.');
         },
       });
   }
@@ -81,10 +92,10 @@ export class ObligacionDetalle implements OnInit {
     this.router.navigateByUrl('/dashboard');
   }
 
-  revertirPago(): void {
+  revertirPago(pagoId: string): void {
     const instancia = this.instancia();
     if (!instancia) return;
-    this.api.revertirPago(instancia.id).subscribe(() => this.cargar(instancia.id));
+    this.api.revertirPago(instancia.id, pagoId).subscribe(() => this.cargar(instancia.id));
   }
 
   desactivarObligacion(): void {
@@ -102,7 +113,8 @@ export class ObligacionDetalle implements OnInit {
   private cargar(id: string): void {
     this.api.instancia(id).subscribe((instancia) => {
       this.instancia.set(instancia);
-      this.montoPagado = instancia.monto;
+      this.montoPagado = instancia.saldoPendienteDePago;
+      this.archivo = null;
       this.guardando.set(false);
     });
   }

@@ -49,8 +49,8 @@ export class InstanciasController {
     return this.instancias.registrarPago(id, dto, file);
   }
 
-  @Delete(':id/pago')
-  revertirPago(@Param('id') id: string) {
-    return this.instancias.revertirPago(id);
+  @Delete(':id/pago/:pagoId')
+  revertirPago(@Param('id') id: string, @Param('pagoId') pagoId: string) {
+    return this.instancias.revertirPago(id, pagoId);
   }
 }

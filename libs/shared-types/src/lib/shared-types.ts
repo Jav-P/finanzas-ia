@@ -128,10 +128,15 @@ export interface Pago {
 
 // Instancia enriquecida con los datos que necesita el dashboard/detalle,
 // sin depender de resource embedding de PostgREST (no hay FKs en el schema).
+// El pago se puede dividir en varios comprobantes (parciales); "pagos"
+// trae todos los registrados hasta ahora, y totalPagado/saldoPendienteDePago
+// ya vienen sumados para no repetir esa cuenta en cada pantalla.
 export interface InstanciaConDetalle extends ObligacionInstancia {
   obligacion: Obligacion;
   categoria: Categoria;
-  pago: Pago | null;
+  pagos: Pago[];
+  totalPagado: number;
+  saldoPendienteDePago: number; // monto - totalPagado, nunca negativo
 }
 
 export interface CreateCategoriaDto {

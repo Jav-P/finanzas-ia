@@ -1,0 +1,67 @@
+<div class="page-head">
+  <h1>Análisis</h1>
+</div>
+
+<div style="display:flex; align-items:center; gap:0.25rem; max-width:280px; margin-bottom:1.5rem;">
+  <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+
+  <mat-form-field appearance="outline" style="flex:1;">
+    <mat-label>Período</mat-label>
+    <input matInput [matDatepicker]="picker" readonly [value]="periodoFecha()" (click)="picker.open()" />
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker
+      #picker
+      startView="multi-year"
+      [startAt]="periodoFecha()"
+      (monthSelected)="seleccionarMes($event, picker)"
+    ></mat-datepicker>
+  </mat-form-field>
+
+  <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+</div>
+
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Qué es lo más caro</h2>
+    <p class="chart-hint">Todo lo que cuesta cada categoría: obligaciones fijas y presupuestos combinados.</p>
+    @if (chartMasCaro(); as config) {
+      <div class="chart-box chart-box--tall">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    } @else {
+      <p class="empty-state">No hay datos para este período todavía.</p>
+    }
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Plan del mes</h2>
+    <p class="chart-hint">En qué se va el sueldo de este mes.</p>
+    @if (chartPlanDelMes(); as config) {
+      <div class="chart-box chart-box--short">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    } @else {
+      <p class="empty-state">No hay datos para este período todavía.</p>
+    }
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Presupuestado vs. gastado</h2>
+    <p class="chart-hint">Lo real cuenta cuando ya lo registraste; mientras tanto se compara contra lo presupuestado.</p>
+    @if (chartPresupuestadoVsGastado(); as config) {
+      <div class="chart-box chart-box--tall">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    } @else {
+      <p class="empty-state">No hay presupuestos definidos para este período.</p>
+    }
+  </mat-card-content>
+</mat-card>

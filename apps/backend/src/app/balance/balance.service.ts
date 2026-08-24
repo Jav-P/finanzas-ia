@@ -125,26 +125,48 @@ export class BalanceService {
   }
 
   private proyectarObligaciones(obligacionRows: any[], periodoObjetivo: string): number {
-    const inicioObjetivo = periodStart(periodoObjetivo);
-    const finObjetivo = periodEnd(periodoObjetivo);
-    const mesesDeAdelanto = 1;
-    const limiteMensual = periodEnd(addMeses(periodoObjetivo, mesesDeAdelanto));
-
     return obligacionRows.reduce((sum: number, row: any) => {
       const obligacion = toObligacion(row);
-      if (!obligacion.activa) return sum;
-      if (obligacion.recurrencia === 'mensual' && obligacion.fechaInicio <= limiteMensual) {
-        return sum + Number(obligacion.monto);
-      }
-      if (
-        obligacion.recurrencia === 'unica' &&
-        obligacion.fechaInicio >= inicioObjetivo &&
-        obligacion.fechaInicio <= finObjetivo
-      ) {
-        return sum + Number(obligacion.monto);
-      }
-      return sum;
+      return this.aplicaAlPeriodo(obligacion, periodoObjetivo) ? sum + Number(obligacion.monto) : sum;
     }, 0);
+  }
+
+  // Igual que proyectarObligaciones, pero agrupado por categoria en vez
+  // de sumado a un solo total. Lo usa Analisis para el ranking de "que
+  // es lo mas caro" combinando obligaciones fijas + presupuestos.
+  async obligacionesPorCategoria(hogarId: string, periodoObjetivo: string): Promise<Map<string, number>> {
+    const obligacionRows = await this.fetchObligaciones(hogarId);
+    const mapa = new Map<string, number>();
+
+    for (const row of obligacionRows) {
+      const obligacion = toObligacion(row);
+      if (!this.aplicaAlPeriodo(obligacion, periodoObjetivo)) continue;
+      mapa.set(obligacion.categoriaId, (mapa.get(obligacion.categoriaId) ?? 0) + Number(obligacion.monto));
+    }
+
+    return mapa;
+  }
+
+  // Una obligacion mensual activa cuenta su monto completo apenas
+  // aplica al periodo, exista o no la instancia (ver comentario en
+  // calcular()). Se admite hasta 1 mes de adelanto sobre el periodo
+  // objetivo para no subestimar creditos recien cargados cuyo "proximo
+  // vencimiento" cayo un mes despues por el dia de pago ya pasado.
+  private aplicaAlPeriodo(obligacion: ReturnType<typeof toObligacion>, periodoObjetivo: string): boolean {
+    if (!obligacion.activa) return false;
+
+    if (obligacion.recurrencia === 'mensual') {
+      const limiteMensual = periodEnd(addMeses(periodoObjetivo, 1));
+      return obligacion.fechaInicio <= limiteMensual;
+    }
+
+    if (obligacion.recurrencia === 'unica') {
+      const inicioObjetivo = periodStart(periodoObjetivo);
+      const finObjetivo = periodEnd(periodoObjetivo);
+      return obligacion.fechaInicio >= inicioObjetivo && obligacion.fechaInicio <= finObjetivo;
+    }
+
+    return false;
   }
 
   private aplicaEnPeriodo(ingresoRow: any, inicio: string, fin: string): boolean {

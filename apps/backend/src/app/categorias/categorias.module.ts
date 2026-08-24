@@ -7,5 +7,6 @@ import { CategoriasService } from './categorias.service';
   imports: [SupabaseModule],
   controllers: [CategoriasController],
   providers: [CategoriasService],
+  exports: [CategoriasService],
 })
 export class CategoriasModule {}

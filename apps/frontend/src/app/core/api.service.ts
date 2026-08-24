@@ -20,6 +20,7 @@ import type {
   CreateObligacionDto,
   CreatePresupuestoDto,
   CreateProductoDto,
+  CategoriaCosto,
   CreditoResumen,
   FacturaOcrResultado,
   GastoConItems,
@@ -220,6 +221,10 @@ export class ApiService {
 
   recomendaciones(periodo: string) {
     return this.http.get<Recomendacion[]>(`${API_URL}/recomendaciones`, { params: { periodo } });
+  }
+
+  analisisCategorias(periodo: string) {
+    return this.http.get<CategoriaCosto[]>(`${API_URL}/analisis/categorias`, { params: { periodo } });
   }
 
   // Presupuestos

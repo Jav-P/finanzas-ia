@@ -380,6 +380,18 @@ export interface PresupuestoResumenItem {
   presupuestoId: string | null;
 }
 
+// --- Analisis (graficas: que es lo mas caro, combinando obligaciones
+// fijas del mes siguiente + presupuestos del mes actual, igual que el
+// plan del mes) ---
+
+export interface CategoriaCosto {
+  categoriaId: string;
+  categoriaNombre: string;
+  obligaciones: number; // parte fija (creditos, arriendo, etc.)
+  presupuesto: number; // parte variable (real donde ya hay gasto, simulado en lo demas)
+  total: number; // obligaciones + presupuesto
+}
+
 export interface HistoricoPrecioItem {
   fecha: string;
   lugarId: string | null;

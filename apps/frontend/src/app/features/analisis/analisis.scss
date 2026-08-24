@@ -1,0 +1,31 @@
+.page-head {
+  margin-bottom: 0.75rem;
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+.chart-hint {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 0 1rem;
+}
+
+.empty-state {
+  color: var(--text-faint);
+  font-size: 0.9rem;
+}
+
+.chart-box {
+  position: relative;
+  width: 100%;
+}
+
+.chart-box--tall {
+  height: 340px;
+}
+
+.chart-box--short {
+  height: 140px;
+}

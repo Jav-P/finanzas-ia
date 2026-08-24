@@ -2,26 +2,28 @@
   <h1>Análisis</h1>
 </div>
 
-<div style="display:flex; align-items:center; gap:0.25rem; max-width:280px; margin-bottom:1.5rem;">
-  <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
-    <mat-icon>chevron_left</mat-icon>
-  </button>
+<div style="display:flex; flex-direction:column; gap:0.3rem; max-width:320px; margin-bottom:1.5rem;">
+  <span style="font-size:0.75rem; color:var(--text-dim);">Período</span>
+  <div style="display:flex; align-items:center; gap:0.4rem;">
+    <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
 
-  <mat-form-field appearance="outline" style="flex:1;">
-    <mat-label>Período</mat-label>
-    <input matInput [matDatepicker]="picker" readonly [value]="periodoFecha()" (click)="picker.open()" />
-    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker
-      #picker
-      startView="multi-year"
-      [startAt]="periodoFecha()"
-      (monthSelected)="seleccionarMes($event, picker)"
-    ></mat-datepicker>
-  </mat-form-field>
+    <mat-form-field appearance="outline" style="flex:1;">
+      <input matInput [matDatepicker]="picker" readonly aria-label="Período" [value]="periodoFecha()" (click)="picker.open()" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker
+        #picker
+        startView="multi-year"
+        [startAt]="periodoFecha()"
+        (monthSelected)="seleccionarMes($event, picker)"
+      ></mat-datepicker>
+    </mat-form-field>
 
-  <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
-    <mat-icon>chevron_right</mat-icon>
-  </button>
+    <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
 </div>
 
 <mat-card class="card-section">

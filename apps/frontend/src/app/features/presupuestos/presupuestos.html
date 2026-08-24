@@ -1,6 +1,6 @@
 <mat-card class="card-section">
   <mat-card-content>
-    <div style="display:flex; justify-content: space-between; align-items:center;">
+    <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
       <h2 style="margin:0;">Presupuesto vs. gastado</h2>
       @if (!mostrarForm()) {
         <button mat-stroked-button (click)="nuevoPresupuesto()">
@@ -9,29 +9,31 @@
         </button>
       }
     </div>
-    <div style="display:flex; align-items:center; gap:0.25rem; max-width:280px;">
-      <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
+    <div style="display:flex; flex-direction:column; gap:0.3rem; max-width:320px;">
+      <span style="font-size:0.75rem; color:var(--text-dim);">Período</span>
+      <div style="display:flex; align-items:center; gap:0.4rem;">
+        <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
 
-      <mat-form-field appearance="outline" style="flex:1;">
-        <mat-label>Período</mat-label>
-        <input matInput [matDatepicker]="picker" readonly [value]="periodoFecha()" (click)="picker.open()" />
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker
-          #picker
-          startView="multi-year"
-          [startAt]="periodoFecha()"
-          (monthSelected)="seleccionarMes($event, picker)"
-        ></mat-datepicker>
-      </mat-form-field>
+        <mat-form-field appearance="outline" style="flex:1;">
+          <input matInput [matDatepicker]="picker" readonly aria-label="Período" [value]="periodoFecha()" (click)="picker.open()" />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker
+            #picker
+            startView="multi-year"
+            [startAt]="periodoFecha()"
+            (monthSelected)="seleccionarMes($event, picker)"
+          ></mat-datepicker>
+        </mat-form-field>
 
-      <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
+        <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
     </div>
 
-    <table>
+    <table class="table-cards">
       <tr>
         <th>Categoría</th>
         <th>Presupuestado</th>
@@ -41,19 +43,23 @@
       </tr>
       @for (item of resumen(); track item.categoriaId) {
         <tr>
-          <td>
+          <td class="cell-title">
             {{ item.categoriaNombre }}
             @if (item.esFijo) {
               <span class="badge pendiente" style="margin-left:0.4rem;">fijo</span>
             }
           </td>
-          <td>{{ item.presupuestado | number: '1.0-0' }}</td>
-          <td>{{ item.gastado | number: '1.0-0' }}</td>
-          <td [style.color]="item.diferencia < 0 ? 'var(--danger)' : 'var(--cyan)'">
+          <td data-label="Presupuestado">{{ item.presupuestado | number: '1.0-0' }}</td>
+          <td data-label="Gastado">{{ item.gastado | number: '1.0-0' }}</td>
+          <td
+            class="cell-block"
+            data-label="Diferencia"
+            [style.color]="item.diferencia < 0 ? 'var(--danger)' : 'var(--cyan)'"
+          >
             {{ item.diferencia | number: '1.0-0' }}
             {{ item.diferencia < 0 ? '(te pasaste)' : '(dentro del presupuesto)' }}
           </td>
-          <td>
+          <td class="cell-block">
             @if (item.presupuestoId) {
               <button mat-button (click)="editarPresupuesto(item)">Editar</button>
               <button mat-button color="warn" (click)="eliminarPresupuesto(item.presupuestoId)">

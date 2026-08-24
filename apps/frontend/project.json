@@ -52,7 +52,9 @@
       "executor": "@angular/build:dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "port": 4210
+        "port": 4210,
+        "host": "0.0.0.0",
+        "allowedHosts": true
       },
       "configurations": {
         "production": {

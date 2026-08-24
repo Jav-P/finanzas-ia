@@ -38,7 +38,7 @@ export class RecomendacionesService {
     const balance = await this.balanceService.calcular(hogarId, periodo);
 
     const [resumenPresupuestos, creditos] = await Promise.all([
-      this.presupuestosService.resumen(hogarId, balance.periodoObligacionesProyectadas),
+      this.presupuestosService.resumen(hogarId, periodo),
       this.obligacionesService.listCreditos(hogarId),
     ]);
 
@@ -66,9 +66,10 @@ export class RecomendacionesService {
         severidad: 'critico',
         titulo: 'El sueldo de este mes no alcanza',
         detalle:
-          `Con el sueldo de ${mesSueldo} no cubres las obligaciones y presupuestos de ${mesDestino}: ` +
-          `faltan ${money(-disponibleParaCreditos)}. Antes de que lleguen esos vencimientos, revisa que ` +
-          `presupuestos variables puedes recortar o si hay alguna obligacion para renegociar.`,
+          `Con el sueldo de ${mesSueldo} no cubres las obligaciones fijas de ${mesDestino} mas los ` +
+          `presupuestos (tarjeta de credito) de ${mesSueldo}: faltan ${money(-disponibleParaCreditos)}. ` +
+          `Antes de que lleguen esos vencimientos, revisa que presupuestos variables puedes recortar o ` +
+          `si hay alguna obligacion para renegociar.`,
       });
       return;
     }
@@ -79,8 +80,9 @@ export class RecomendacionesService {
         severidad: 'alerta',
         titulo: 'Vas a quedar con poco margen',
         detalle:
-          `Despues de cubrir obligaciones y presupuestos de ${mesDestino} te quedan ${money(disponibleParaCreditos)} ` +
-          `(${pct(proporcion)} del sueldo de ${mesSueldo}). Antes de sumar gastos nuevos conviene tener mas colchon.`,
+          `Despues de cubrir las obligaciones fijas de ${mesDestino} y los presupuestos de ${mesSueldo} ` +
+          `te quedan ${money(disponibleParaCreditos)} (${pct(proporcion)} del sueldo de ${mesSueldo}). ` +
+          `Antes de sumar gastos nuevos conviene tener mas colchon.`,
       });
       return;
     }
@@ -92,8 +94,8 @@ export class RecomendacionesService {
         titulo: 'Buen margen este mes',
         detalle:
           `Te quedan ${money(disponibleParaCreditos)} libres (${pct(proporcion)} del sueldo de ${mesSueldo}) ` +
-          `despues de obligaciones y presupuestos de ${mesDestino}. Es buen momento para abonar capital extra ` +
-          `a tus creditos o alimentar un fondo de emergencia.`,
+          `despues de cubrir las obligaciones fijas de ${mesDestino} y los presupuestos de ${mesSueldo}. ` +
+          `Es buen momento para abonar capital extra a tus creditos o alimentar un fondo de emergencia.`,
       });
     }
   }

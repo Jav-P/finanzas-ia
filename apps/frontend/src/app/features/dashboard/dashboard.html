@@ -44,12 +44,12 @@
     <div class="plan-head">
       <h2>Plan del mes</h2>
       <span class="hint-text plan-hint">
-        El sueldo de {{ nombreMes(b.periodo) }} cubre las obligaciones y presupuestos de
+        El sueldo de {{ nombreMes(b.periodo) }} cubre dos cosas: las obligaciones fijas de
         {{ nombreMes(b.periodoObligacionesProyectadas) }} (los vencimientos caen justo después del
-        pago). Se simula que todo se cumple al 100%: las obligaciones fijas activas de
-        {{ nombreMes(b.periodoObligacionesProyectadas) }} cuentan completas (aunque su cuota todavía
-        no se haya generado) y cada presupuesto usa el gasto real si ya lo registraste, o el monto
-        presupuestado mientras tanto.
+        pago) y los presupuestos de {{ nombreMes(b.periodo) }} mismo (lo que se paga con tarjeta de
+        crédito durante el mes y se salda con este sueldo). Se simula que todo se cumple al 100%:
+        las obligaciones fijas cuentan completas aunque su cuota todavía no se haya generado, y cada
+        presupuesto usa el gasto real si ya lo registraste, o el monto presupuestado mientras tanto.
       </span>
     </div>
     <div class="plan-lines">
@@ -67,7 +67,7 @@
       </div>
       <div class="plan-line negative">
         <span>
-          − Presupuestos de {{ nombreMes(b.periodoObligacionesProyectadas) }} (real donde ya hay
+          − Presupuestos de {{ nombreMes(b.periodo) }} — tarjeta de crédito (real donde ya hay
           gasto, simulado en lo demás)
         </span>
         <b class="mono">{{ b.presupuestado | number: '1.0-0' }}</b>

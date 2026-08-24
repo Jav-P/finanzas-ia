@@ -20,11 +20,12 @@ export class BalanceService {
     const fin = periodEnd(periodo);
 
     // El sueldo se paga a fin de mes y con eso se cubren las obligaciones
-    // y presupuestos del mes SIGUIENTE (los vencimientos caen apenas
-    // despues del pago). Por eso el plan proyectado no compara ingresos
-    // de este periodo contra sus propias obligaciones/presupuestos, sino
-    // contra los del periodo siguiente: es lo que ese sueldo realmente
-    // tiene que cubrir.
+    // fijas del mes SIGUIENTE (los vencimientos caen apenas despues del
+    // pago). Los presupuestos, en cambio, se pagan con tarjeta de credito
+    // DURANTE el mes y esa tarjeta se salda con el sueldo de ese MISMO
+    // mes (no el siguiente) -- por eso solo las obligaciones se proyectan
+    // contra el periodo siguiente; los presupuestos se quedan en el
+    // mismo periodo que los ingresos.
     const periodoSiguiente = addMeses(periodo, 1);
 
     const usuarios = await this.usuarios.findByHogar(hogarId);
@@ -33,7 +34,7 @@ export class BalanceService {
       this.fetchIngresos(hogarId),
       this.fetchObligaciones(hogarId),
       this.fetchGastos(hogarId, inicio, fin),
-      this.presupuestos.resumen(hogarId, periodoSiguiente),
+      this.presupuestos.resumen(hogarId, periodo),
     ]);
 
     const obligacionIds = obligacionRows.map((o: any) => o.id);

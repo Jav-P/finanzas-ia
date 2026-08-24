@@ -231,25 +231,27 @@ export interface Balance {
   gastos: number;
   saldo: number;
   // El sueldo de "periodo" se cobra a fin de mes y cubre las
-  // obligaciones y presupuestos del mes SIGUIENTE (los vencimientos caen
-  // apenas despues del pago). Por eso presupuestado/obligacionesProyectadas
-  // no son de "periodo" sino de periodoObligacionesProyectadas.
+  // obligaciones fijas del mes SIGUIENTE (los vencimientos caen apenas
+  // despues del pago). obligacionesProyectadas es de este periodo
+  // siguiente, no de "periodo".
   periodoObligacionesProyectadas: string;
-  // Cuanto de los presupuestos de periodoObligacionesProyectadas ya se
-  // "usa": el gasto real donde ya se registro, o el monto presupuestado
-  // como simulacion mientras no se registre un gasto real en esa
-  // categoria.
+  // Cuanto de los presupuestos de "periodo" (no de periodoObligacionesProyectadas:
+  // los presupuestos se pagan con tarjeta de credito DURANTE el mes y esa
+  // tarjeta se salda con el sueldo de ese mismo mes) ya se "usa": el
+  // gasto real donde ya se registro, o el monto presupuestado como
+  // simulacion mientras no se registre un gasto real en esa categoria.
   presupuestado: number;
   // Total de obligaciones fijas activas que aplican a
   // periodoObligacionesProyectadas, simulado al 100% (monto completo de
   // la plantilla), sin depender de que ya exista una instancia generada
   // para ese mes.
   obligacionesProyectadas: number;
-  // ingresos (de "periodo") - obligacionesProyectadas - presupuestado
-  // (de periodoObligacionesProyectadas): lo que queda del sueldo de este
-  // periodo despues de cubrir, al 100%, las obligaciones y presupuestos
-  // del mes siguiente, y por lo tanto lo que se podria destinar a abonar
-  // creditos/tarjetas.
+  // ingresos (de "periodo") - obligacionesProyectadas (del mes
+  // siguiente) - presupuestado (de "periodo"): lo que queda del sueldo
+  // de este periodo despues de cubrir, al 100%, las obligaciones fijas
+  // del mes siguiente y los presupuestos (tarjeta de credito) de este
+  // mismo mes, y por lo tanto lo que se podria destinar a abonar
+  // creditos/tarjetas extra.
   disponibleParaCreditos: number;
   porUsuario: BalancePersona[];
 }

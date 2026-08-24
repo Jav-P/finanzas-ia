@@ -1,0 +1,144 @@
+@if (tipo() === null) {
+  <div class="page-head">
+    <h1>Subir pago</h1>
+  </div>
+  <p class="hint-text">Elige qué vas a registrar. En ambos casos subes el comprobante directo, sin pasar por cada detalle.</p>
+
+  <div class="tipo-grid">
+    <button class="tipo-card" (click)="elegirTipo('obligacion')">
+      <mat-icon>credit_card</mat-icon>
+      <div>
+        <strong>Pago de obligación</strong>
+        <span>Cuota de crédito, arriendo, servicio, administración...</span>
+      </div>
+    </button>
+    <button class="tipo-card" (click)="elegirTipo('gasto')">
+      <mat-icon>shopping_cart</mat-icon>
+      <div>
+        <strong>Gasto de presupuesto</strong>
+        <span>Mercado, aseo y demás categorías presupuestadas</span>
+      </div>
+    </button>
+  </div>
+}
+
+@if (tipo() === 'obligacion') {
+  <button mat-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+    Volver
+  </button>
+
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Pago de obligación</h2>
+
+      @if (!pendientes().length) {
+        <p class="empty-state">No tienes obligaciones pendientes de pago.</p>
+      } @else {
+        <form class="form-grid" (ngSubmit)="registrarPago()">
+          <mat-form-field appearance="outline">
+            <mat-label>Obligación</mat-label>
+            <mat-select name="instanciaId" [(ngModel)]="instanciaId" required>
+              @for (i of pendientes(); track i.id) {
+                <mat-option [value]="i.id">
+                  {{ i.obligacion.descripcion }} · {{ i.monto | number: '1.0-0' }} · vence {{ i.fechaVencimiento }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <label class="file-field">
+            Comprobante (imagen o PDF)
+            <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoObligacion($event)" required />
+          </label>
+
+          @if (leyendoComprobante()) {
+            <div class="ocr-status">
+              <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+              Leyendo el comprobante...
+            </div>
+          }
+          @if (ocrFallo()) {
+            <p class="hint-text">No pudimos leer el comprobante automáticamente. Completa los datos a mano.</p>
+          }
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de pago</mat-label>
+            <input matInput [matDatepicker]="pickerFechaPago" name="fechaPago" [(ngModel)]="fechaPago" required />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFechaPago"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFechaPago></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Monto pagado</mat-label>
+            <input matInput appMonto name="montoPagado" [(ngModel)]="montoPagado" required />
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button mat-flat-button type="submit" [disabled]="guardando()">Registrar pago</button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (tipo() === 'gasto') {
+  <button mat-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+    Volver
+  </button>
+
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Gasto de presupuesto</h2>
+
+      <form class="form-grid" (ngSubmit)="registrarGasto()">
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select name="categoriaId" [(ngModel)]="categoriaId" required>
+            @for (categoria of categorias(); track categoria.id) {
+              <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <label class="file-field">
+          Comprobante (imagen o PDF)
+          <input name="comprobante" type="file" accept="image/*,.pdf" (change)="onArchivoGasto($event)" required />
+        </label>
+
+        @if (leyendoComprobante()) {
+          <div class="ocr-status">
+            <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+            Leyendo el comprobante...
+          </div>
+        }
+        @if (ocrFallo()) {
+          <p class="hint-text">No pudimos leer el comprobante automáticamente. Completa los datos a mano.</p>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Monto total</mat-label>
+          <input matInput appMonto name="montoGasto" [(ngModel)]="montoGasto" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha</mat-label>
+          <input matInput [matDatepicker]="pickerFechaGasto" name="fechaGasto" [(ngModel)]="fechaGasto" required />
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFechaGasto"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFechaGasto></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Descripción (opcional)</mat-label>
+          <input matInput name="descripcionGasto" [(ngModel)]="descripcionGasto" placeholder="ej. Mercado del mes" />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-flat-button type="submit" [disabled]="guardando()">Registrar gasto</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}

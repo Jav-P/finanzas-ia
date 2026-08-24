@@ -1,0 +1,81 @@
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+.hint-text {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 0 1.5rem;
+}
+
+.empty-state {
+  color: var(--text-faint);
+  font-size: 0.9rem;
+}
+
+.tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  max-width: 720px;
+}
+
+.tipo-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.5rem;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+
+  &:hover {
+    border-color: var(--violet);
+    background: var(--panel-raised);
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: var(--cyan);
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  strong {
+    font-size: 1rem;
+  }
+
+  span {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+}
+
+.ocr-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: -0.25rem 0 0.25rem;
+}

@@ -5,6 +5,7 @@ import type {
   Balance,
   Categoria,
   Hogar,
+  ComprobantePagoOcrResultado,
   CompletarRegistroDto,
   CompletarRegistroResultado,
   CredencialesDto,
@@ -20,6 +21,7 @@ import type {
   CreatePresupuestoDto,
   CreateProductoDto,
   CreditoResumen,
+  FacturaOcrResultado,
   GastoConItems,
   GenerarInstanciasResultado,
   HistoricoPrecioItem,
@@ -179,6 +181,22 @@ export class ApiService {
     return this.http.delete<void>(`${API_URL}/instancias/${instanciaId}/pago`);
   }
 
+  // OCR (Claude): lee un comprobante/factura y devuelve un borrador de
+  // datos para prellenar un formulario; el usuario siempre revisa antes
+  // de guardar. Si Claude no esta disponible, el backend devuelve 503 y
+  // el formulario se llena a mano.
+  ocrFactura(archivo: File) {
+    const form = new FormData();
+    form.set('archivo', archivo);
+    return this.http.post<FacturaOcrResultado>(`${API_URL}/ocr/factura`, form);
+  }
+
+  ocrComprobantePago(archivo: File) {
+    const form = new FormData();
+    form.set('archivo', archivo);
+    return this.http.post<ComprobantePagoOcrResultado>(`${API_URL}/ocr/comprobante-pago`, form);
+  }
+
   // Ingresos + balance
   ingresos() {
     return this.http.get<Ingreso[]>(`${API_URL}/ingresos`);
@@ -282,6 +300,18 @@ export class ApiService {
 
   crearGasto(dto: CreateGastoDto) {
     return this.http.post<GastoConItems>(`${API_URL}/gastos`, dto);
+  }
+
+  // "Subir pago" rapido: un gasto de un solo monto + comprobante, sin
+  // desglose de productos.
+  crearGastoRapido(datos: { categoriaId: string; montoTotal: number; fecha: string; descripcion?: string }, comprobante: File) {
+    const form = new FormData();
+    form.set('categoriaId', datos.categoriaId);
+    form.set('montoTotal', String(datos.montoTotal));
+    form.set('fecha', datos.fecha);
+    if (datos.descripcion) form.set('descripcion', datos.descripcion);
+    form.set('comprobante', comprobante);
+    return this.http.post<GastoConItems>(`${API_URL}/gastos/rapido`, form);
   }
 
   editarGasto(id: string, dto: UpdateGastoDto) {

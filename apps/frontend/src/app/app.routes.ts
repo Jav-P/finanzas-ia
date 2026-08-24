@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { Dashboard } from './features/dashboard/dashboard';
+import { SubirPago } from './features/subir-pago/subir-pago';
 import { ObligacionForm } from './features/obligaciones/obligacion-form';
 import { ObligacionDetalle } from './features/obligaciones/obligacion-detalle';
 import { Ingresos } from './features/ingresos/ingresos';
@@ -22,6 +23,7 @@ export const appRoutes: Route[] = [
   { path: 'invitacion/:token', component: InvitacionAceptar, canActivate: [authGuard] },
   { path: 'invitar', component: Invitaciones, canActivate: [hogarGuard] },
   { path: 'dashboard', component: Dashboard, canActivate: [hogarGuard] },
+  { path: 'subir-pago', component: SubirPago, canActivate: [hogarGuard] },
   { path: 'obligaciones/nueva', component: ObligacionForm, canActivate: [hogarGuard] },
   { path: 'obligaciones/:id/editar', component: ObligacionForm, canActivate: [hogarGuard] },
   { path: 'obligaciones/:id', component: ObligacionDetalle, canActivate: [hogarGuard] },

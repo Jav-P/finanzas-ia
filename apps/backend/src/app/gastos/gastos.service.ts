@@ -4,6 +4,16 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { toGasto, toGastoItem } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 
+const BUCKET_COMPROBANTES = 'comprobantes';
+
+export interface CrearGastoRapidoInput {
+  usuarioId: string;
+  categoriaId: string;
+  descripcion: string;
+  montoTotal: number;
+  fecha: string;
+}
+
 @Injectable()
 export class GastosService {
   constructor(private readonly supabase: SupabaseService) {}
@@ -87,6 +97,45 @@ export class GastosService {
     throwIfError(itemsError);
 
     return { ...toGasto(gastoRow), items: (itemRows ?? []).map(toGastoItem) };
+  }
+
+  // Flujo rapido: registrar un gasto de un solo monto (sin desglose de
+  // productos) con su comprobante, para no tener que pasar por el
+  // formulario completo de Mercado. Usado por /gastos/rapido.
+  async crearRapido(
+    hogarId: string,
+    input: CrearGastoRapidoInput,
+    file: Express.Multer.File,
+  ): Promise<GastoConItems> {
+    const { data: gastoRow, error } = await this.supabase.client
+      .from('gastos')
+      .insert({
+        hogar_id: hogarId,
+        usuario_id: input.usuarioId,
+        categoria_id: input.categoriaId,
+        descripcion: input.descripcion,
+        monto_total: input.montoTotal,
+        fecha: input.fecha,
+      })
+      .select()
+      .single();
+    throwIfError(error);
+
+    const path = `gasto-${gastoRow.id}/${Date.now()}-${file.originalname}`;
+    const { error: uploadError } = await this.supabase.client.storage
+      .from(BUCKET_COMPROBANTES)
+      .upload(path, file.buffer, { contentType: file.mimetype });
+    throwIfError(uploadError);
+
+    const { data: actualizado, error: updateError } = await this.supabase.client
+      .from('gastos')
+      .update({ url_comprobante: path })
+      .eq('id', gastoRow.id)
+      .select()
+      .single();
+    throwIfError(updateError);
+
+    return { ...toGasto(actualizado), items: [] };
   }
 
   async update(id: string, dto: UpdateGastoDto): Promise<GastoConItems> {

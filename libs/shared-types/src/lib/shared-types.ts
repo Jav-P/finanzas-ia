@@ -424,3 +424,8 @@ export interface ExtractoTransaccion {
 export interface ExtractoOcrResultado {
   transacciones: ExtractoTransaccion[];
 }
+
+export interface ComprobantePagoOcrResultado {
+  fecha: string | null; // YYYY-MM-DD
+  monto: number | null;
+}

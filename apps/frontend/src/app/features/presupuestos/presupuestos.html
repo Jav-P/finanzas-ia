@@ -9,10 +9,27 @@
         </button>
       }
     </div>
-    <mat-form-field appearance="outline">
-      <mat-label>Período</mat-label>
-      <input matInput type="month" [value]="periodo()" (change)="cambiarPeriodo($event)" />
-    </mat-form-field>
+    <div style="display:flex; align-items:center; gap:0.25rem; max-width:280px;">
+      <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <mat-form-field appearance="outline" style="flex:1;">
+        <mat-label>Período</mat-label>
+        <input matInput [matDatepicker]="picker" readonly [value]="periodoFecha()" (click)="picker.open()" />
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker
+          #picker
+          startView="multi-year"
+          [startAt]="periodoFecha()"
+          (monthSelected)="seleccionarMes($event, picker)"
+        ></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
 
     <table>
       <tr>

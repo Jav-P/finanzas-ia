@@ -39,10 +39,12 @@ export class GastosService {
 
     const itemsByGasto = await this.fetchItemsAgrupados(gastos.map((g: any) => g.id));
 
-    return gastos.map((row: any) => ({
+    const conItems = gastos.map((row: any) => ({
       ...toGasto(row),
       items: itemsByGasto.get(row.id) ?? [],
     }));
+
+    return this.withSignedUrls(conItems);
   }
 
   async findOne(id: string): Promise<GastoConItems> {
@@ -55,7 +57,8 @@ export class GastosService {
     if (!gastoRow) throw new NotFoundException('Gasto no encontrado');
 
     const itemsByGasto = await this.fetchItemsAgrupados([id]);
-    return { ...toGasto(gastoRow), items: itemsByGasto.get(id) ?? [] };
+    const [gasto] = await this.withSignedUrls([{ ...toGasto(gastoRow), items: itemsByGasto.get(id) ?? [] }]);
+    return gasto;
   }
 
   async create(hogarId: string, dto: CreateGastoDto): Promise<GastoConItems> {
@@ -193,6 +196,26 @@ export class GastosService {
 
     const { error } = await this.supabase.client.from('gastos').delete().eq('id', id);
     throwIfError(error);
+  }
+
+  // url_comprobante se guarda como la ruta dentro del bucket privado
+  // (no es una URL usable directo); aca se cambia por una URL firmada
+  // de corta duracion para que el front pueda mostrar "Ver comprobante".
+  private async withSignedUrls(gastos: GastoConItems[]): Promise<GastoConItems[]> {
+    const paths = gastos.map((g) => g.urlComprobante).filter((p): p is string => !!p);
+    if (!paths.length) return gastos;
+
+    const { data, error } = await this.supabase.client.storage
+      .from(BUCKET_COMPROBANTES)
+      .createSignedUrls(paths, 3600);
+    if (error || !data) return gastos;
+
+    const urlPorPath = new Map(data.map((d) => [d.path, d.signedUrl]));
+    return gastos.map((g) =>
+      g.urlComprobante && urlPorPath.get(g.urlComprobante)
+        ? { ...g, urlComprobante: urlPorPath.get(g.urlComprobante)! }
+        : g,
+    );
   }
 
   private async fetchItemsAgrupados(gastoIds: string[]) {

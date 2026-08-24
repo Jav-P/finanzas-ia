@@ -173,6 +173,9 @@
               @for (item of gasto.items; track item.id) {
                 <div>{{ nombreProducto(item.productoId) }}: {{ item.precioUnitario | number: '1.0-0' }}</div>
               }
+              @if (gasto.urlComprobante) {
+                <a class="auth-link" [href]="gasto.urlComprobante" target="_blank">Ver comprobante</a>
+              }
             </td>
             <td>
               <button mat-button (click)="editarGasto(gasto)">Editar</button>

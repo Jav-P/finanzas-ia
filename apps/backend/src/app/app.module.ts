@@ -1,6 +1,8 @@
+import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SupabaseModule } from './supabase/supabase.module';
@@ -27,6 +29,14 @@ import { MailModule } from './mail/mail.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    // Sirve el Angular ya compilado (copiado a dist/apps/backend/frontend
+    // durante el build de despliegue) para las rutas que no son /api, con
+    // fallback de SPA. En dev esta carpeta no existe y el modulo simplemente
+    // no encuentra nada que servir (el front corre aparte con `nx serve`).
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'frontend'),
+      exclude: ['/api/{*splat}'],
+    }),
     SupabaseModule,
     AuthModule,
     HogaresModule,

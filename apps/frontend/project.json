@@ -54,7 +54,8 @@
       "options": {
         "port": 4210,
         "host": "0.0.0.0",
-        "allowedHosts": true
+        "allowedHosts": true,
+        "proxyConfig": "apps/frontend/proxy.conf.json"
       },
       "configurations": {
         "production": {

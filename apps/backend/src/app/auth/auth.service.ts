@@ -33,10 +33,22 @@ export class AuthService {
   async signup(email: string, password: string): Promise<SesionAuth> {
     const { data, error } = await this.supabase.authClient.auth.signUp({ email, password });
     if (error) throw new BadRequestException(error.message);
-    if (!data.session) {
-      throw new BadRequestException('No se pudo iniciar sesion tras el registro');
+    if (data.session) return toSesionAuth(data.session);
+
+    // Sin sesion significa que el proyecto de Supabase exige confirmar
+    // el correo antes de poder iniciar sesion. Como la app no tiene un
+    // SMTP propio configurado para enviar ese correo, confirmamos el
+    // usuario nosotros mismos (con la key de servicio, que tiene
+    // permisos de administrador) e iniciamos sesion de inmediato.
+    if (!data.user) {
+      throw new BadRequestException('No se pudo registrar el usuario');
     }
-    return toSesionAuth(data.session);
+    const { error: errorConfirmar } = await this.supabase.client.auth.admin.updateUserById(data.user.id, {
+      email_confirm: true,
+    });
+    if (errorConfirmar) throw new BadRequestException(errorConfirmar.message);
+
+    return this.login(email, password);
   }
 
   async login(email: string, password: string): Promise<SesionAuth> {

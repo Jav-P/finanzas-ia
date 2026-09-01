@@ -164,6 +164,82 @@ th.sortable:hover {
   color: var(--text);
 }
 
+// Tables with many columns (presupuestos, ingresos, créditos) turn into a
+// stack of cards on narrow screens instead of squeezing every column into
+// one scrollable row. Opt in with class="table-cards" on the <table>; give
+// the row's identifying cell class="cell-title" (no data-label, shown as
+// the card heading) and any cell too wide/complex for a label-left,
+// value-right line (actions, inline edit forms, multi-line content)
+// class="cell-block" (label above, content below, full width). Every other
+// <td> needs a data-label="…" matching its column header.
+@media (max-width: 860px) {
+  .table-cards {
+    display: block;
+  }
+
+  .table-cards > tr:first-child {
+    display: none;
+  }
+
+  .table-cards > tr {
+    display: block;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .table-cards td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+
+  .table-cards td:last-child {
+    border-bottom: none;
+  }
+
+  .table-cards td:empty {
+    display: none;
+  }
+
+  .table-cards td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: var(--text-faint);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+  }
+
+  .table-cards td.cell-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .table-cards td.cell-title::before {
+    content: none;
+  }
+
+  .table-cards td.cell-block {
+    display: block;
+    text-align: left;
+  }
+
+  .table-cards td.cell-block::before {
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

@@ -49,3 +49,6 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
+# Config local de Claude Code (permisos especificos de esta maquina)
+.claude/settings.local.json

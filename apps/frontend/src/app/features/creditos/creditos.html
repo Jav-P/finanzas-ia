@@ -44,7 +44,7 @@
     }
 
     @if (creditos().length) {
-      <table>
+      <table class="table-cards">
         <tr>
           <th class="sortable" (click)="ordenarPor('banco')">Banco {{ indicadorOrden('banco') }}</th>
           <th class="sortable" (click)="ordenarPor('descripcion')">Descripción {{ indicadorOrden('descripcion') }}</th>
@@ -60,12 +60,12 @@
         </tr>
         @for (credito of creditosOrdenados(); track credito.obligacionId) {
           <tr>
-            <td>{{ credito.banco }}</td>
-            <td>{{ credito.descripcion }}</td>
-            <td>{{ credito.categoriaNombre }}</td>
-            <td>{{ credito.montoCuota | number: '1.0-0' }}</td>
-            <td>{{ credito.tasaInteres != null ? (credito.tasaInteres | number: '1.2-2') + '%' : '—' }}</td>
-            <td>
+            <td class="cell-title">{{ credito.banco }}</td>
+            <td data-label="Descripción">{{ credito.descripcion }}</td>
+            <td data-label="Categoría">{{ credito.categoriaNombre }}</td>
+            <td data-label="Cuota">{{ credito.montoCuota | number: '1.0-0' }}</td>
+            <td data-label="Tasa E.A.">{{ credito.tasaInteres != null ? (credito.tasaInteres | number: '1.2-2') + '%' : '—' }}</td>
+            <td class="cell-block" data-label="Cuotas">
               @if (credito.numeroCuotas != null) {
                 {{ credito.cuotasPagadas }} / {{ credito.numeroCuotas }}
                 ({{ credito.cuotasRestantes }} restantes)
@@ -73,8 +73,8 @@
                 {{ credito.cuotasPagadas }} pagadas (indefinido)
               }
             </td>
-            <td>{{ credito.proximaFechaVencimiento ?? '—' }}</td>
-            <td>
+            <td data-label="Próximo vencimiento">{{ credito.proximaFechaVencimiento ?? '—' }}</td>
+            <td class="cell-block" data-label="Saldo pendiente">
               @if (editandoId() === credito.obligacionId) {
                 <div style="display:flex; gap:0.5rem; align-items:start;">
                   <mat-form-field appearance="outline" style="width:140px;">
@@ -101,7 +101,7 @@
                 </div>
               }
             </td>
-            <td>
+            <td data-label="Estado">
               <span class="badge" [class]="credito.activa ? 'pendiente' : 'pagado'">
                 {{ credito.activa ? 'activo' : 'terminado' }}
               </span>

@@ -1,6 +1,6 @@
 <mat-card class="card-section">
   <mat-card-content>
-    <div style="display:flex; justify-content: space-between; align-items:center;">
+    <div style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
       <h2 style="margin:0;">Ingresos registrados</h2>
       @if (!mostrarForm()) {
         <button mat-stroked-button (click)="mostrarForm.set(true)">
@@ -9,7 +9,7 @@
         </button>
       }
     </div>
-    <table>
+    <table class="table-cards">
       <tr>
         <th>Persona</th>
         <th>Descripción</th>
@@ -21,30 +21,30 @@
       @for (ingreso of ingresos(); track ingreso.id) {
         <tr>
           @if (editandoId() === ingreso.id) {
-            <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
-            <td>
+            <td class="cell-title">{{ nombreUsuario(ingreso.usuarioId) }}</td>
+            <td class="cell-block" data-label="Descripción">
               <mat-form-field appearance="outline" style="width:100%;">
                 <input matInput [(ngModel)]="descripcionEdit" name="descripcionEdit" />
               </mat-form-field>
             </td>
-            <td>
+            <td class="cell-block" data-label="Monto">
               <mat-form-field appearance="outline" style="width:100%;">
                 <input matInput appMonto [(ngModel)]="montoEdit" name="montoEdit" />
               </mat-form-field>
             </td>
-            <td>{{ ingreso.periodicidad }}</td>
-            <td>{{ ingreso.fechaInicio }}</td>
-            <td>
+            <td data-label="Periodicidad">{{ ingreso.periodicidad }}</td>
+            <td data-label="Desde">{{ ingreso.fechaInicio }}</td>
+            <td class="cell-block">
               <button mat-stroked-button (click)="guardarEdicion(ingreso.id)">Guardar</button>
               <button mat-button (click)="cancelarEdicion()">Cancelar</button>
             </td>
           } @else {
-            <td>{{ nombreUsuario(ingreso.usuarioId) }}</td>
-            <td>{{ ingreso.descripcion }}</td>
-            <td>{{ ingreso.monto | number: '1.0-0' }}</td>
-            <td>{{ ingreso.periodicidad }}</td>
-            <td>{{ ingreso.fechaInicio }}</td>
-            <td>
+            <td class="cell-title">{{ nombreUsuario(ingreso.usuarioId) }}</td>
+            <td data-label="Descripción">{{ ingreso.descripcion }}</td>
+            <td data-label="Monto">{{ ingreso.monto | number: '1.0-0' }}</td>
+            <td data-label="Periodicidad">{{ ingreso.periodicidad }}</td>
+            <td data-label="Desde">{{ ingreso.fechaInicio }}</td>
+            <td class="cell-block">
               <button mat-button (click)="editar(ingreso)">Editar</button>
               <button mat-button color="warn" (click)="eliminar(ingreso.id)">Eliminar</button>
             </td>

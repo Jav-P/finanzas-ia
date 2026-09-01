@@ -62,9 +62,99 @@
       </div>
     </aside>
 
+    <header class="topbar-mobile">
+      <div class="brand">
+        <div class="brand-mark">FP</div>
+        @if (session.hogar(); as hogar) {
+          <span class="hogar-name">{{ hogar.nombre }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        class="who-avatar who-avatar--btn"
+        (click)="toggleMenu()"
+        [title]="session.usuario()?.nombre ?? ''"
+      >
+        {{ iniciales() }}
+      </button>
+    </header>
+
     <main>
       <router-outlet />
     </main>
+
+    <nav class="tabbar-mobile">
+      <a class="tab-item" routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon>space_dashboard</mat-icon>
+        <span>Inicio</span>
+      </a>
+      <a class="tab-item" routerLink="/gastos" routerLinkActive="active">
+        <mat-icon>shopping_cart</mat-icon>
+        <span>Gastos</span>
+      </a>
+      <a class="tab-item" routerLink="/subir-pago" routerLinkActive="active">
+        <mat-icon>upload_file</mat-icon>
+        <span>Subir</span>
+      </a>
+      <a class="tab-item" routerLink="/presupuestos" routerLinkActive="active">
+        <mat-icon>pie_chart</mat-icon>
+        <span>Presup.</span>
+      </a>
+      <button
+        type="button"
+        class="tab-item"
+        [class.active]="menuAbierto() || esRutaDelMenuMas()"
+        (click)="toggleMenu()"
+      >
+        <mat-icon>more_horiz</mat-icon>
+        <span>Más</span>
+      </button>
+    </nav>
+
+    @if (menuAbierto()) {
+      <button type="button" class="sheet-backdrop" aria-label="Cerrar menú" (click)="cerrarMenu()"></button>
+      <div class="sheet-mobile">
+        <div class="sheet-handle"></div>
+
+        <div class="sheet-who">
+          <div class="who-avatar">{{ iniciales() }}</div>
+          <div class="sheet-who-text">
+            <strong>{{ session.usuario()?.nombre }}</strong>
+            @if (session.hogar(); as hogar) {
+              <small>{{ hogar.nombre }}</small>
+            }
+          </div>
+        </div>
+
+        <div class="sheet-links">
+          <a class="sheet-link" routerLink="/analisis" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>bar_chart</mat-icon>
+            <span>Análisis</span>
+          </a>
+          <a class="sheet-link" routerLink="/ingresos" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>trending_up</mat-icon>
+            <span>Ingresos</span>
+          </a>
+          <a class="sheet-link" routerLink="/creditos" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>credit_card</mat-icon>
+            <span>Créditos</span>
+          </a>
+          <a class="sheet-link" routerLink="/catalogos" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>sell</mat-icon>
+            <span>Catálogos</span>
+          </a>
+          <a class="sheet-link" routerLink="/invitar" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>person_add</mat-icon>
+            <span>Invitar</span>
+          </a>
+        </div>
+
+        <button type="button" class="sheet-signout" (click)="cerrarSesion()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    }
   </div>
 } @else {
   <main>

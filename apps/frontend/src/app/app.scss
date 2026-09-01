@@ -42,13 +42,7 @@ main {
   height: 34px;
   border-radius: 10px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--cyan), var(--violet) 55%, var(--magenta));
-  display: grid;
-  place-items: center;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #0a0810;
+  object-fit: cover;
 }
 
 .brand-text {

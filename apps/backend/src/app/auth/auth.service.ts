@@ -30,23 +30,21 @@ export class AuthService {
     private readonly invitaciones: InvitacionesService,
   ) {}
 
+  // Se crea el usuario por la via de administrador (con la key de
+  // servicio) en vez del signUp publico: asi queda confirmado desde
+  // el inicio y Supabase nunca intenta mandar un correo de
+  // confirmacion (el proyecto no tiene SMTP propio, y ese correo
+  // tampoco hace falta para una app de uso privado como esta).
   async signup(email: string, password: string): Promise<SesionAuth> {
-    const { data, error } = await this.supabase.authClient.auth.signUp({ email, password });
+    const { data, error } = await this.supabase.client.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
     if (error) throw new BadRequestException(error.message);
-    if (data.session) return toSesionAuth(data.session);
-
-    // Sin sesion significa que el proyecto de Supabase exige confirmar
-    // el correo antes de poder iniciar sesion. Como la app no tiene un
-    // SMTP propio configurado para enviar ese correo, confirmamos el
-    // usuario nosotros mismos (con la key de servicio, que tiene
-    // permisos de administrador) e iniciamos sesion de inmediato.
     if (!data.user) {
       throw new BadRequestException('No se pudo registrar el usuario');
     }
-    const { error: errorConfirmar } = await this.supabase.client.auth.admin.updateUserById(data.user.id, {
-      email_confirm: true,
-    });
-    if (errorConfirmar) throw new BadRequestException(errorConfirmar.message);
 
     return this.login(email, password);
   }

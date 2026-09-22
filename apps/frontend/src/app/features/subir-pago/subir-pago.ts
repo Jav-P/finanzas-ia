@@ -174,7 +174,17 @@ export class SubirPago implements OnInit {
 
   registrarGasto(): void {
     const fecha = dateToIso(this.fechaGasto);
-    if (!this.categoriaId || !this.archivoGasto || !this.montoGasto || !fecha) return;
+    if (!this.categoriaId || !this.archivoGasto || !this.montoGasto || !fecha) {
+      const faltante = !this.archivoGasto
+        ? 'el comprobante'
+        : !this.categoriaId
+          ? 'la categoría'
+          : !this.montoGasto
+            ? 'el monto'
+            : 'la fecha';
+      this.snackBar.open(`Falta ${faltante} para poder registrar el gasto`, 'Cerrar', { duration: 5000 });
+      return;
+    }
 
     this.guardando.set(true);
     this.api

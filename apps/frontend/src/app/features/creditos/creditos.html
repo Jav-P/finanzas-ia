@@ -101,10 +101,13 @@
                 </div>
               }
             </td>
-            <td data-label="Estado">
+            <td class="cell-block" data-label="Estado">
               <span class="badge" [class]="credito.activa ? 'pendiente' : 'pagado'">
                 {{ credito.activa ? 'activo' : 'terminado' }}
               </span>
+              @if (credito.activa) {
+                <button mat-button (click)="desactivarCredito(credito)">Desactivar</button>
+              }
             </td>
           </tr>
         }

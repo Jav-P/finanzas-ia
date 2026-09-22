@@ -212,6 +212,10 @@ export class Creditos implements OnInit {
     });
   }
 
+  desactivarCredito(credito: CreditoResumen): void {
+    this.api.desactivarObligacion(credito.obligacionId).subscribe(() => this.cargar());
+  }
+
   private cargar(): void {
     this.api.creditos().subscribe((creditos) => this.creditos.set(creditos));
   }

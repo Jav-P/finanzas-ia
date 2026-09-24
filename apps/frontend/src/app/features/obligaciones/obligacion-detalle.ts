@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import type { InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
@@ -35,6 +36,7 @@ export class ObligacionDetalle implements OnInit {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
   protected readonly session = inject(SessionService);
 
   protected readonly instancia = signal<InstanciaConDetalle | null>(null);
@@ -101,7 +103,15 @@ export class ObligacionDetalle implements OnInit {
   desactivarObligacion(): void {
     const instancia = this.instancia();
     if (!instancia) return;
-    this.api.desactivarObligacion(instancia.obligacion.id).subscribe(() => this.cargar(instancia.id));
+    this.api.desactivarObligacion(instancia.obligacion.id).subscribe({
+      next: () => {
+        this.snackBar.open('Obligación desactivada', 'Cerrar', { duration: 4000 });
+        this.cargar(instancia.id);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.snackBar.open(err.error?.message ?? 'No se pudo desactivar la obligación', 'Cerrar', { duration: 6000 });
+      },
+    });
   }
 
   eliminarObligacion(): void {

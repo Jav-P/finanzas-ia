@@ -22,10 +22,18 @@
             }
           }
           <p>Estado: <span class="badge" [class]="i.estado">{{ i.estado }}</span></p>
+          <p>
+            Obligación:
+            <span class="badge" [class]="i.obligacion.activa ? 'pendiente' : 'pagado'">
+              {{ i.obligacion.activa ? 'activa' : 'desactivada' }}
+            </span>
+          </p>
         </div>
         <div style="display:flex; gap:0.5rem;">
           <a mat-stroked-button [routerLink]="['/obligaciones', i.obligacion.id, 'editar']">Editar</a>
-          <button mat-stroked-button (click)="desactivarObligacion()">Desactivar</button>
+          @if (i.obligacion.activa) {
+            <button mat-stroked-button (click)="desactivarObligacion()">Desactivar</button>
+          }
           <button mat-stroked-button color="warn" (click)="eliminarObligacion()">Eliminar</button>
         </div>
       </div>

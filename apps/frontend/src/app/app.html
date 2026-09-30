@@ -20,6 +20,10 @@
           <mat-icon>bar_chart</mat-icon>
           <span class="label">Análisis</span>
         </a>
+        <a class="nav-item" routerLink="/cuentas" routerLinkActive="active">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <span class="label">Cuentas</span>
+        </a>
         <a class="nav-item" routerLink="/subir-pago" routerLinkActive="active">
           <mat-icon>upload_file</mat-icon>
           <span class="label">Subir pago</span>
@@ -130,6 +134,10 @@
           <a class="sheet-link" routerLink="/analisis" routerLinkActive="active" (click)="cerrarMenu()">
             <mat-icon>bar_chart</mat-icon>
             <span>Análisis</span>
+          </a>
+          <a class="sheet-link" routerLink="/cuentas" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>Cuentas</span>
           </a>
           <a class="sheet-link" routerLink="/ingresos" routerLinkActive="active" (click)="cerrarMenu()">
             <mat-icon>trending_up</mat-icon>

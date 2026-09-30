@@ -278,6 +278,41 @@ export interface CreateMedioPagoDto {
 
 export type UpdateMedioPagoDto = Partial<CreateMedioPagoDto>;
 
+// --- Cuentas y patrimonio ---
+
+export type TipoCuenta = 'efectivo' | 'ahorros' | 'bolsillo' | 'tarjeta_credito';
+
+export interface Cuenta {
+  id: string;
+  hogarId: string;
+  nombre: string;
+  tipo: TipoCuenta;
+  cuentaPadreId: string | null; // solo bolsillos: la cuenta de ahorros de la que cuelgan
+  saldo: number; // en tarjeta_credito es lo que se debe
+  saldoActualizadoEn: string;
+  createdAt: string;
+}
+
+export interface CreateCuentaDto {
+  nombre: string;
+  tipo: TipoCuenta;
+  cuentaPadreId?: string | null;
+  saldo: number;
+}
+
+export interface UpdateCuentaDto {
+  nombre?: string;
+  saldo?: number;
+}
+
+export interface Patrimonio {
+  activos: number; // efectivo + ahorros + bolsillos
+  deudaTarjetas: number;
+  deudaCreditos: number; // saldo pendiente registrado de los creditos activos
+  creditosSinSaldo: number; // creditos activos sin saldo registrado: no suman a la deuda
+  patrimonioNeto: number;
+}
+
 export interface Lugar {
   id: string;
   hogarId: string;

@@ -1,0 +1,108 @@
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+.hint-text {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0.75rem 0 0;
+}
+
+.empty-state {
+  color: var(--text-faint);
+  font-size: 0.9rem;
+}
+
+.patrimonio-label {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.patrimonio-monto {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cyan);
+  margin: 0.2rem 0 0.8rem;
+
+  &.negativo {
+    color: var(--danger);
+  }
+}
+
+.patrimonio-lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 420px;
+}
+
+.patrimonio-linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+
+  b {
+    color: var(--text);
+  }
+}
+
+.cuenta-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.cuenta-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--bolsillo {
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--line-strong);
+  }
+}
+
+.cuenta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cuenta-tipo {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.cuenta-acciones,
+.cuenta-edicion {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cuenta-saldo {
+  margin-right: 0.5rem;
+}
+
+.cuenta-edicion-campo {
+  width: 150px;
+}

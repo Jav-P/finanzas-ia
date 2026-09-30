@@ -9,6 +9,7 @@ import { Gastos } from './features/gastos/gastos';
 import { Catalogos } from './features/catalogos/catalogos';
 import { Creditos } from './features/creditos/creditos';
 import { Analisis } from './features/analisis/analisis';
+import { Cuentas } from './features/cuentas/cuentas';
 import { Login } from './features/auth/login';
 import { Registro } from './features/auth/registro';
 import { InvitacionAceptar } from './features/auth/invitacion-aceptar';
@@ -32,6 +33,7 @@ export const appRoutes: Route[] = [
   { path: 'presupuestos', component: Presupuestos, canActivate: [hogarGuard] },
   { path: 'creditos', component: Creditos, canActivate: [hogarGuard] },
   { path: 'analisis', component: Analisis, canActivate: [hogarGuard] },
+  { path: 'cuentas', component: Cuentas, canActivate: [hogarGuard] },
   { path: 'gastos', component: Gastos, canActivate: [hogarGuard] },
   { path: 'catalogos', component: Catalogos, canActivate: [hogarGuard] },
 ];

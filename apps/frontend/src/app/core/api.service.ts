@@ -17,7 +17,11 @@ import type {
   CreateInvitacionDto,
   CreateLugarDto,
   CreateMedioPagoDto,
+  CreateCuentaDto,
   CreateObligacionDto,
+  Cuenta,
+  Patrimonio,
+  UpdateCuentaDto,
   CreatePresupuestoDto,
   CreateProductoDto,
   CategoriaCosto,
@@ -241,6 +245,27 @@ export class ApiService {
 
   eliminarPresupuesto(id: string) {
     return this.http.delete<void>(`${API_URL}/presupuestos/${id}`);
+  }
+
+  // Cuentas y patrimonio
+  cuentas() {
+    return this.http.get<Cuenta[]>(`${API_URL}/cuentas`);
+  }
+
+  patrimonio() {
+    return this.http.get<Patrimonio>(`${API_URL}/cuentas/patrimonio`);
+  }
+
+  crearCuenta(dto: CreateCuentaDto) {
+    return this.http.post<Cuenta>(`${API_URL}/cuentas`, dto);
+  }
+
+  editarCuenta(id: string, dto: UpdateCuentaDto) {
+    return this.http.patch<Cuenta>(`${API_URL}/cuentas/${id}`, dto);
+  }
+
+  eliminarCuenta(id: string) {
+    return this.http.delete<void>(`${API_URL}/cuentas/${id}`);
   }
 
   // Catalogos

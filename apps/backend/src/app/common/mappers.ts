@@ -4,6 +4,7 @@
 
 import type {
   Categoria,
+  Cuenta,
   Gasto,
   GastoItem,
   Ingreso,
@@ -103,6 +104,19 @@ export function toMedioPago(row: any): MedioPago {
     hogarId: row.hogar_id,
     nombre: row.nombre,
     tipo: row.tipo,
+    createdAt: row.created_at,
+  };
+}
+
+export function toCuenta(row: any): Cuenta {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    nombre: row.nombre,
+    tipo: row.tipo,
+    cuentaPadreId: row.cuenta_padre_id,
+    saldo: Number(row.saldo),
+    saldoActualizadoEn: row.saldo_actualizado_en,
     createdAt: row.created_at,
   };
 }

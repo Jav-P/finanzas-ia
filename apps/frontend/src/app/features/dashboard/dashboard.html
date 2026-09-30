@@ -22,6 +22,18 @@
       </div>
     </div>
 
+    @if (patrimonio(); as p) {
+      <a class="hero-card person-card" routerLink="/cuentas">
+        <div class="hero-label">Patrimonio neto</div>
+        <div class="hero-amount mono" [class.positive]="p.patrimonioNeto >= 0" [class.negative]="p.patrimonioNeto < 0">
+          {{ p.patrimonioNeto | number: '1.0-0' }}
+        </div>
+        <div class="hero-sub">
+          Tengo {{ p.activos | number: '1.0-0' }} · Debo {{ p.deudaTarjetas + p.deudaCreditos | number: '1.0-0' }}
+        </div>
+      </a>
+    }
+
     @for (persona of b.porUsuario; track persona.usuarioId) {
       <div class="hero-card person-card">
         <div class="person-row">

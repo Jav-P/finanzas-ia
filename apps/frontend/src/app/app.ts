@@ -6,7 +6,7 @@ import { filter } from 'rxjs';
 import { SessionService } from './core/session.service';
 import { NotificationService } from './core/notification.service';
 
-const RUTAS_MENU_MAS = ['/analisis', '/ingresos', '/creditos', '/catalogos', '/invitar'];
+const RUTAS_MENU_MAS = ['/analisis', '/cuentas','/ingresos', '/creditos', '/catalogos', '/invitar'];
 
 @Component({
   imports: [RouterModule, MatIconModule],

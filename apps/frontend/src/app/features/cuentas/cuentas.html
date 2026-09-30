@@ -1,0 +1,142 @@
+<div class="page-head">
+  <h1>Cuentas</h1>
+  @if (!mostrarForm()) {
+    <button mat-flat-button (click)="abrirForm()">
+      <mat-icon>add</mat-icon>
+      Nueva cuenta
+    </button>
+  }
+</div>
+
+@if (patrimonio(); as p) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <div class="patrimonio-label">Patrimonio neto</div>
+      <div class="patrimonio-monto mono" [class.negativo]="p.patrimonioNeto < 0">
+        {{ p.patrimonioNeto | number: '1.0-0' }}
+      </div>
+      <div class="patrimonio-lineas">
+        <div class="patrimonio-linea">
+          <span>Lo que tengo</span>
+          <b class="mono">{{ p.activos | number: '1.0-0' }}</b>
+        </div>
+        <div class="patrimonio-linea">
+          <span>− Deuda en tarjetas</span>
+          <b class="mono">{{ p.deudaTarjetas | number: '1.0-0' }}</b>
+        </div>
+        <div class="patrimonio-linea">
+          <span>− Deuda en <a class="auth-link" routerLink="/creditos">créditos</a></span>
+          <b class="mono">{{ p.deudaCreditos | number: '1.0-0' }}</b>
+        </div>
+      </div>
+      @if (p.creditosSinSaldo > 0) {
+        <p class="hint-text">
+          {{ p.creditosSinSaldo }} {{ p.creditosSinSaldo === 1 ? 'crédito no tiene' : 'créditos no tienen' }}
+          saldo registrado y no se está contando. Regístralo en <a class="auth-link" routerLink="/creditos">Créditos</a>.
+        </p>
+      }
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (mostrarForm()) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Nueva cuenta</h2>
+      <form class="form-grid" (ngSubmit)="guardar()">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select name="tipo" [(ngModel)]="tipo" required>
+            <mat-option value="ahorros">Cuenta de ahorros</mat-option>
+            <mat-option value="bolsillo">Bolsillo</mat-option>
+            <mat-option value="efectivo">Efectivo</mat-option>
+            <mat-option value="tarjeta_credito">Tarjeta de crédito</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (tipo === 'bolsillo') {
+          @if (cuentasAhorros().length) {
+            <mat-form-field appearance="outline">
+              <mat-label>¿En qué cuenta está el bolsillo?</mat-label>
+              <mat-select name="cuentaPadreId" [(ngModel)]="cuentaPadreId" required>
+                @for (cuenta of cuentasAhorros(); track cuenta.id) {
+                  <mat-option [value]="cuenta.id">{{ cuenta.nombre }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <p class="hint-text">Primero crea la cuenta de ahorros a la que pertenece el bolsillo.</p>
+          }
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input
+            matInput
+            name="nombre"
+            [(ngModel)]="nombre"
+            [placeholder]="tipo === 'tarjeta_credito' ? 'Visa Bancolombia' : tipo === 'bolsillo' ? 'Vacaciones' : 'Nequi'"
+            required
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ tipo === 'tarjeta_credito' ? 'Deuda actual' : 'Saldo actual' }}</mat-label>
+          <input matInput appMonto name="saldo" [(ngModel)]="saldo" />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
+          <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}
+
+@for (grupo of grupos(); track grupo.titulo) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>{{ grupo.titulo }}</h2>
+      <div class="cuenta-lista">
+        @for (cuenta of grupo.cuentas; track cuenta.id) {
+          <div class="cuenta-fila" [class.cuenta-fila--bolsillo]="cuenta.tipo === 'bolsillo'">
+            <div class="cuenta-info">
+              <strong>{{ cuenta.nombre }}</strong>
+              <span class="cuenta-tipo">{{ etiquetaTipo[cuenta.tipo] }} · actualizado {{ cuenta.saldoActualizadoEn }}</span>
+            </div>
+
+            @if (editandoId() === cuenta.id) {
+              <div class="cuenta-edicion">
+                <mat-form-field appearance="outline" class="cuenta-edicion-campo" subscriptSizing="dynamic">
+                  <input
+                    matInput
+                    appMonto
+                    name="saldoEdit"
+                    [(ngModel)]="saldoEdit"
+                    [attr.aria-label]="cuenta.tipo === 'tarjeta_credito' ? 'Deuda actual' : 'Saldo actual'"
+                  />
+                </mat-form-field>
+                <button mat-button (click)="guardarSaldo(cuenta.id)" [disabled]="guardando()">Guardar</button>
+                <button mat-button (click)="editandoId.set(null)">Cancelar</button>
+              </div>
+            } @else {
+              <div class="cuenta-acciones">
+                <b class="mono cuenta-saldo">{{ cuenta.saldo | number: '1.0-0' }}</b>
+                <button mat-button (click)="editarSaldo(cuenta)">Actualizar</button>
+                <button mat-button color="warn" (click)="eliminar(cuenta)">Eliminar</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+} @empty {
+  @if (!mostrarForm()) {
+    <p class="empty-state">
+      Todavía no tienes cuentas. Agrega tu efectivo, tus cuentas de ahorros, bolsillos y tarjetas de crédito para ver
+      tu patrimonio neto.
+    </p>
+  }
+}

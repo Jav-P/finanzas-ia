@@ -2,7 +2,7 @@ import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import type { Balance, InstanciaConDetalle, Recomendacion } from '@finanzas-ia/shared-types';
+import type { Balance, InstanciaConDetalle, Patrimonio, Recomendacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 
@@ -36,6 +36,7 @@ export class Dashboard implements OnInit {
   protected readonly session = inject(SessionService);
 
   protected readonly balance = signal<Balance | null>(null);
+  protected readonly patrimonio = signal<Patrimonio | null>(null);
   protected readonly recomendaciones = signal<Recomendacion[]>([]);
   protected readonly instancias = signal<InstanciaConDetalle[]>([]);
   protected readonly viendoUsuarioId = signal<string | typeof TODAS | null>(null);
@@ -67,6 +68,7 @@ export class Dashboard implements OnInit {
     this.api.recomendaciones(periodoActual()).subscribe((recomendaciones) => {
       this.recomendaciones.set(recomendaciones);
     });
+    this.api.patrimonio().subscribe((patrimonio) => this.patrimonio.set(patrimonio));
   }
 
   iconoSeveridad(severidad: Recomendacion['severidad']): string {

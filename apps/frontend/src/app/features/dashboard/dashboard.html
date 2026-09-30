@@ -29,7 +29,7 @@
           {{ p.patrimonioNeto | number: '1.0-0' }}
         </div>
         <div class="hero-sub">
-          Tengo {{ p.activos | number: '1.0-0' }} · Debo {{ p.deudaTarjetas + p.deudaCreditos | number: '1.0-0' }}
+          Tengo {{ p.disponible + p.inversiones | number: '1.0-0' }} · Debo {{ p.deudaTarjetas + p.deudaCreditos | number: '1.0-0' }}
         </div>
       </a>
     }

@@ -1,12 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateCuentaDto, Cuenta, Patrimonio, UpdateCuentaDto } from '@finanzas-ia/shared-types';
+import type { CreateCuentaDto, Cuenta, Patrimonio, PatrimonioMes, UpdateCuentaDto } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { toCuenta } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
+import { hoyColombia } from '../common/period';
 
-function hoyIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+const TIPOS_DISPONIBLES = ['efectivo', 'ahorros', 'bolsillo'];
 
 @Injectable()
 export class CuentasService {
@@ -59,7 +58,7 @@ export class CuentasService {
     if (dto.nombre !== undefined) patch['nombre'] = dto.nombre;
     if (dto.saldo !== undefined) {
       patch['saldo'] = dto.saldo;
-      patch['saldo_actualizado_en'] = hoyIso();
+      patch['saldo_actualizado_en'] = hoyColombia();
     }
 
     const { data, error } = await this.supabase.client
@@ -89,12 +88,15 @@ export class CuentasService {
     throwIfError(error);
   }
 
-  // Lo que se tiene (efectivo, cuentas, bolsillos) menos lo que se debe
+  // Lo que se tiene (plata disponible e inversiones) menos lo que se debe
   // (tarjetas y el saldo pendiente registrado de los creditos activos).
   async patrimonio(hogarId: string): Promise<Patrimonio> {
     const cuentas = await this.findByHogar(hogarId);
-    const activos = cuentas.filter((c) => c.tipo !== 'tarjeta_credito').reduce((suma, c) => suma + c.saldo, 0);
-    const deudaTarjetas = cuentas.filter((c) => c.tipo === 'tarjeta_credito').reduce((suma, c) => suma + c.saldo, 0);
+    const sumar = (tipos: string[]) =>
+      cuentas.filter((c) => tipos.includes(c.tipo)).reduce((suma, c) => suma + c.saldo, 0);
+    const disponible = sumar(TIPOS_DISPONIBLES);
+    const inversiones = sumar(['inversion']);
+    const deudaTarjetas = sumar(['tarjeta_credito']);
 
     const { data: creditos, error } = await this.supabase.client
       .from('obligaciones')
@@ -108,11 +110,54 @@ export class CuentasService {
     const deudaCreditos = conSaldo.reduce((suma: number, c: any) => suma + Number(c.saldo_pendiente), 0);
 
     return {
-      activos,
+      disponible,
+      inversiones,
       deudaTarjetas,
       deudaCreditos,
       creditosSinSaldo: (creditos ?? []).length - conSaldo.length,
-      patrimonioNeto: activos - deudaTarjetas - deudaCreditos,
+      patrimonioNeto: disponible + inversiones - deudaTarjetas - deudaCreditos,
     };
+  }
+
+  // Guarda (o reescribe) el patrimonio del mes en curso. Lo llama el cron
+  // diario y tambien la consulta del historico, para que el mes actual
+  // siempre refleje los saldos de hoy.
+  async registrarFoto(hogarId: string): Promise<void> {
+    const p = await this.patrimonio(hogarId);
+    const { error } = await this.supabase.client.from('patrimonio_historico').upsert({
+      hogar_id: hogarId,
+      periodo: `${hoyColombia().slice(0, 7)}-01`,
+      disponible: p.disponible,
+      inversiones: p.inversiones,
+      deudas: p.deudaTarjetas + p.deudaCreditos,
+      patrimonio_neto: p.patrimonioNeto,
+      actualizado_en: new Date().toISOString(),
+    });
+    throwIfError(error);
+  }
+
+  async historico(hogarId: string): Promise<PatrimonioMes[]> {
+    await this.registrarFoto(hogarId);
+    const { data, error } = await this.supabase.client
+      .from('patrimonio_historico')
+      .select('*')
+      .eq('hogar_id', hogarId)
+      .order('periodo', { ascending: false })
+      .limit(24);
+    throwIfError(error);
+
+    return (data ?? []).reverse().map((row: any) => ({
+      periodo: String(row.periodo).slice(0, 7),
+      disponible: Number(row.disponible),
+      inversiones: Number(row.inversiones),
+      deudas: Number(row.deudas),
+      patrimonioNeto: Number(row.patrimonio_neto),
+    }));
+  }
+
+  async hogaresConCuentas(): Promise<string[]> {
+    const { data, error } = await this.supabase.client.from('cuentas').select('hogar_id');
+    throwIfError(error);
+    return [...new Set((data ?? []).map((row: any) => row.hogar_id as string))];
   }
 }

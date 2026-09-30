@@ -21,6 +21,7 @@ import type {
   CreateObligacionDto,
   Cuenta,
   Patrimonio,
+  PatrimonioMes,
   UpdateCuentaDto,
   CreatePresupuestoDto,
   CreateProductoDto,
@@ -254,6 +255,10 @@ export class ApiService {
 
   patrimonio() {
     return this.http.get<Patrimonio>(`${API_URL}/cuentas/patrimonio`);
+  }
+
+  patrimonioHistorico() {
+    return this.http.get<PatrimonioMes[]>(`${API_URL}/cuentas/patrimonio/historico`);
   }
 
   crearCuenta(dto: CreateCuentaDto) {

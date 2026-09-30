@@ -280,7 +280,7 @@ export type UpdateMedioPagoDto = Partial<CreateMedioPagoDto>;
 
 // --- Cuentas y patrimonio ---
 
-export type TipoCuenta = 'efectivo' | 'ahorros' | 'bolsillo' | 'tarjeta_credito';
+export type TipoCuenta = 'efectivo' | 'ahorros' | 'bolsillo' | 'tarjeta_credito' | 'inversion';
 
 export interface Cuenta {
   id: string;
@@ -306,10 +306,19 @@ export interface UpdateCuentaDto {
 }
 
 export interface Patrimonio {
-  activos: number; // efectivo + ahorros + bolsillos
+  disponible: number; // efectivo + ahorros + bolsillos
+  inversiones: number;
   deudaTarjetas: number;
   deudaCreditos: number; // saldo pendiente registrado de los creditos activos
   creditosSinSaldo: number; // creditos activos sin saldo registrado: no suman a la deuda
+  patrimonioNeto: number;
+}
+
+export interface PatrimonioMes {
+  periodo: string; // YYYY-MM
+  disponible: number;
+  inversiones: number;
+  deudas: number;
   patrimonioNeto: number;
 }
 

@@ -17,8 +17,12 @@
       </div>
       <div class="patrimonio-lineas">
         <div class="patrimonio-linea">
-          <span>Lo que tengo</span>
-          <b class="mono">{{ p.activos | number: '1.0-0' }}</b>
+          <span>Disponible</span>
+          <b class="mono">{{ p.disponible | number: '1.0-0' }}</b>
+        </div>
+        <div class="patrimonio-linea">
+          <span>+ Inversiones</span>
+          <b class="mono">{{ p.inversiones | number: '1.0-0' }}</b>
         </div>
         <div class="patrimonio-linea">
           <span>− Deuda en tarjetas</span>
@@ -51,6 +55,7 @@
             <mat-option value="bolsillo">Bolsillo</mat-option>
             <mat-option value="efectivo">Efectivo</mat-option>
             <mat-option value="tarjeta_credito">Tarjeta de crédito</mat-option>
+            <mat-option value="inversion">Inversión (CDT, fondo, acciones)</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -75,13 +80,13 @@
             matInput
             name="nombre"
             [(ngModel)]="nombre"
-            [placeholder]="tipo === 'tarjeta_credito' ? 'Visa Bancolombia' : tipo === 'bolsillo' ? 'Vacaciones' : 'Nequi'"
+            [placeholder]="placeholderNombre(tipo)"
             required
           />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>{{ tipo === 'tarjeta_credito' ? 'Deuda actual' : 'Saldo actual' }}</mat-label>
+          <mat-label>{{ etiquetaSaldo(tipo) }}</mat-label>
           <input matInput appMonto name="saldo" [(ngModel)]="saldo" />
         </mat-form-field>
 
@@ -114,7 +119,7 @@
                     appMonto
                     name="saldoEdit"
                     [(ngModel)]="saldoEdit"
-                    [attr.aria-label]="cuenta.tipo === 'tarjeta_credito' ? 'Deuda actual' : 'Saldo actual'"
+                    [attr.aria-label]="etiquetaSaldo(cuenta.tipo)"
                   />
                 </mat-form-field>
                 <button mat-button (click)="guardarSaldo(cuenta.id)" [disabled]="guardando()">Guardar</button>
@@ -139,4 +144,18 @@
       tu patrimonio neto.
     </p>
   }
+}
+
+@if (chartHistorico(); as config) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Evolución del patrimonio</h2>
+      @if (historico().length === 1) {
+        <p class="hint-text">Se guarda un punto por mes: la gráfica se irá llenando con el tiempo.</p>
+      }
+      <div class="chart-box">
+        <canvas [appChart]="config"></canvas>
+      </div>
+    </mat-card-content>
+  </mat-card>
 }

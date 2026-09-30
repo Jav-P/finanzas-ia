@@ -1,5 +1,11 @@
 // periodo llega como 'YYYY-MM' en la mayoria de endpoints de reportes.
 
+// Fecha de hoy (YYYY-MM-DD) en Colombia. El servidor corre en UTC, asi
+// que despues de las 7 p. m. hora local toISOString() ya da "mañana".
+export function hoyColombia(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+}
+
 export function periodStart(periodo: string): string {
   return `${periodo}-01`;
 }

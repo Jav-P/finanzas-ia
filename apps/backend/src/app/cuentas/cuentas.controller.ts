@@ -3,7 +3,7 @@ import type { CreateCuentaDto, UpdateCuentaDto } from '@finanzas-ia/shared-types
 import { HogarActual } from '../auth/usuario-actual.decorator';
 import { CuentasService } from './cuentas.service';
 
-const TIPOS = ['efectivo', 'ahorros', 'bolsillo', 'tarjeta_credito'];
+const TIPOS = ['efectivo', 'ahorros', 'bolsillo', 'tarjeta_credito', 'inversion'];
 
 @Controller('cuentas')
 export class CuentasController {
@@ -17,6 +17,11 @@ export class CuentasController {
   @Get('patrimonio')
   patrimonio(@HogarActual() hogarId: string) {
     return this.cuentas.patrimonio(hogarId);
+  }
+
+  @Get('patrimonio/historico')
+  historico(@HogarActual() hogarId: string) {
+    return this.cuentas.historico(hogarId);
   }
 
   @Post()

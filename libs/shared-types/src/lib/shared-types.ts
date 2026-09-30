@@ -123,6 +123,7 @@ export interface Pago {
   fechaPago: string;
   montoPagado: number;
   urlComprobante: string;
+  cuentaId: string | null; // cuenta de la que salio la plata, si se registro
   createdAt: string;
 }
 
@@ -192,6 +193,7 @@ export interface RegistrarPagoDto {
   usuarioPagoId: string;
   fechaPago: string;
   montoPagado: number;
+  cuentaId?: string | null;
 }
 
 // --- Fase 2: ingresos, gastos variables, presupuestos ---
@@ -314,6 +316,61 @@ export interface Patrimonio {
   patrimonioNeto: number;
 }
 
+// --- Movimientos entre cuentas ---
+// La plata sale de cuentaOrigen y entra a cuentaDestino. En una tarjeta
+// de credito (cuyo saldo es deuda) lo que sale es una compra y lo que
+// entra es un pago.
+
+export type TipoMovimiento = 'ingreso' | 'gasto' | 'pago_obligacion' | 'transferencia' | 'ajuste';
+
+export interface Movimiento {
+  id: string;
+  hogarId: string;
+  fecha: string;
+  tipo: TipoMovimiento;
+  cuentaOrigenId: string | null;
+  cuentaDestinoId: string | null;
+  monto: number;
+  montoDestino: number | null; // solo transferencias entre monedas distintas
+  descripcion: string;
+  gastoId: string | null;
+  pagoId: string | null;
+  ingresoId: string | null;
+  createdAt: string;
+}
+
+export interface TransferenciaDto {
+  cuentaOrigenId: string;
+  cuentaDestinoId: string;
+  monto: number;
+  montoDestino?: number | null;
+  fecha: string;
+  descripcion?: string;
+}
+
+// Un ingreso recurrente cuyo dia de pago ya llego y que falta confirmar.
+export interface IngresoPendiente {
+  ingresoId: string;
+  usuarioId: string;
+  descripcion: string;
+  periodo: string; // YYYY-MM
+  fechaEsperada: string;
+  monto: number;
+}
+
+export interface ConfirmarIngresoDto {
+  ingresoId: string;
+  periodo: string; // YYYY-MM
+  cuentaId: string;
+  monto: number;
+  fecha: string;
+}
+
+export interface OmitirIngresoDto {
+  ingresoId: string;
+  periodo: string; // YYYY-MM
+}
+
 export interface PatrimonioMes {
   periodo: string; // YYYY-MM
   disponible: number;
@@ -378,6 +435,7 @@ export interface Gasto {
   montoTotal: number;
   fecha: string;
   urlComprobante: string | null;
+  cuentaId: string | null; // cuenta de la que salio la plata, si se registro
   createdAt: string;
 }
 
@@ -386,6 +444,7 @@ export interface CreateGastoDto {
   categoriaId: string;
   lugarId?: string | null;
   medioPagoId?: string | null;
+  cuentaId?: string | null;
   descripcion: string;
   montoTotal: number;
   fecha: string;

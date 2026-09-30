@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateGastoDto, GastoConItems, UpdateGastoDto } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
+import { MovimientosService } from '../cuentas/movimientos.service';
 import { toGasto, toGastoItem } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 
@@ -12,11 +13,15 @@ export interface CrearGastoRapidoInput {
   descripcion: string;
   montoTotal: number;
   fecha: string;
+  cuentaId?: string | null;
 }
 
 @Injectable()
 export class GastosService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(
+    private readonly supabase: SupabaseService,
+    private readonly movimientos: MovimientosService,
+  ) {}
 
   async findByHogar(
     hogarId: string,
@@ -70,6 +75,7 @@ export class GastosService {
         categoria_id: dto.categoriaId,
         lugar_id: dto.lugarId ?? null,
         medio_pago_id: dto.medioPagoId ?? null,
+        cuenta_id: dto.cuentaId ?? null,
         descripcion: dto.descripcion,
         monto_total: dto.montoTotal,
         fecha: dto.fecha,
@@ -78,6 +84,7 @@ export class GastosService {
       .single();
 
     throwIfError(error);
+    await this.movimientos.sincronizarGasto(gastoRow);
 
     const items = dto.items ?? [];
     if (!items.length) {
@@ -116,6 +123,7 @@ export class GastosService {
         hogar_id: hogarId,
         usuario_id: input.usuarioId,
         categoria_id: input.categoriaId,
+        cuenta_id: input.cuentaId ?? null,
         descripcion: input.descripcion,
         monto_total: input.montoTotal,
         fecha: input.fecha,
@@ -123,6 +131,7 @@ export class GastosService {
       .select()
       .single();
     throwIfError(error);
+    await this.movimientos.sincronizarGasto(gastoRow);
 
     const path = `gasto-${gastoRow.id}/${Date.now()}-${file.originalname}`;
     const { error: uploadError } = await this.supabase.client.storage
@@ -147,6 +156,7 @@ export class GastosService {
     if (dto.categoriaId !== undefined) patch['categoria_id'] = dto.categoriaId;
     if (dto.lugarId !== undefined) patch['lugar_id'] = dto.lugarId;
     if (dto.medioPagoId !== undefined) patch['medio_pago_id'] = dto.medioPagoId;
+    if (dto.cuentaId !== undefined) patch['cuenta_id'] = dto.cuentaId;
     if (dto.descripcion !== undefined) patch['descripcion'] = dto.descripcion;
     if (dto.montoTotal !== undefined) patch['monto_total'] = dto.montoTotal;
     if (dto.fecha !== undefined) patch['fecha'] = dto.fecha;
@@ -160,6 +170,9 @@ export class GastosService {
 
     throwIfError(error);
     if (!gastoRow) throw new NotFoundException('Gasto no encontrado');
+    if (dto.cuentaId !== undefined || dto.montoTotal !== undefined || dto.fecha !== undefined) {
+      await this.movimientos.sincronizarGasto(gastoRow);
+    }
 
     // Si vienen items, reemplazan por completo los existentes.
     if (dto.items !== undefined) {
@@ -193,6 +206,8 @@ export class GastosService {
       .delete()
       .eq('gasto_id', id);
     throwIfError(itemsError);
+
+    await this.movimientos.eliminarDe('gasto_id', id);
 
     const { error } = await this.supabase.client.from('gastos').delete().eq('id', id);
     throwIfError(error);

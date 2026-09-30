@@ -5,6 +5,7 @@
 import type {
   Categoria,
   Cuenta,
+  Movimiento,
   Gasto,
   GastoItem,
   Ingreso,
@@ -79,6 +80,7 @@ export function toPago(row: any): Pago {
     fechaPago: row.fecha_pago,
     montoPagado: row.monto_pagado,
     urlComprobante: row.url_comprobante,
+    cuentaId: row.cuenta_id ?? null,
     createdAt: row.created_at,
   };
 }
@@ -121,6 +123,24 @@ export function toCuenta(row: any): Cuenta {
   };
 }
 
+export function toMovimiento(row: any): Movimiento {
+  return {
+    id: row.id,
+    hogarId: row.hogar_id,
+    fecha: row.fecha,
+    tipo: row.tipo,
+    cuentaOrigenId: row.cuenta_origen_id,
+    cuentaDestinoId: row.cuenta_destino_id,
+    monto: Number(row.monto),
+    montoDestino: row.monto_destino == null ? null : Number(row.monto_destino),
+    descripcion: row.descripcion,
+    gastoId: row.gasto_id,
+    pagoId: row.pago_id,
+    ingresoId: row.ingreso_id,
+    createdAt: row.created_at,
+  };
+}
+
 export function toLugar(row: any): Lugar {
   return {
     id: row.id,
@@ -152,6 +172,7 @@ export function toGasto(row: any): Gasto {
     montoTotal: row.monto_total,
     fecha: row.fecha,
     urlComprobante: row.url_comprobante,
+    cuentaId: row.cuenta_id ?? null,
     createdAt: row.created_at,
   };
 }

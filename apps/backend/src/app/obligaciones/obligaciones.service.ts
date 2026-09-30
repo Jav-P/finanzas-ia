@@ -7,6 +7,7 @@ import type {
   UpdateObligacionDto,
 } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
+import { MovimientosService } from '../cuentas/movimientos.service';
 import { toCategoria, toObligacion } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 
@@ -38,7 +39,10 @@ function addMonths(dateIso: string, meses: number): string {
 export class ObligacionesService {
   private readonly logger = new Logger(ObligacionesService.name);
 
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(
+    private readonly supabase: SupabaseService,
+    private readonly movimientos: MovimientosService,
+  ) {}
 
   async create(hogarId: string, dto: CreateObligacionDto): Promise<Obligacion> {
     const { data: obligacionRow, error } = await this.supabase.client
@@ -195,9 +199,13 @@ export class ObligacionesService {
     if (instanciaIds.length) {
       const { data: pagoRows, error: pagosError } = await this.supabase.client
         .from('pagos')
-        .select('url_comprobante')
+        .select('id, url_comprobante')
         .in('instancia_id', instanciaIds);
       throwIfError(pagosError);
+
+      for (const pago of pagoRows ?? []) {
+        await this.movimientos.eliminarDe('pago_id', pago.id);
+      }
 
       const paths = (pagoRows ?? []).map((p: any) => p.url_comprobante).filter(Boolean);
       if (paths.length) {

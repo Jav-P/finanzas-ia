@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import type { Categoria, InstanciaConDetalle } from '@finanzas-ia/shared-types';
+import type { Categoria, Cuenta, InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
@@ -49,6 +49,9 @@ export class SubirPago implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly leyendoComprobante = signal(false);
   protected readonly ocrFallo = signal(false);
+  protected readonly cuentas = signal<Cuenta[]>([]);
+  protected cuentaObligacionId = '';
+  protected cuentaGastoId = '';
 
   // Pago de obligacion
   protected readonly pendientes = signal<InstanciaConDetalle[]>([]);
@@ -72,12 +75,18 @@ export class SubirPago implements OnInit {
 
   ngOnInit(): void {
     this.api.categorias().subscribe((categorias) => this.categorias.set(categorias));
+    this.api.cuentas().subscribe((cuentas) => this.cuentas.set(cuentas));
   }
 
   elegirTipo(tipo: Tipo): void {
     this.tipo.set(tipo);
     this.ocrFallo.set(false);
-    if (tipo === 'obligacion') this.cargarPendientes();
+    if (tipo === 'obligacion') {
+      this.cargarPendientes();
+      this.cuentaObligacionId = this.cuentas().find((c) => c.tipo === 'ahorros')?.id ?? '';
+    } else {
+      this.cuentaGastoId = this.cuentas().find((c) => c.tipo === 'tarjeta_credito')?.id ?? '';
+    }
   }
 
   volver(): void {
@@ -159,7 +168,11 @@ export class SubirPago implements OnInit {
 
     this.guardando.set(true);
     this.api
-      .registrarPago(instanciaId, { usuarioPagoId: usuarioId, fechaPago, montoPagado: this.montoPagado }, this.archivoObligacion)
+      .registrarPago(
+        instanciaId,
+        { usuarioPagoId: usuarioId, fechaPago, montoPagado: this.montoPagado, cuentaId: this.cuentaObligacionId || null },
+        this.archivoObligacion,
+      )
       .subscribe({
         next: () => {
           this.snackBar.open('Pago registrado', 'Cerrar', { duration: 4000 });
@@ -189,7 +202,13 @@ export class SubirPago implements OnInit {
     this.guardando.set(true);
     this.api
       .crearGastoRapido(
-        { categoriaId: this.categoriaId, montoTotal: this.montoGasto, fecha, descripcion: this.descripcionGasto },
+        {
+          categoriaId: this.categoriaId,
+          montoTotal: this.montoGasto,
+          fecha,
+          descripcion: this.descripcionGasto,
+          cuentaId: this.cuentaGastoId || null,
+        },
         this.archivoGasto,
       )
       .subscribe({

@@ -53,7 +53,7 @@ export class GastosController {
   crearRapido(
     @HogarActual() hogarId: string,
     @UsuarioActual() usuario: RequestUsuario,
-    @Body() body: { categoriaId?: string; montoTotal?: string; fecha?: string; descripcion?: string },
+    @Body() body: { categoriaId?: string; montoTotal?: string; fecha?: string; descripcion?: string; cuentaId?: string },
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('El comprobante (archivo) es requerido');
@@ -71,6 +71,7 @@ export class GastosController {
         montoTotal,
         fecha: body.fecha,
         descripcion: body.descripcion?.trim() || 'Gasto rápido',
+        cuentaId: body.cuentaId || null,
       },
       file,
     );

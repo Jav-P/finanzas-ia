@@ -130,6 +130,18 @@
               </p>
             }
 
+            @if (cuentas().length) {
+              <mat-form-field appearance="outline">
+                <mat-label>Pagado desde (opcional)</mat-label>
+                <mat-select name="cuentaObligacionId" [(ngModel)]="cuentaObligacionId">
+                  <mat-option value="">Sin registrar en una cuenta</mat-option>
+                  @for (cuenta of cuentas(); track cuenta.id) {
+                    <mat-option [value]="cuenta.id">{{ cuenta.nombre }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+
             <div class="form-actions">
               <button mat-flat-button type="submit" [disabled]="guardando() || excedeSaldo()">Registrar pago</button>
             </div>
@@ -191,6 +203,18 @@
           <mat-label>Descripción (opcional)</mat-label>
           <input matInput name="descripcionGasto" [(ngModel)]="descripcionGasto" placeholder="ej. Mercado del mes" />
         </mat-form-field>
+
+        @if (cuentas().length) {
+          <mat-form-field appearance="outline">
+            <mat-label>Pagado con (opcional)</mat-label>
+            <mat-select name="cuentaGastoId" [(ngModel)]="cuentaGastoId">
+              <mat-option value="">Sin registrar en una cuenta</mat-option>
+              @for (cuenta of cuentas(); track cuenta.id) {
+                <mat-option [value]="cuenta.id">{{ cuenta.nombre }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
 
         <div class="form-actions">
           <button mat-flat-button type="submit" [disabled]="guardando()">Registrar gasto</button>

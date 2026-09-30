@@ -9,12 +9,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { ChartConfiguration } from 'chart.js';
-import type { Cuenta, Patrimonio, PatrimonioMes, TipoCuenta } from '@finanzas-ia/shared-types';
+import type { Cuenta, Movimiento, Patrimonio, PatrimonioMes, TipoCuenta } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
 import { ChartDirective } from '../../core/chart.directive';
+import { dateToIso } from '../../core/date-utils';
 
 const ETIQUETA_TIPO_CUENTA: Record<TipoCuenta, string> = {
   efectivo: 'Efectivo',
@@ -22,6 +24,14 @@ const ETIQUETA_TIPO_CUENTA: Record<TipoCuenta, string> = {
   bolsillo: 'Bolsillo',
   tarjeta_credito: 'Tarjeta de crédito',
   inversion: 'Inversión',
+};
+
+const ETIQUETA_TIPO_MOVIMIENTO: Record<Movimiento['tipo'], string> = {
+  ingreso: 'Ingreso',
+  gasto: 'Gasto',
+  pago_obligacion: 'Pago de obligación',
+  transferencia: 'Transferencia',
+  ajuste: 'Ajuste',
 };
 
 const CYAN = '#33e6e0';
@@ -47,6 +57,7 @@ function etiquetaMes(periodo: string): string {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatDatepickerModule,
     MontoInputDirective,
     ChartDirective,
   ],
@@ -61,18 +72,28 @@ export class Cuentas implements OnInit {
   protected readonly cuentas = signal<Cuenta[]>([]);
   protected readonly patrimonio = signal<Patrimonio | null>(null);
   protected readonly historico = signal<PatrimonioMes[]>([]);
+  protected readonly movimientos = signal<Movimiento[]>([]);
   protected readonly guardando = signal(false);
   protected readonly mostrarForm = signal(false);
+  protected readonly mostrarTransferencia = signal(false);
+  protected readonly etiquetaTipoMovimiento = ETIQUETA_TIPO_MOVIMIENTO;
 
   protected tipo: TipoCuenta = 'ahorros';
   protected nombre = '';
   protected cuentaPadreId = '';
   protected saldo: number | null = null;
 
+  protected cuentaOrigenId = '';
+  protected cuentaDestinoId = '';
+  protected montoTransferencia: number | null = null;
+  protected fechaTransferencia: Date | null = new Date();
+  protected descripcionTransferencia = '';
+
   protected readonly editandoId = signal<string | null>(null);
   protected saldoEdit: number | null = null;
 
   protected readonly cuentasAhorros = computed(() => this.cuentas().filter((c) => c.tipo === 'ahorros'));
+  protected readonly nombrePorCuenta = computed(() => new Map(this.cuentas().map((c) => [c.id, c.nombre])));
 
   // La plata disponible (cada cuenta seguida de sus bolsillos), las
   // inversiones y lo que se debe en tarjetas.
@@ -189,6 +210,47 @@ export class Cuentas implements OnInit {
     });
   }
 
+  abrirTransferencia(): void {
+    this.cuentaOrigenId = '';
+    this.cuentaDestinoId = '';
+    this.montoTransferencia = null;
+    this.fechaTransferencia = new Date();
+    this.descripcionTransferencia = '';
+    this.mostrarTransferencia.set(true);
+  }
+
+  transferir(): void {
+    if (!this.cuentaOrigenId || !this.cuentaDestinoId || !this.montoTransferencia) return;
+    const fecha = dateToIso(this.fechaTransferencia);
+    if (!fecha) return;
+
+    this.guardando.set(true);
+    this.api
+      .transferir({
+        cuentaOrigenId: this.cuentaOrigenId,
+        cuentaDestinoId: this.cuentaDestinoId,
+        monto: this.montoTransferencia,
+        fecha,
+        descripcion: this.descripcionTransferencia,
+      })
+      .subscribe({
+        next: () => {
+          this.guardando.set(false);
+          this.mostrarTransferencia.set(false);
+          this.cargar();
+        },
+        error: (err: HttpErrorResponse) => this.mostrarError(err, 'No se pudo registrar la transferencia'),
+      });
+  }
+
+  eliminarMovimiento(movimiento: Movimiento): void {
+    if (!confirm('¿Eliminar este movimiento? Los saldos de las cuentas involucradas se ajustan de vuelta.')) return;
+    this.api.eliminarMovimiento(movimiento.id).subscribe({
+      next: () => this.cargar(),
+      error: (err: HttpErrorResponse) => this.mostrarError(err, 'No se pudo eliminar el movimiento'),
+    });
+  }
+
   private mostrarError(err: HttpErrorResponse, porDefecto: string): void {
     this.guardando.set(false);
     this.snackBar.open(err.error?.message ?? porDefecto, 'Cerrar', { duration: 6000 });
@@ -198,5 +260,6 @@ export class Cuentas implements OnInit {
     this.api.cuentas().subscribe((cuentas) => this.cuentas.set(cuentas));
     this.api.patrimonio().subscribe((patrimonio) => this.patrimonio.set(patrimonio));
     this.api.patrimonioHistorico().subscribe((historico) => this.historico.set(historico));
+    this.api.movimientos().subscribe((movimientos) => this.movimientos.set(movimientos));
   }
 }

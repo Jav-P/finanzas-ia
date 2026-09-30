@@ -7,6 +7,7 @@ import type {
   RegistrarPagoDto,
 } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
+import { MovimientosService } from '../cuentas/movimientos.service';
 import { toCategoria, toInstancia, toObligacion, toPago } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 
@@ -17,7 +18,10 @@ const BUCKET = 'comprobantes';
 // instancias/obligaciones/categorias/pagos se arma aqui, en la app.
 @Injectable()
 export class InstanciasService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(
+    private readonly supabase: SupabaseService,
+    private readonly movimientos: MovimientosService,
+  ) {}
 
   async findAll(
     hogarId: string,
@@ -106,7 +110,7 @@ export class InstanciasService {
   ): Promise<Pago> {
     const { data: instanciaRow, error } = await this.supabase.client
       .from('obligacion_instancias')
-      .select('id, monto')
+      .select('id, monto, obligacion_id')
       .eq('id', instanciaId)
       .maybeSingle();
     throwIfError(error);
@@ -136,10 +140,29 @@ export class InstanciasService {
         fecha_pago: dto.fechaPago,
         monto_pagado: dto.montoPagado,
         url_comprobante: path,
+        cuenta_id: dto.cuentaId ?? null,
       })
       .select()
       .single();
     throwIfError(pagoError);
+
+    if (dto.cuentaId) {
+      const { data: obligacionRow, error: obligacionError } = await this.supabase.client
+        .from('obligaciones')
+        .select('hogar_id, descripcion')
+        .eq('id', instanciaRow.obligacion_id)
+        .single();
+      throwIfError(obligacionError);
+      if (!obligacionRow) throw new NotFoundException('Obligación no encontrada');
+      await this.movimientos.registrarPago({
+        id: pagoRow.id,
+        cuentaId: dto.cuentaId,
+        hogarId: obligacionRow.hogar_id,
+        fecha: dto.fechaPago,
+        monto: dto.montoPagado,
+        descripcion: obligacionRow.descripcion,
+      });
+    }
 
     const nuevoTotal = yaPagado + dto.montoPagado;
     if (nuevoTotal >= Number(instanciaRow.monto) - 0.01) {
@@ -165,6 +188,8 @@ export class InstanciasService {
       .maybeSingle();
     throwIfError(error);
     if (!pagoRow) throw new NotFoundException('Ese comprobante no existe para esta instancia');
+
+    await this.movimientos.eliminarDe('pago_id', pagoId);
 
     const { error: deleteError } = await this.supabase.client.from('pagos').delete().eq('id', pagoId);
     throwIfError(deleteError);

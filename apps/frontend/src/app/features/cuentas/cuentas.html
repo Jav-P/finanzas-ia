@@ -1,11 +1,19 @@
 <div class="page-head">
   <h1>Cuentas</h1>
-  @if (!mostrarForm()) {
-    <button mat-flat-button (click)="abrirForm()">
-      <mat-icon>add</mat-icon>
-      Nueva cuenta
-    </button>
-  }
+  <div class="page-head-acciones">
+    @if (cuentas().length > 1) {
+      <button mat-stroked-button (click)="abrirTransferencia()">
+        <mat-icon>sync_alt</mat-icon>
+        Transferir
+      </button>
+    }
+    @if (!mostrarForm()) {
+      <button mat-flat-button (click)="abrirForm()">
+        <mat-icon>add</mat-icon>
+        Nueva cuenta
+      </button>
+    }
+  </div>
 </div>
 
 @if (patrimonio(); as p) {
@@ -39,6 +47,58 @@
           saldo registrado y no se está contando. Regístralo en <a class="auth-link" routerLink="/creditos">Créditos</a>.
         </p>
       }
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (mostrarTransferencia()) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Transferir entre cuentas</h2>
+      <p class="hint-text">
+        Para pagar una tarjeta de crédito, transfiere desde tu cuenta de ahorros hacia la tarjeta.
+      </p>
+      <form class="form-grid" (ngSubmit)="transferir()">
+        <mat-form-field appearance="outline">
+          <mat-label>Desde</mat-label>
+          <mat-select name="cuentaOrigenId" [(ngModel)]="cuentaOrigenId" required>
+            @for (cuenta of cuentas(); track cuenta.id) {
+              <mat-option [value]="cuenta.id" [disabled]="cuenta.id === cuentaDestinoId">{{ cuenta.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Hacia</mat-label>
+          <mat-select name="cuentaDestinoId" [(ngModel)]="cuentaDestinoId" required>
+            @for (cuenta of cuentas(); track cuenta.id) {
+              <mat-option [value]="cuenta.id" [disabled]="cuenta.id === cuentaOrigenId">{{ cuenta.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Monto</mat-label>
+          <input matInput appMonto name="montoTransferencia" [(ngModel)]="montoTransferencia" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha</mat-label>
+          <input matInput [matDatepicker]="pickerTransferencia" name="fechaTransferencia" [(ngModel)]="fechaTransferencia" required />
+          <mat-datepicker-toggle matIconSuffix [for]="pickerTransferencia"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTransferencia></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Descripción (opcional)</mat-label>
+          <input matInput name="descripcionTransferencia" [(ngModel)]="descripcionTransferencia" placeholder="Pago tarjeta Visa" />
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-flat-button type="submit" [disabled]="guardando()">Transferir</button>
+          <button mat-button type="button" (click)="mostrarTransferencia.set(false)">Cancelar</button>
+        </div>
+      </form>
     </mat-card-content>
   </mat-card>
 }
@@ -155,6 +215,40 @@
       }
       <div class="chart-box">
         <canvas [appChart]="config"></canvas>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (movimientos().length) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Movimientos recientes</h2>
+      <div class="movimiento-lista">
+        @for (m of movimientos(); track m.id) {
+          <div class="movimiento-fila">
+            <div class="movimiento-info">
+              <strong>{{ m.descripcion || etiquetaTipoMovimiento[m.tipo] }}</strong>
+              <span class="movimiento-detalle">
+                {{ m.fecha }} · {{ etiquetaTipoMovimiento[m.tipo] }}
+                @if (m.cuentaOrigenId) {
+                  · desde {{ nombrePorCuenta().get(m.cuentaOrigenId) }}
+                }
+                @if (m.cuentaDestinoId) {
+                  · hacia {{ nombrePorCuenta().get(m.cuentaDestinoId) }}
+                }
+              </span>
+            </div>
+            <div class="movimiento-acciones">
+              <b class="mono">{{ m.monto | number: '1.0-0' }}</b>
+              @if (m.tipo === 'transferencia' || m.tipo === 'ajuste') {
+                <button mat-icon-button color="warn" (click)="eliminarMovimiento(m)" aria-label="Eliminar movimiento">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+        }
       </div>
     </mat-card-content>
   </mat-card>

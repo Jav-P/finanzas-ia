@@ -36,6 +36,18 @@
         </mat-select>
       </mat-form-field>
 
+      @if (cuentas().length) {
+        <mat-form-field appearance="outline">
+          <mat-label>Pagado con (opcional)</mat-label>
+          <mat-select name="cuentaId" [(ngModel)]="cuentaId">
+            <mat-option value="">Sin registrar en una cuenta</mat-option>
+            @for (cuenta of cuentas(); track cuenta.id) {
+              <mat-option [value]="cuenta.id">{{ cuenta.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
       <mat-form-field appearance="outline">
         <mat-label>Fecha</mat-label>
         <input matInput [matDatepicker]="pickerFecha" name="fecha" [(ngModel)]="fecha" required />

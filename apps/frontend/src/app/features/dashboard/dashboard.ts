@@ -1,10 +1,16 @@
-import { Component, OnInit, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import type { Balance, InstanciaConDetalle, Patrimonio, Recomendacion } from '@finanzas-ia/shared-types';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import type { Balance, Cuenta, IngresoPendiente, InstanciaConDetalle, Patrimonio, Recomendacion } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
+import { MontoInputDirective } from '../../core/monto-input.directive';
 
 const TODAS = 'todas' as const;
 
@@ -27,17 +33,33 @@ function diasRestantes(fechaVencimiento: string): number {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, DecimalPipe, MatIconModule],
+  imports: [RouterLink, DecimalPipe, FormsModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule, MontoInputDirective],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly snackBar = inject(MatSnackBar);
   protected readonly session = inject(SessionService);
 
   protected readonly balance = signal<Balance | null>(null);
   protected readonly patrimonio = signal<Patrimonio | null>(null);
   protected readonly recomendaciones = signal<Recomendacion[]>([]);
+  protected readonly ingresosPendientes = signal<IngresoPendiente[]>([]);
+  protected readonly cuentas = signal<Cuenta[]>([]);
+  protected readonly confirmandoId = signal<string | null>(null);
+  protected cuentaConfirmarId = '';
+  protected montoConfirmar: number | null = null;
+
+  // El mat-select del formulario de confirmar no puede vivir dentro del
+  // @for de la lista (Angular Material no resuelve bien el control del
+  // form-field cuando esta anidado en un @for + @if a la vez), asi que
+  // el formulario se muestra una sola vez, fuera del @for, para el
+  // ingreso que corresponda a confirmandoId().
+  protected readonly ingresoConfirmando = computed(() => {
+    const id = this.confirmandoId();
+    return id ? (this.ingresosPendientes().find((i) => i.ingresoId + '|' + i.periodo === id) ?? null) : null;
+  });
   protected readonly instancias = signal<InstanciaConDetalle[]>([]);
   protected readonly viendoUsuarioId = signal<string | typeof TODAS | null>(null);
   protected readonly generando = signal(false);
@@ -69,6 +91,46 @@ export class Dashboard implements OnInit {
       this.recomendaciones.set(recomendaciones);
     });
     this.api.patrimonio().subscribe((patrimonio) => this.patrimonio.set(patrimonio));
+    this.api.cuentas().subscribe((cuentas) => this.cuentas.set(cuentas));
+    this.cargarIngresosPendientes();
+  }
+
+  prepararConfirmacion(ingreso: IngresoPendiente): void {
+    this.confirmandoId.set(`${ingreso.ingresoId}|${ingreso.periodo}`);
+    this.cuentaConfirmarId = this.cuentas()[0]?.id ?? '';
+    this.montoConfirmar = ingreso.monto;
+  }
+
+  confirmarIngreso(ingreso: IngresoPendiente): void {
+    if (!this.cuentaConfirmarId || !this.montoConfirmar) return;
+    this.api
+      .confirmarIngreso({
+        ingresoId: ingreso.ingresoId,
+        periodo: ingreso.periodo,
+        cuentaId: this.cuentaConfirmarId,
+        monto: this.montoConfirmar,
+        fecha: ingreso.fechaEsperada,
+      })
+      .subscribe({
+        next: () => {
+          this.confirmandoId.set(null);
+          this.cargarIngresosPendientes();
+          this.api.patrimonio().subscribe((patrimonio) => this.patrimonio.set(patrimonio));
+          this.api.cuentas().subscribe((cuentas) => this.cuentas.set(cuentas));
+        },
+        error: () => this.snackBar.open('No se pudo confirmar el ingreso', 'Cerrar', { duration: 5000 }),
+      });
+  }
+
+  omitirIngreso(ingreso: IngresoPendiente): void {
+    this.api.omitirIngreso({ ingresoId: ingreso.ingresoId, periodo: ingreso.periodo }).subscribe({
+      next: () => this.cargarIngresosPendientes(),
+      error: () => this.snackBar.open('No se pudo omitir el ingreso', 'Cerrar', { duration: 5000 }),
+    });
+  }
+
+  private cargarIngresosPendientes(): void {
+    this.api.ingresosPendientes().subscribe((pendientes) => this.ingresosPendientes.set(pendientes));
   }
 
   iconoSeveridad(severidad: Recomendacion['severidad']): string {

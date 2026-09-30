@@ -20,8 +20,13 @@ import type {
   CreateCuentaDto,
   CreateObligacionDto,
   Cuenta,
+  ConfirmarIngresoDto,
+  IngresoPendiente,
+  Movimiento,
+  OmitirIngresoDto,
   Patrimonio,
   PatrimonioMes,
+  TransferenciaDto,
   UpdateCuentaDto,
   CreatePresupuestoDto,
   CreateProductoDto,
@@ -180,6 +185,7 @@ export class ApiService {
     form.set('usuarioPagoId', dto.usuarioPagoId);
     form.set('fechaPago', dto.fechaPago);
     form.set('montoPagado', String(dto.montoPagado));
+    if (dto.cuentaId) form.set('cuentaId', dto.cuentaId);
     form.set('comprobante', comprobante);
     return this.http.post<Pago>(`${API_URL}/instancias/${instanciaId}/pago`, form);
   }
@@ -273,6 +279,34 @@ export class ApiService {
     return this.http.delete<void>(`${API_URL}/cuentas/${id}`);
   }
 
+  // Movimientos y transferencias
+  movimientos(cuentaId?: string) {
+    let params = new HttpParams();
+    if (cuentaId) params = params.set('cuentaId', cuentaId);
+    return this.http.get<Movimiento[]>(`${API_URL}/movimientos`, { params });
+  }
+
+  transferir(dto: TransferenciaDto) {
+    return this.http.post<Movimiento>(`${API_URL}/movimientos/transferencia`, dto);
+  }
+
+  eliminarMovimiento(id: string) {
+    return this.http.delete<void>(`${API_URL}/movimientos/${id}`);
+  }
+
+  // Ingresos pendientes de confirmar en una cuenta
+  ingresosPendientes() {
+    return this.http.get<IngresoPendiente[]>(`${API_URL}/ingresos/pendientes`);
+  }
+
+  confirmarIngreso(dto: ConfirmarIngresoDto) {
+    return this.http.post<Movimiento>(`${API_URL}/ingresos/confirmar`, dto);
+  }
+
+  omitirIngreso(dto: OmitirIngresoDto) {
+    return this.http.post<void>(`${API_URL}/ingresos/omitir`, dto);
+  }
+
   // Catalogos
   mediosPago() {
     return this.http.get<MedioPago[]>(`${API_URL}/medios-pago`);
@@ -340,12 +374,16 @@ export class ApiService {
 
   // "Subir pago" rapido: un gasto de un solo monto + comprobante, sin
   // desglose de productos.
-  crearGastoRapido(datos: { categoriaId: string; montoTotal: number; fecha: string; descripcion?: string }, comprobante: File) {
+  crearGastoRapido(
+    datos: { categoriaId: string; montoTotal: number; fecha: string; descripcion?: string; cuentaId?: string | null },
+    comprobante: File,
+  ) {
     const form = new FormData();
     form.set('categoriaId', datos.categoriaId);
     form.set('montoTotal', String(datos.montoTotal));
     form.set('fecha', datos.fecha);
     if (datos.descripcion) form.set('descripcion', datos.descripcion);
+    if (datos.cuentaId) form.set('cuentaId', datos.cuentaId);
     form.set('comprobante', comprobante);
     return this.http.post<GastoConItems>(`${API_URL}/gastos/rapido`, form);
   }

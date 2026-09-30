@@ -11,6 +11,48 @@
   }
 }
 
+.page-head-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.movimiento-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.movimiento-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.movimiento-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.movimiento-detalle {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.movimiento-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
 .hint-text {
   font-size: 0.85rem;
   color: var(--text-dim);

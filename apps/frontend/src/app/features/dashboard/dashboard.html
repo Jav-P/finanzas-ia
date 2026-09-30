@@ -52,6 +52,56 @@
     }
   </div>
 
+  @if (ingresosPendientes().length) {
+    <div class="plan-card">
+      <div class="plan-head">
+        <h2>Ingresos por confirmar</h2>
+        <span class="hint-text plan-hint">¿Ya te llegó alguno de estos? Confírmalo para que sume a tus cuentas.</span>
+      </div>
+      <div class="ingreso-pendiente-lista">
+        @for (ingreso of ingresosPendientes(); track ingreso.ingresoId + ingreso.periodo) {
+          <div class="ingreso-pendiente-fila">
+            <div class="ingreso-pendiente-info">
+              <strong>{{ ingreso.descripcion }}</strong>
+              <span class="hint-text">Esperado el {{ ingreso.fechaEsperada }} · {{ ingreso.monto | number: '1.0-0' }}</span>
+            </div>
+
+            @if (confirmandoId() !== ingreso.ingresoId + '|' + ingreso.periodo) {
+              <div class="ingreso-pendiente-acciones">
+                @if (cuentas().length) {
+                  <button mat-flat-button (click)="prepararConfirmacion(ingreso)">Confirmar</button>
+                } @else {
+                  <a mat-button routerLink="/cuentas">Crea una cuenta primero</a>
+                }
+                <button mat-button (click)="omitirIngreso(ingreso)">Omitir este mes</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (ingresoConfirmando(); as ingreso) {
+        <div class="ingreso-pendiente-form">
+          <span class="hint-text">Confirmando: {{ ingreso.descripcion }}</span>
+          <label class="cuenta-select-nativo">
+            Cuenta
+            <select name="cuentaConfirmarId" [(ngModel)]="cuentaConfirmarId">
+              @for (cuenta of cuentas(); track cuenta.id) {
+                <option [ngValue]="cuenta.id">{{ cuenta.nombre }}</option>
+              }
+            </select>
+          </label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ingreso-pendiente-monto">
+            <mat-label>Monto</mat-label>
+            <input matInput appMonto name="montoConfirmar" [(ngModel)]="montoConfirmar" />
+          </mat-form-field>
+          <button mat-flat-button [disabled]="!cuentaConfirmarId" (click)="confirmarIngreso(ingreso)">Confirmar</button>
+          <button mat-button (click)="confirmandoId.set(null)">Cancelar</button>
+        </div>
+      }
+    </div>
+  }
+
   <div class="plan-card">
     <div class="plan-head">
       <h2>Plan del mes</h2>

@@ -8,9 +8,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import type { InstanciaConDetalle } from '@finanzas-ia/shared-types';
+import type { Cuenta, InstanciaConDetalle } from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
@@ -27,6 +28,7 @@ import { dateToIso } from '../../core/date-utils';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatSelectModule,
     MatDatepickerModule,
     MontoInputDirective,
   ],
@@ -40,16 +42,22 @@ export class ObligacionDetalle implements OnInit {
   protected readonly session = inject(SessionService);
 
   protected readonly instancia = signal<InstanciaConDetalle | null>(null);
+  protected readonly cuentas = signal<Cuenta[]>([]);
   protected readonly guardando = signal(false);
   protected readonly error = signal<string | null>(null);
 
   protected fechaPago: Date | null = new Date();
   protected montoPagado: number | null = null;
   protected archivo: File | null = null;
+  protected cuentaId = '';
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.cargar(id);
+    this.api.cuentas().subscribe((cuentas) => {
+      this.cuentas.set(cuentas);
+      this.cuentaId = cuentas.find((c) => c.tipo === 'ahorros')?.id ?? '';
+    });
   }
 
   onArchivoSeleccionado(event: Event): void {
@@ -78,7 +86,7 @@ export class ObligacionDetalle implements OnInit {
     this.api
       .registrarPago(
         instancia.id,
-        { usuarioPagoId: usuarioId, fechaPago, montoPagado: this.montoPagado },
+        { usuarioPagoId: usuarioId, fechaPago, montoPagado: this.montoPagado, cuentaId: this.cuentaId || null },
         this.archivo,
       )
       .subscribe({

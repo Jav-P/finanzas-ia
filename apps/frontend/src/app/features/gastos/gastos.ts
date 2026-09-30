@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import type {
   Categoria,
   CreateGastoItemDto,
+  Cuenta,
   GastoConItems,
   HistoricoPrecioItem,
   Lugar,
@@ -55,6 +56,7 @@ export class Gastos implements OnInit {
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly lugares = signal<Lugar[]>([]);
   protected readonly mediosPago = signal<MedioPago[]>([]);
+  protected readonly cuentas = signal<Cuenta[]>([]);
   protected readonly productos = signal<Producto[]>([]);
   protected readonly guardando = signal(false);
   protected readonly historico = signal<HistoricoPrecioItem[] | null>(null);
@@ -64,6 +66,7 @@ export class Gastos implements OnInit {
   protected categoriaId = '';
   protected lugarNombre = '';
   protected medioPagoId = '';
+  protected cuentaId = '';
   protected fecha: Date | null = new Date();
   protected items: ItemBorrador[] = [];
 
@@ -78,13 +81,16 @@ export class Gastos implements OnInit {
       lugares: this.api.lugares(),
       mediosPago: this.api.mediosPago(),
       productos: this.api.productos(),
-    }).subscribe(({ categorias, lugares, mediosPago, productos }) => {
+      cuentas: this.api.cuentas(),
+    }).subscribe(({ categorias, lugares, mediosPago, productos, cuentas }) => {
       this.categorias.set(categorias);
       this.lugares.set(lugares);
       this.mediosPago.set(mediosPago);
       this.productos.set(productos);
+      this.cuentas.set(cuentas);
       const mercado = categorias.find((c) => c.nombre.toLowerCase() === 'mercado');
       this.categoriaId = mercado?.id ?? categorias[0]?.id ?? '';
+      this.cuentaId = cuentas.find((c) => c.tipo === 'tarjeta_credito')?.id ?? '';
     });
     this.cargarGastos();
     this.agregarItem();
@@ -127,6 +133,7 @@ export class Gastos implements OnInit {
         categoriaId: this.categoriaId,
         lugarId,
         medioPagoId: this.medioPagoId || null,
+        cuentaId: this.cuentaId || null,
         descripcion: this.descripcion,
         montoTotal: this.montoTotal,
         fecha,

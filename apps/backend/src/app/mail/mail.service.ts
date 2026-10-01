@@ -43,4 +43,24 @@ export class MailService {
       return false;
     }
   }
+
+  async enviarRecuperacion(email: string, link: string): Promise<boolean> {
+    try {
+      await this.getTransporter().sendMail({
+        from: '"Finanzas en pareja" <invitaciones@finanzasenpareja.com>',
+        to: email,
+        subject: 'Restablece tu contraseña en Finanzas en pareja',
+        html: `
+          <p>Recibimos una solicitud para restablecer tu contraseña en Finanzas en pareja.</p>
+          <p><a href="${link}">Hace click aqui para elegir una contraseña nueva</a></p>
+          <p>Si el link no funciona, copia y pega esta direccion en tu navegador:<br>${link}</p>
+          <p>Si tu no pediste esto, puedes ignorar este correo: tu contraseña actual sigue funcionando.</p>
+        `,
+      });
+      return true;
+    } catch (error) {
+      this.logger.error('No se pudo enviar el correo de recuperacion', error instanceof Error ? error.stack : error);
+      return false;
+    }
+  }
 }

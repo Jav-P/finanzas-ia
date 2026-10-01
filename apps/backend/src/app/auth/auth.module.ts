@@ -4,12 +4,13 @@ import { SupabaseModule } from '../supabase/supabase.module';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { HogaresModule } from '../hogares/hogares.module';
 import { InvitacionesModule } from '../invitaciones/invitaciones.module';
+import { MailModule } from '../mail/mail.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 
 @Module({
-  imports: [SupabaseModule, UsuariosModule, HogaresModule, InvitacionesModule],
+  imports: [SupabaseModule, UsuariosModule, HogaresModule, InvitacionesModule, MailModule],
   controllers: [AuthController],
   providers: [AuthService, { provide: APP_GUARD, useClass: AuthGuard }],
 })

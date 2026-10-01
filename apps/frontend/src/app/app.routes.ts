@@ -14,6 +14,8 @@ import { Comprobantes } from './features/comprobantes/comprobantes';
 import { CambiarPassword } from './features/cambiar-password/cambiar-password';
 import { Login } from './features/auth/login';
 import { Registro } from './features/auth/registro';
+import { OlvidePassword } from './features/auth/olvide-password';
+import { RestablecerPassword } from './features/auth/restablecer-password';
 import { InvitacionAceptar } from './features/auth/invitacion-aceptar';
 import { SinHogar } from './features/auth/sin-hogar';
 import { Invitaciones } from './features/invitaciones/invitaciones';
@@ -23,6 +25,10 @@ export const appRoutes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: 'login', component: Login, canActivate: [soloInvitadoGuard] },
   { path: 'registro', component: Registro, canActivate: [soloInvitadoGuard] },
+  { path: 'olvide-password', component: OlvidePassword, canActivate: [soloInvitadoGuard] },
+  // Sin guard: el link del correo debe funcionar aunque la persona
+  // tenga sesion activa en ese navegador (otro dispositivo, etc).
+  { path: 'restablecer-password', component: RestablecerPassword },
   { path: 'sin-hogar', component: SinHogar, canActivate: [authGuard] },
   { path: 'invitacion/:token', component: InvitacionAceptar, canActivate: [authGuard] },
   { path: 'invitar', component: Invitaciones, canActivate: [hogarGuard] },

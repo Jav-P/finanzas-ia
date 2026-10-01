@@ -39,6 +39,15 @@ export interface CambiarPasswordDto {
   passwordNueva: string;
 }
 
+export interface OlvidePasswordDto {
+  email: string;
+}
+
+export interface RestablecerPasswordDto {
+  token: string;
+  passwordNueva: string;
+}
+
 export interface SesionAuth {
   accessToken: string;
   refreshToken: string;

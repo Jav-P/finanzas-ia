@@ -10,7 +10,9 @@ import type {
   CompletarRegistroDto,
   CompletarRegistroResultado,
   CredencialesDto,
+  OlvidePasswordDto,
   RefrescarSesionDto,
+  RestablecerPasswordDto,
   SesionAuth,
   CreateCategoriaDto,
   CreateGastoDto,
@@ -97,6 +99,14 @@ export class ApiService {
 
   cambiarPassword(dto: CambiarPasswordDto) {
     return this.http.post<void>(`${API_URL}/auth/cambiar-password`, dto);
+  }
+
+  olvidePassword(dto: OlvidePasswordDto) {
+    return this.http.post<void>(`${API_URL}/auth/olvide-password`, dto);
+  }
+
+  restablecerPassword(dto: RestablecerPasswordDto) {
+    return this.http.post<void>(`${API_URL}/auth/restablecer-password`, dto);
   }
 
   crearInvitacion(dto: CreateInvitacionDto) {

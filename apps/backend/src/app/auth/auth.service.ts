@@ -1,15 +1,18 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Session } from '@supabase/supabase-js';
 import type {
   CambiarPasswordDto,
   CompletarRegistroDto,
   CompletarRegistroResultado,
+  RestablecerPasswordDto,
   SesionAuth,
 } from '@finanzas-ia/shared-types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { HogaresService } from '../hogares/hogares.service';
 import { InvitacionesService } from '../invitaciones/invitaciones.service';
+import { MailService } from '../mail/mail.service';
 import type { RequestUsuario } from './auth.guard';
 
 function toSesionAuth(session: Session): SesionAuth {
@@ -29,6 +32,8 @@ export class AuthService {
     private readonly usuarios: UsuariosService,
     private readonly hogares: HogaresService,
     private readonly invitaciones: InvitacionesService,
+    private readonly mail: MailService,
+    private readonly config: ConfigService,
   ) {}
 
   // Se crea el usuario por la via de administrador (con la key de
@@ -89,6 +94,44 @@ export class AuthService {
       password: dto.passwordNueva,
     });
     if (error) throw new BadRequestException(error.message);
+  }
+
+  // "Olvide mi contraseña": nunca revela si el correo existe o no (el
+  // controller siempre responde igual). Se usa generateLink en vez de
+  // la invitacion/recovery automatica de Supabase porque el front
+  // nunca habla con Supabase directo: el link que mandamos por correo
+  // apunta a nuestra propia pantalla, con el hashed_token como parametro.
+  async olvidePassword(email: string): Promise<void> {
+    const { data, error } = await this.supabase.client.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+    });
+    if (error || !data.properties?.hashed_token) {
+      this.logger.warn(`No se genero link de recuperacion para ${email}: ${error?.message ?? 'sin hashed_token'}`);
+      return;
+    }
+
+    const link = `${this.config.getOrThrow<string>('FRONTEND_URL')}/restablecer-password?token=${data.properties.hashed_token}`;
+    await this.mail.enviarRecuperacion(email, link);
+  }
+
+  // El hashed_token generado arriba se valida aca con verifyOtp (lo
+  // revisa Supabase: expiracion, que no se haya usado ya, etc.). Si es
+  // valido, se sobreescribe la contraseña con la key de servicio, igual
+  // que en cambiarPassword.
+  async restablecerPassword(dto: RestablecerPasswordDto): Promise<void> {
+    const { data, error } = await this.supabase.authClient.auth.verifyOtp({
+      token_hash: dto.token,
+      type: 'recovery',
+    });
+    if (error || !data.user) {
+      throw new BadRequestException('El enlace no es válido o ya expiró. Pide uno nuevo.');
+    }
+
+    const { error: errorUpdate } = await this.supabase.client.auth.admin.updateUserById(data.user.id, {
+      password: dto.passwordNueva,
+    });
+    if (errorUpdate) throw new BadRequestException(errorUpdate.message);
   }
 
   async completarRegistro(

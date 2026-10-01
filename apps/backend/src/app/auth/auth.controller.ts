@@ -1,5 +1,12 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
-import type { CambiarPasswordDto, CompletarRegistroDto, CredencialesDto, RefrescarSesionDto } from '@finanzas-ia/shared-types';
+import type {
+  CambiarPasswordDto,
+  CompletarRegistroDto,
+  CredencialesDto,
+  OlvidePasswordDto,
+  RefrescarSesionDto,
+  RestablecerPasswordDto,
+} from '@finanzas-ia/shared-types';
 import { UsuarioActual } from './usuario-actual.decorator';
 import type { RequestUsuario } from './auth.guard';
 import { Public } from './public.decorator';
@@ -40,6 +47,29 @@ export class AuthController {
   @Post('logout')
   async logout(@Body() dto: { accessToken?: string }) {
     await this.auth.logout(dto.accessToken);
+  }
+
+  // Siempre responde igual, exista o no el correo: evita que alguien
+  // use este endpoint para averiguar que correos estan registrados.
+  @Public()
+  @Post('olvide-password')
+  async olvidePassword(@Body() dto: OlvidePasswordDto) {
+    if (!dto.email) {
+      throw new BadRequestException('email es requerido');
+    }
+    await this.auth.olvidePassword(dto.email);
+  }
+
+  @Public()
+  @Post('restablecer-password')
+  restablecerPassword(@Body() dto: RestablecerPasswordDto) {
+    if (!dto.token || !dto.passwordNueva) {
+      throw new BadRequestException('token y passwordNueva son requeridos');
+    }
+    if (dto.passwordNueva.length < 6) {
+      throw new BadRequestException('La contraseña nueva debe tener al menos 6 caracteres');
+    }
+    return this.auth.restablecerPassword(dto);
   }
 
   @Post('completar-registro')

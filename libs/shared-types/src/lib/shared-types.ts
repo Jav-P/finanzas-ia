@@ -34,6 +34,11 @@ export interface RefrescarSesionDto {
   refreshToken: string;
 }
 
+export interface CambiarPasswordDto {
+  passwordActual: string;
+  passwordNueva: string;
+}
+
 export interface SesionAuth {
   accessToken: string;
   refreshToken: string;

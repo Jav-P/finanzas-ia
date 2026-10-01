@@ -63,6 +63,10 @@
           <div class="who-avatar">{{ iniciales() }}</div>
           <strong class="label">{{ session.usuario()?.nombre }}</strong>
         </div>
+        <a class="signout" routerLink="/cambiar-password" routerLinkActive="active" [title]="'Cambiar contraseña'">
+          <mat-icon>lock_reset</mat-icon>
+          <span class="label">Cambiar contraseña</span>
+        </a>
         <button class="signout" (click)="cerrarSesion()" [title]="'Cerrar sesión'">
           <mat-icon>logout</mat-icon>
           <span class="label">Cerrar sesión</span>
@@ -162,6 +166,10 @@
           <a class="sheet-link" routerLink="/invitar" routerLinkActive="active" (click)="cerrarMenu()">
             <mat-icon>person_add</mat-icon>
             <span>Invitar</span>
+          </a>
+          <a class="sheet-link" routerLink="/cambiar-password" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>lock_reset</mat-icon>
+            <span>Cambiar contraseña</span>
           </a>
         </div>
 

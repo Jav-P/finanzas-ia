@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import type { Session } from '@supabase/supabase-js';
 import type {
+  CambiarPasswordDto,
   CompletarRegistroDto,
   CompletarRegistroResultado,
   SesionAuth,
@@ -72,6 +73,22 @@ export class AuthService {
     } catch (error) {
       this.logger.warn('No se pudo revocar el token en logout', error instanceof Error ? error.stack : error);
     }
+  }
+
+  // No depende de correo: se verifica la contraseña actual contra
+  // GoTrue (login real, sin crear sesion nueva de cara al cliente) y,
+  // si es correcta, se sobreescribe con la key de servicio.
+  async cambiarPassword(usuarioActual: RequestUsuario, dto: CambiarPasswordDto): Promise<void> {
+    const { error: errorLogin } = await this.supabase.authClient.auth.signInWithPassword({
+      email: usuarioActual.email,
+      password: dto.passwordActual,
+    });
+    if (errorLogin) throw new UnauthorizedException('La contraseña actual no es correcta');
+
+    const { error } = await this.supabase.client.auth.admin.updateUserById(usuarioActual.id, {
+      password: dto.passwordNueva,
+    });
+    if (error) throw new BadRequestException(error.message);
   }
 
   async completarRegistro(

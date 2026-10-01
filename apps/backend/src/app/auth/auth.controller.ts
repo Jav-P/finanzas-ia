@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
-import type { CompletarRegistroDto, CredencialesDto, RefrescarSesionDto } from '@finanzas-ia/shared-types';
+import type { CambiarPasswordDto, CompletarRegistroDto, CredencialesDto, RefrescarSesionDto } from '@finanzas-ia/shared-types';
 import { UsuarioActual } from './usuario-actual.decorator';
 import type { RequestUsuario } from './auth.guard';
 import { Public } from './public.decorator';
@@ -45,5 +45,16 @@ export class AuthController {
   @Post('completar-registro')
   completarRegistro(@UsuarioActual() usuario: RequestUsuario, @Body() dto: CompletarRegistroDto) {
     return this.auth.completarRegistro(usuario, dto);
+  }
+
+  @Post('cambiar-password')
+  cambiarPassword(@UsuarioActual() usuario: RequestUsuario, @Body() dto: CambiarPasswordDto) {
+    if (!dto.passwordActual || !dto.passwordNueva) {
+      throw new BadRequestException('passwordActual y passwordNueva son requeridos');
+    }
+    if (dto.passwordNueva.length < 6) {
+      throw new BadRequestException('La contraseña nueva debe tener al menos 6 caracteres');
+    }
+    return this.auth.cambiarPassword(usuario, dto);
   }
 }

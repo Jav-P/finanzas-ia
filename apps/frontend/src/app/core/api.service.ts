@@ -6,6 +6,7 @@ import type {
   Categoria,
   Hogar,
   ComprobantePagoOcrResultado,
+  CambiarPasswordDto,
   CompletarRegistroDto,
   CompletarRegistroResultado,
   CredencialesDto,
@@ -92,6 +93,10 @@ export class ApiService {
 
   completarRegistro(dto: CompletarRegistroDto) {
     return this.http.post<CompletarRegistroResultado>(`${API_URL}/auth/completar-registro`, dto);
+  }
+
+  cambiarPassword(dto: CambiarPasswordDto) {
+    return this.http.post<void>(`${API_URL}/auth/cambiar-password`, dto);
   }
 
   crearInvitacion(dto: CreateInvitacionDto) {

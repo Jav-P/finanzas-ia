@@ -44,6 +44,10 @@
           <mat-icon>shopping_cart</mat-icon>
           <span class="label">Mercado / gastos</span>
         </a>
+        <a class="nav-item" routerLink="/comprobantes" routerLinkActive="active">
+          <mat-icon>receipt_long</mat-icon>
+          <span class="label">Comprobantes</span>
+        </a>
         <a class="nav-item" routerLink="/catalogos" routerLinkActive="active">
           <mat-icon>sell</mat-icon>
           <span class="label">Catálogos</span>
@@ -146,6 +150,10 @@
           <a class="sheet-link" routerLink="/creditos" routerLinkActive="active" (click)="cerrarMenu()">
             <mat-icon>credit_card</mat-icon>
             <span>Créditos</span>
+          </a>
+          <a class="sheet-link" routerLink="/comprobantes" routerLinkActive="active" (click)="cerrarMenu()">
+            <mat-icon>receipt_long</mat-icon>
+            <span>Comprobantes</span>
           </a>
           <a class="sheet-link" routerLink="/catalogos" routerLinkActive="active" (click)="cerrarMenu()">
             <mat-icon>sell</mat-icon>

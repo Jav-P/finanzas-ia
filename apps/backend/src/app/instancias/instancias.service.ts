@@ -67,6 +67,7 @@ export class InstanciasService {
     const enriched = instancias.map((row) =>
       this.enrich(row, obligacionesById, categoriasById, pagosByInstancia),
     );
+    await this.withSignedUrls(enriched);
 
     return estado ? enriched.filter((i) => i.estado === estado) : enriched;
   }
@@ -216,6 +217,27 @@ export class InstanciasService {
       .createSignedUrl(pago.urlComprobante, 3600);
     if (error || !data) return pago;
     return { ...pago, urlComprobante: data.signedUrl };
+  }
+
+  // Firma en lote (una sola llamada a Storage) los comprobantes de
+  // todos los pagos de una lista de instancias, mutandolas in-place.
+  private async withSignedUrls(instancias: InstanciaConDetalle[]): Promise<void> {
+    const paths = instancias.flatMap((i) => i.pagos.map((p) => p.urlComprobante)).filter(Boolean);
+    if (!paths.length) return;
+
+    const { data, error } = await this.supabase.client.storage
+      .from(BUCKET)
+      .createSignedUrls(paths, 3600);
+    if (error || !data) return;
+
+    const urlPorPath = new Map(data.map((d) => [d.path, d.signedUrl]));
+    for (const instancia of instancias) {
+      instancia.pagos = instancia.pagos.map((p) =>
+        p.urlComprobante && urlPorPath.get(p.urlComprobante)
+          ? { ...p, urlComprobante: urlPorPath.get(p.urlComprobante)! }
+          : p,
+      );
+    }
   }
 
   private enrich(

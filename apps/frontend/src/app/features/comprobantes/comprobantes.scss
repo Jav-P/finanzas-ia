@@ -1,0 +1,66 @@
+.page-head {
+  margin-bottom: 0.3rem;
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+.hint-text {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.empty-state {
+  color: var(--text-faint);
+  font-size: 0.9rem;
+}
+
+.periodo-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-width: 320px;
+  margin: 1rem 0 1.5rem;
+}
+
+.periodo-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.periodo-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.periodo-campo {
+  flex: 1;
+}
+
+.comprobante-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.comprobante-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.comprobante-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}

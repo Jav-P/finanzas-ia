@@ -1,0 +1,49 @@
+<div class="page-head">
+  <h1>Comprobantes</h1>
+</div>
+<p class="hint-text">Todos los comprobantes de gastos y pagos de obligaciones de un mes, en un solo lugar.</p>
+
+<div class="periodo-selector">
+  <span class="periodo-label">Período</span>
+  <div class="periodo-fila">
+    <button mat-icon-button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <mat-form-field appearance="outline" class="periodo-campo">
+      <input matInput [matDatepicker]="picker" readonly aria-label="Período" [value]="periodoFecha()" (click)="picker.open()" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker
+        #picker
+        startView="multi-year"
+        [startAt]="periodoFecha()"
+        (monthSelected)="seleccionarMes($event, picker)"
+      ></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-icon-button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>
+
+<mat-card class="card-section">
+  <mat-card-content>
+    @if (filas().length) {
+      <div class="comprobante-lista">
+        @for (fila of filas(); track fila.tipo + fila.fecha + fila.descripcion + $index) {
+          <div class="comprobante-fila">
+            <div class="comprobante-info">
+              <strong>{{ fila.descripcion }}</strong>
+              <span class="hint-text">{{ fila.tipo }} · {{ fila.fecha }}</span>
+            </div>
+            <b class="mono">{{ fila.monto | number: '1.0-0' }}</b>
+            <a class="auth-link" [href]="fila.urlComprobante" target="_blank">Ver comprobante</a>
+          </div>
+        }
+      </div>
+    } @else if (!cargando()) {
+      <p class="empty-state">No hay comprobantes registrados para este mes.</p>
+    }
+  </mat-card-content>
+</mat-card>

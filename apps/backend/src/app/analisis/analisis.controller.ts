@@ -13,4 +13,12 @@ export class AnalisisController {
     }
     return this.analisis.categorias_(hogarId, periodo);
   }
+
+  @Get('salud-financiera')
+  saludFinanciera(@HogarActual() hogarId: string, @Query('periodo') periodo?: string) {
+    if (!periodo) {
+      throw new BadRequestException('periodo (YYYY-MM) es requerido');
+    }
+    return this.analisis.saludFinanciera(hogarId, periodo);
+  }
 }

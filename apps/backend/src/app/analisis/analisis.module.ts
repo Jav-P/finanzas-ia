@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { BalanceModule } from '../balance/balance.module';
 import { PresupuestosModule } from '../presupuestos/presupuestos.module';
 import { CategoriasModule } from '../categorias/categorias.module';
+import { CuentasModule } from '../cuentas/cuentas.module';
+import { ObligacionesModule } from '../obligaciones/obligaciones.module';
 import { AnalisisController } from './analisis.controller';
 import { AnalisisService } from './analisis.service';
 
 @Module({
-  imports: [BalanceModule, PresupuestosModule, CategoriasModule],
+  imports: [BalanceModule, PresupuestosModule, CategoriasModule, CuentasModule, ObligacionesModule],
   controllers: [AnalisisController],
   providers: [AnalisisService],
 })

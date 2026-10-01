@@ -49,6 +49,7 @@ import type {
   Producto,
   Recomendacion,
   RegistrarPagoDto,
+  SaludFinanciera,
   UpdateCategoriaDto,
   UpdateGastoDto,
   UpdateIngresoDto,
@@ -237,6 +238,10 @@ export class ApiService {
 
   analisisCategorias(periodo: string) {
     return this.http.get<CategoriaCosto[]>(`${API_URL}/analisis/categorias`, { params: { periodo } });
+  }
+
+  saludFinanciera(periodo: string) {
+    return this.http.get<SaludFinanciera>(`${API_URL}/analisis/salud-financiera`, { params: { periodo } });
   }
 
   // Presupuestos

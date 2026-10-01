@@ -29,3 +29,55 @@
 .chart-box--short {
   height: 140px;
 }
+
+.salud-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.salud-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel-raised);
+  border-radius: var(--radius-sm);
+}
+
+.salud-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.salud-valor {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--cyan);
+  font-variant-numeric: tabular-nums;
+
+  &.negativo {
+    color: var(--danger);
+  }
+}
+
+.salud-hint {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.simulador-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem 1rem;
+  max-width: 640px;
+  margin-bottom: 0.75rem;
+}
+
+.simulador-resultado {
+  font-size: 0.9rem;
+  background: var(--panel-raised);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  max-width: 640px;
+}

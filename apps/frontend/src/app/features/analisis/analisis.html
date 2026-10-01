@@ -26,6 +26,36 @@
   </div>
 </div>
 
+@if (salud(); as s) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Salud financiera</h2>
+      <div class="salud-grid">
+        <div class="salud-item">
+          <span class="salud-label">Colchón de emergencia</span>
+          <span class="salud-valor">{{ s.colchonMeses != null ? (s.colchonMeses | number: '1.1-1') + ' meses' : '—' }}</span>
+          <span class="salud-hint">Cuánto te alcanza lo disponible si dejaras de recibir ingresos.</span>
+        </div>
+        <div class="salud-item">
+          <span class="salud-label">Capacidad de inversión mensual</span>
+          <span class="salud-valor">{{ s.capacidadInversionMensual | number: '1.0-0' }}</span>
+          <span class="salud-hint">Lo que te queda libre este mes tras obligaciones y presupuestos.</span>
+        </div>
+        <div class="salud-item">
+          <span class="salud-label">Nivel de endeudamiento</span>
+          <span class="salud-valor">{{ s.nivelEndeudamiento != null ? (s.nivelEndeudamiento * 100 | number: '1.0-0') + '%' : '—' }}</span>
+          <span class="salud-hint">Cuánto de tu ingreso se va en cuotas de crédito.</span>
+        </div>
+        <div class="salud-item">
+          <span class="salud-label">Costo de tu deuda</span>
+          <span class="salud-valor">{{ s.costoDeudaPromedio != null ? (s.costoDeudaPromedio | number: '1.2-2') + '% E.A.' : '—' }}</span>
+          <span class="salud-hint">Tasa promedio de tus créditos, ponderada por saldo.</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
 <mat-card class="card-section">
   <mat-card-content>
     <h2>Qué es lo más caro</h2>
@@ -64,6 +94,73 @@
       </div>
     } @else {
       <p class="empty-state">No hay presupuestos definidos para este período.</p>
+    }
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Simulador: ¿abono o invierto?</h2>
+    <p class="chart-hint">
+      Compara qué te cuesta un crédito contra lo que rendiría invertir ese mismo dinero.
+    </p>
+    @if (creditos().length) {
+      <div class="simulador-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Crédito</mat-label>
+          <mat-select name="creditoSimuladoId" [(ngModel)]="creditoSimuladoId">
+            @for (credito of creditos(); track credito.obligacionId) {
+              <mat-option [value]="credito.obligacionId">
+                {{ credito.descripcion }} ({{ credito.tasaInteres != null ? (credito.tasaInteres | number: '1.2-2') + '%' : 'sin tasa' }})
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Rendimiento de la inversión (% E.A.)</mat-label>
+          <input matInput type="number" step="0.1" name="tasaInversion" [(ngModel)]="tasaInversion" />
+        </mat-form-field>
+      </div>
+      @if (recomendacionAbonoOInversion(); as recomendacion) {
+        <p class="simulador-resultado">{{ recomendacion }}</p>
+      } @else if (creditoSimulado() && creditoSimulado()!.tasaInteres == null) {
+        <p class="hint-text">Ese crédito no tiene tasa de interés registrada; no se puede comparar.</p>
+      }
+    } @else {
+      <p class="empty-state">No tienes créditos registrados todavía.</p>
+    }
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="card-section">
+  <mat-card-content>
+    <h2>Simulador: ¿qué pasa si...?</h2>
+    <p class="chart-hint">Evalúa el impacto de un imprevisto sobre tu colchón y tu capacidad de inversión.</p>
+    <div class="simulador-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Pierdo este ingreso mensual (opcional)</mat-label>
+        <input matInput appMonto name="reduccionIngresoMensual" [(ngModel)]="reduccionIngresoMensual" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Gasto imprevisto único (opcional)</mat-label>
+        <input matInput appMonto name="gastoImprevistoUnico" [(ngModel)]="gastoImprevistoUnico" />
+      </mat-form-field>
+    </div>
+    @if (simulacionEscenario(); as sim) {
+      <div class="salud-grid">
+        <div class="salud-item">
+          <span class="salud-label">Disponible tras el imprevisto</span>
+          <span class="salud-valor">{{ sim.nuevoDisponible | number: '1.0-0' }}</span>
+        </div>
+        <div class="salud-item">
+          <span class="salud-label">Nuevo colchón de emergencia</span>
+          <span class="salud-valor">{{ sim.nuevoColchon != null ? (sim.nuevoColchon | number: '1.1-1') + ' meses' : '—' }}</span>
+        </div>
+        <div class="salud-item">
+          <span class="salud-label">Nueva capacidad de inversión</span>
+          <span class="salud-valor" [class.negativo]="sim.nuevaCapacidad < 0">{{ sim.nuevaCapacidad | number: '1.0-0' }}</span>
+        </div>
+      </div>
     }
   </mat-card-content>
 </mat-card>

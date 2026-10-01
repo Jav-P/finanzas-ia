@@ -280,6 +280,23 @@ export interface CreateMedioPagoDto {
 
 export type UpdateMedioPagoDto = Partial<CreateMedioPagoDto>;
 
+export interface SaludFinanciera {
+  // Meses que el disponible (efectivo + ahorros + bolsillos) alcanzaria
+  // para cubrir obligaciones fijas + presupuestos si se dejara de
+  // recibir ingresos. Null si no hay gasto fijo mensual con que dividir.
+  colchonMeses: number | null;
+  // Lo mismo que Balance.disponibleParaCreditos, para tenerlo junto a
+  // los demas indicadores de salud financiera.
+  capacidadInversionMensual: number;
+  // Cuotas mensuales de creditos activos / ingresos del periodo (0-1+).
+  // Null si no hay ingresos registrados.
+  nivelEndeudamiento: number | null;
+  // Tasa E.A. promedio de los creditos activos, ponderada por su saldo
+  // pendiente (o su cuota si no tienen saldo registrado). Null si
+  // ningun credito activo tiene tasa registrada.
+  costoDeudaPromedio: number | null;
+}
+
 // --- Cuentas y patrimonio ---
 
 export type TipoCuenta = 'efectivo' | 'ahorros' | 'bolsillo' | 'tarjeta_credito' | 'inversion';

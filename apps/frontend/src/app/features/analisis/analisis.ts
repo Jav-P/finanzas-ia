@@ -3,14 +3,25 @@ import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule, MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DATE_FORMATS } from '@angular/material/core';
 import type { ChartConfiguration } from 'chart.js';
-import type { Balance, CategoriaCosto, PresupuestoResumenItem } from '@finanzas-ia/shared-types';
+import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
+import type {
+  Balance,
+  CategoriaCosto,
+  CreditoResumen,
+  Patrimonio,
+  PresupuestoResumenItem,
+  SaludFinanciera,
+} from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { ChartDirective } from '../../core/chart.directive';
+import { MontoInputDirective } from '../../core/monto-input.directive';
 import { FORMATO_MES_ANIO, periodoActual, periodoDe, periodoMasMeses } from '../../core/mes-anio-formats';
 
 const CYAN = '#33e6e0';
@@ -28,13 +39,17 @@ function nombreMes(periodo: string): string {
 @Component({
   selector: 'app-analisis',
   imports: [
+    FormsModule,
+    DecimalPipe,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatIconModule,
     MatButtonModule,
     MatDatepickerModule,
     ChartDirective,
+    MontoInputDirective,
   ],
   providers: [{ provide: MAT_DATE_FORMATS, useValue: FORMATO_MES_ANIO }],
   templateUrl: './analisis.html',
@@ -48,9 +63,61 @@ export class Analisis implements OnInit {
   protected readonly balance = signal<Balance | null>(null);
   protected readonly categoriasCosto = signal<CategoriaCosto[]>([]);
   protected readonly resumenPresupuestos = signal<PresupuestoResumenItem[]>([]);
+  protected readonly salud = signal<SaludFinanciera | null>(null);
+  protected readonly patrimonio = signal<Patrimonio | null>(null);
+  protected readonly creditos = signal<CreditoResumen[]>([]);
+
+  // Simulador "¿abono o invierto?"
+  protected creditoSimuladoId = '';
+  protected tasaInversion: number | null = null;
+
+  // Simulador "¿qué pasa si...?"
+  protected reduccionIngresoMensual: number | null = null;
+  protected gastoImprevistoUnico: number | null = null;
 
   ngOnInit(): void {
     this.cargar();
+    this.api.creditos().subscribe((creditos) => this.creditos.set(creditos));
+  }
+
+  // Metodo (no computed): creditoSimuladoId es una propiedad normal que
+  // cambia por ngModel, no una signal, asi que un computed() no la
+  // detectaria y quedaria con el primer valor cacheado para siempre.
+  protected creditoSimulado(): CreditoResumen | null {
+    return this.creditos().find((c) => c.obligacionId === this.creditoSimuladoId) ?? null;
+  }
+
+  // Si lo que rendiria invertir es menor que la tasa del credito mas
+  // caro, abonar a ese credito "rinde" mas garantizado que invertir.
+  protected recomendacionAbonoOInversion(): string | null {
+    const credito = this.creditoSimulado();
+    if (!credito || credito.tasaInteres == null || this.tasaInversion == null) return null;
+
+    if (this.tasaInversion > credito.tasaInteres) {
+      return `Invertir (${this.tasaInversion}% E.A.) rendiría más que lo que te cuesta "${credito.descripcion}" (${credito.tasaInteres}% E.A.). Conviene más invertir ese dinero.`;
+    }
+    return `"${credito.descripcion}" te cuesta ${credito.tasaInteres}% E.A., más de lo que rendiría invertir (${this.tasaInversion}%). Abonarle es la apuesta más segura.`;
+  }
+
+  // Colchon de emergencia y capacidad de inversión recalculados con los
+  // ajustes hipotéticos del simulador, usando la misma formula que el
+  // backend (gastoMensualFijo = obligacionesProyectadas + presupuestado).
+  // Metodo, no computed: los montos del simulador son propiedades
+  // normales (ngModel), no signals.
+  protected simulacionEscenario(): { nuevoDisponible: number; nuevoColchon: number | null; nuevaCapacidad: number } | null {
+    const b = this.balance();
+    const p = this.patrimonio();
+    if (!b || !p) return null;
+
+    const reduccion = this.reduccionIngresoMensual ?? 0;
+    const imprevisto = this.gastoImprevistoUnico ?? 0;
+    const gastoMensualFijo = b.obligacionesProyectadas + b.presupuestado;
+
+    const nuevoDisponible = p.disponible - imprevisto;
+    const nuevoColchon = gastoMensualFijo > 0 ? nuevoDisponible / gastoMensualFijo : null;
+    const nuevaCapacidad = b.disponibleParaCreditos - reduccion;
+
+    return { nuevoDisponible, nuevoColchon, nuevaCapacidad };
   }
 
   periodoFecha(): Date {
@@ -184,5 +251,7 @@ export class Analisis implements OnInit {
     this.api.balance(periodo).subscribe((balance) => this.balance.set(balance));
     this.api.analisisCategorias(periodo).subscribe((categorias) => this.categoriasCosto.set(categorias));
     this.api.presupuestosResumen(periodo).subscribe((resumen) => this.resumenPresupuestos.set(resumen));
+    this.api.saludFinanciera(periodo).subscribe((salud) => this.salud.set(salud));
+    this.api.patrimonio().subscribe((patrimonio) => this.patrimonio.set(patrimonio));
   }
 }

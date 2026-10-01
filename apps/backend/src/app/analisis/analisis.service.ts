@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type { CategoriaCosto } from '@finanzas-ia/shared-types';
+import type { CategoriaCosto, SaludFinanciera } from '@finanzas-ia/shared-types';
 import { BalanceService } from '../balance/balance.service';
 import { PresupuestosService } from '../presupuestos/presupuestos.service';
 import { CategoriasService } from '../categorias/categorias.service';
+import { CuentasService } from '../cuentas/cuentas.service';
+import { ObligacionesService } from '../obligaciones/obligaciones.service';
 import { addMeses } from '../common/period';
 
 @Injectable()
@@ -11,6 +13,8 @@ export class AnalisisService {
     private readonly balance: BalanceService,
     private readonly presupuestos: PresupuestosService,
     private readonly categorias: CategoriasService,
+    private readonly cuentas: CuentasService,
+    private readonly obligaciones: ObligacionesService,
   ) {}
 
   // Ranking de categorias por costo total del mes, combinando lo fijo
@@ -52,5 +56,37 @@ export class AnalisisService {
         total: obligaciones + presupuesto,
       }))
       .sort((a, b) => b.total - a.total);
+  }
+
+  // Cuatro numeros para responder "¿puedo con un imprevisto?" y
+  // "¿que tan cara/pesada es mi deuda?", a partir de datos que ya se
+  // calculan en otros lados (Balance, Patrimonio, Creditos).
+  async saludFinanciera(hogarId: string, periodo: string): Promise<SaludFinanciera> {
+    const [balanceDelMes, patrimonio, creditos] = await Promise.all([
+      this.balance.calcular(hogarId, periodo),
+      this.cuentas.patrimonio(hogarId),
+      this.obligaciones.listCreditos(hogarId),
+    ]);
+
+    const gastoMensualFijo = balanceDelMes.obligacionesProyectadas + balanceDelMes.presupuestado;
+    const colchonMeses = gastoMensualFijo > 0 ? patrimonio.disponible / gastoMensualFijo : null;
+
+    const creditosActivos = creditos.filter((c) => c.activa);
+    const cuotasMensuales = creditosActivos.reduce((sum, c) => sum + c.montoCuota, 0);
+    const nivelEndeudamiento = balanceDelMes.ingresos > 0 ? cuotasMensuales / balanceDelMes.ingresos : null;
+
+    const conTasa = creditosActivos.filter((c) => c.tasaInteres != null);
+    const pesoTotal = conTasa.reduce((sum, c) => sum + (c.saldoPendiente ?? c.montoCuota), 0);
+    const costoDeudaPromedio =
+      pesoTotal > 0
+        ? conTasa.reduce((sum, c) => sum + c.tasaInteres! * (c.saldoPendiente ?? c.montoCuota), 0) / pesoTotal
+        : null;
+
+    return {
+      colchonMeses,
+      capacidadInversionMensual: balanceDelMes.disponibleParaCreditos,
+      nivelEndeudamiento,
+      costoDeudaPromedio,
+    };
   }
 }

@@ -28,7 +28,7 @@ export class MailService {
   async enviarInvitacion(email: string, hogarNombre: string, link: string): Promise<boolean> {
     try {
       await this.getTransporter().sendMail({
-        from: '"Finanzas en pareja" <invitaciones@finanzas-ia.local>',
+        from: '"Finanzas en pareja" <invitaciones@finanzasenpareja.com>',
         to: email,
         subject: `Te invitaron al hogar "${hogarNombre}" en Finanzas en pareja`,
         html: `

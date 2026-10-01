@@ -12,7 +12,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { ChartConfiguration } from 'chart.js';
-import type { Cuenta, Movimiento, Patrimonio, PatrimonioMes, TipoCuenta } from '@finanzas-ia/shared-types';
+import type {
+  Cuenta,
+  Moneda,
+  Movimiento,
+  Patrimonio,
+  PatrimonioMes,
+  TarjetaCiclo,
+  TipoCuenta,
+} from '@finanzas-ia/shared-types';
 import { ApiService } from '../../core/api.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
 import { ChartDirective } from '../../core/chart.directive';
@@ -24,6 +32,7 @@ const ETIQUETA_TIPO_CUENTA: Record<TipoCuenta, string> = {
   bolsillo: 'Bolsillo',
   tarjeta_credito: 'Tarjeta de crédito',
   inversion: 'Inversión',
+  bien: 'Bien físico',
 };
 
 const ETIQUETA_TIPO_MOVIMIENTO: Record<Movimiento['tipo'], string> = {
@@ -73,6 +82,8 @@ export class Cuentas implements OnInit {
   protected readonly patrimonio = signal<Patrimonio | null>(null);
   protected readonly historico = signal<PatrimonioMes[]>([]);
   protected readonly movimientos = signal<Movimiento[]>([]);
+  protected readonly ciclosTarjetas = signal<TarjetaCiclo[]>([]);
+  protected readonly tasasCambio = signal<Record<'USD' | 'EUR', number> | null>(null);
   protected readonly guardando = signal(false);
   protected readonly mostrarForm = signal(false);
   protected readonly mostrarTransferencia = signal(false);
@@ -82,6 +93,10 @@ export class Cuentas implements OnInit {
   protected nombre = '';
   protected cuentaPadreId = '';
   protected saldo: number | null = null;
+  protected moneda: Moneda = 'COP';
+  protected cupoTotal: number | null = null;
+  protected diaCorte: number | null = null;
+  protected diaPago: number | null = null;
 
   protected cuentaOrigenId = '';
   protected cuentaDestinoId = '';
@@ -92,11 +107,17 @@ export class Cuentas implements OnInit {
   protected readonly editandoId = signal<string | null>(null);
   protected saldoEdit: number | null = null;
 
+  protected readonly editandoCicloId = signal<string | null>(null);
+  protected cupoTotalEdit: number | null = null;
+  protected diaCorteEdit: number | null = null;
+  protected diaPagoEdit: number | null = null;
+
   protected readonly cuentasAhorros = computed(() => this.cuentas().filter((c) => c.tipo === 'ahorros'));
   protected readonly nombrePorCuenta = computed(() => new Map(this.cuentas().map((c) => [c.id, c.nombre])));
+  protected readonly cicloPorCuenta = computed(() => new Map(this.ciclosTarjetas().map((c) => [c.cuentaId, c])));
 
   // La plata disponible (cada cuenta seguida de sus bolsillos), las
-  // inversiones y lo que se debe en tarjetas.
+  // inversiones, los bienes fisicos y lo que se debe en tarjetas.
   protected readonly grupos = computed(() => {
     const todas = this.cuentas();
     return [
@@ -107,6 +128,7 @@ export class Cuentas implements OnInit {
           .flatMap((c) => [c, ...todas.filter((b) => b.cuentaPadreId === c.id)]),
       },
       { titulo: 'Inversiones', cuentas: todas.filter((c) => c.tipo === 'inversion') },
+      { titulo: 'Bienes físicos', cuentas: todas.filter((c) => c.tipo === 'bien') },
       { titulo: 'Tarjetas de crédito', cuentas: todas.filter((c) => c.tipo === 'tarjeta_credito') },
     ].filter((g) => g.cuentas.length);
   });
@@ -123,6 +145,7 @@ export class Cuentas implements OnInit {
           { label: 'Patrimonio neto', data: meses.map((m) => m.patrimonioNeto), borderColor: CYAN, backgroundColor: CYAN, tension: 0.3 },
           { label: 'Disponible', data: meses.map((m) => m.disponible), borderColor: VIOLET, backgroundColor: VIOLET, tension: 0.3 },
           { label: 'Inversiones', data: meses.map((m) => m.inversiones), borderColor: '#4f9dff', backgroundColor: '#4f9dff', tension: 0.3 },
+          { label: 'Bienes físicos', data: meses.map((m) => m.bienes), borderColor: '#f0a64e', backgroundColor: '#f0a64e', tension: 0.3 },
           { label: 'Deudas', data: meses.map((m) => m.deudas), borderColor: MAGENTA, backgroundColor: MAGENTA, tension: 0.3 },
         ],
       },
@@ -144,7 +167,7 @@ export class Cuentas implements OnInit {
 
   etiquetaSaldo(tipo: TipoCuenta): string {
     if (tipo === 'tarjeta_credito') return 'Deuda actual';
-    if (tipo === 'inversion') return 'Valor actual';
+    if (tipo === 'inversion' || tipo === 'bien') return 'Valor actual';
     return 'Saldo actual';
   }
 
@@ -152,6 +175,7 @@ export class Cuentas implements OnInit {
     if (tipo === 'tarjeta_credito') return 'Visa Bancolombia';
     if (tipo === 'bolsillo') return 'Vacaciones';
     if (tipo === 'inversion') return 'CDT Bancolombia';
+    if (tipo === 'bien') return 'Apartamento, carro...';
     return 'Nequi';
   }
 
@@ -160,6 +184,10 @@ export class Cuentas implements OnInit {
     this.nombre = '';
     this.cuentaPadreId = '';
     this.saldo = null;
+    this.moneda = 'COP';
+    this.cupoTotal = null;
+    this.diaCorte = null;
+    this.diaPago = null;
     this.mostrarForm.set(true);
   }
 
@@ -173,6 +201,10 @@ export class Cuentas implements OnInit {
         tipo: this.tipo,
         cuentaPadreId: this.tipo === 'bolsillo' ? this.cuentaPadreId : null,
         saldo: this.saldo ?? 0,
+        moneda: this.moneda,
+        cupoTotal: this.tipo === 'tarjeta_credito' ? this.cupoTotal : null,
+        diaCorte: this.tipo === 'tarjeta_credito' ? this.diaCorte : null,
+        diaPago: this.tipo === 'tarjeta_credito' ? this.diaPago : null,
       })
       .subscribe({
         next: () => {
@@ -200,6 +232,27 @@ export class Cuentas implements OnInit {
       },
       error: (err: HttpErrorResponse) => this.mostrarError(err, 'No se pudo actualizar el saldo'),
     });
+  }
+
+  editarCiclo(cuenta: Cuenta): void {
+    this.editandoCicloId.set(cuenta.id);
+    this.cupoTotalEdit = cuenta.cupoTotal;
+    this.diaCorteEdit = cuenta.diaCorte;
+    this.diaPagoEdit = cuenta.diaPago;
+  }
+
+  guardarCiclo(id: string): void {
+    this.guardando.set(true);
+    this.api
+      .editarCuenta(id, { cupoTotal: this.cupoTotalEdit, diaCorte: this.diaCorteEdit, diaPago: this.diaPagoEdit })
+      .subscribe({
+        next: () => {
+          this.guardando.set(false);
+          this.editandoCicloId.set(null);
+          this.cargar();
+        },
+        error: (err: HttpErrorResponse) => this.mostrarError(err, 'No se pudo actualizar el ciclo de la tarjeta'),
+      });
   }
 
   eliminar(cuenta: Cuenta): void {
@@ -261,5 +314,7 @@ export class Cuentas implements OnInit {
     this.api.patrimonio().subscribe((patrimonio) => this.patrimonio.set(patrimonio));
     this.api.patrimonioHistorico().subscribe((historico) => this.historico.set(historico));
     this.api.movimientos().subscribe((movimientos) => this.movimientos.set(movimientos));
+    this.api.ciclosTarjetas().subscribe((ciclos) => this.ciclosTarjetas.set(ciclos));
+    this.api.tasasCambioActuales().subscribe((tasas) => this.tasasCambio.set(tasas));
   }
 }

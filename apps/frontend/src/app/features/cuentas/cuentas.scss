@@ -103,6 +103,25 @@
   }
 }
 
+.tasas-cambio {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.tasa-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+
+  b {
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+}
+
 .cuenta-lista {
   display: flex;
   flex-direction: column;

@@ -2,12 +2,18 @@ import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post 
 import type { CreateCuentaDto, UpdateCuentaDto } from '@finanzas-ia/shared-types';
 import { HogarActual } from '../auth/usuario-actual.decorator';
 import { CuentasService } from './cuentas.service';
+import { TarjetasService } from './tarjetas.service';
+import { TasasCambioService } from './tasas-cambio.service';
 
-const TIPOS = ['efectivo', 'ahorros', 'bolsillo', 'tarjeta_credito', 'inversion'];
+const TIPOS = ['efectivo', 'ahorros', 'bolsillo', 'tarjeta_credito', 'inversion', 'bien'];
 
 @Controller('cuentas')
 export class CuentasController {
-  constructor(private readonly cuentas: CuentasService) {}
+  constructor(
+    private readonly cuentas: CuentasService,
+    private readonly tarjetas: TarjetasService,
+    private readonly tasasCambio: TasasCambioService,
+  ) {}
 
   @Get()
   findAll(@HogarActual() hogarId: string) {
@@ -22,6 +28,21 @@ export class CuentasController {
   @Get('patrimonio/historico')
   historico(@HogarActual() hogarId: string) {
     return this.cuentas.historico(hogarId);
+  }
+
+  @Get('tarjetas/ciclos')
+  ciclosTarjetas(@HogarActual() hogarId: string) {
+    return this.tarjetas.ciclos(hogarId);
+  }
+
+  @Get('tasas-cambio/actuales')
+  tasasActuales() {
+    return this.tasasCambio.ultimasTasas();
+  }
+
+  @Get('tasas-cambio/historico')
+  tasasHistorico() {
+    return this.tasasCambio.historico();
   }
 
   @Post()

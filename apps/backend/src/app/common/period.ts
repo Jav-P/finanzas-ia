@@ -23,6 +23,13 @@ export function addMeses(periodo: string, meses: number): string {
   return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// 'YYYY-MM-DD' + N dias -> 'YYYY-MM-DD'.
+export function addDiasIso(fechaIso: string, dias: number): string {
+  const fecha = new Date(`${fechaIso}T00:00:00Z`);
+  fecha.setUTCDate(fecha.getUTCDate() + dias);
+  return fecha.toISOString().slice(0, 10);
+}
+
 // 'YYYY-MM' -> "agosto de 2026", para mensajes en texto (recomendaciones).
 export function periodLabel(periodo: string): string {
   const [year, month] = periodo.split('-').map(Number);

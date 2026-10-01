@@ -313,7 +313,8 @@ export interface SaludFinanciera {
 
 // --- Cuentas y patrimonio ---
 
-export type TipoCuenta = 'efectivo' | 'ahorros' | 'bolsillo' | 'tarjeta_credito' | 'inversion';
+export type TipoCuenta = 'efectivo' | 'ahorros' | 'bolsillo' | 'tarjeta_credito' | 'inversion' | 'bien';
+export type Moneda = 'COP' | 'USD' | 'EUR';
 
 export interface Cuenta {
   id: string;
@@ -323,6 +324,11 @@ export interface Cuenta {
   cuentaPadreId: string | null; // solo bolsillos: la cuenta de ahorros de la que cuelgan
   saldo: number; // en tarjeta_credito es lo que se debe
   saldoActualizadoEn: string;
+  moneda: Moneda;
+  // Solo tiene sentido para tipo = 'tarjeta_credito':
+  cupoTotal: number | null;
+  diaCorte: number | null; // dia del mes en que corta el ciclo (1-28)
+  diaPago: number | null; // dia del mes limite para pagar (1-28)
   createdAt: string;
 }
 
@@ -331,20 +337,44 @@ export interface CreateCuentaDto {
   tipo: TipoCuenta;
   cuentaPadreId?: string | null;
   saldo: number;
+  moneda?: Moneda;
+  cupoTotal?: number | null;
+  diaCorte?: number | null;
+  diaPago?: number | null;
 }
 
 export interface UpdateCuentaDto {
   nombre?: string;
   saldo?: number;
+  cupoTotal?: number | null;
+  diaCorte?: number | null;
+  diaPago?: number | null;
 }
 
 export interface Patrimonio {
-  disponible: number; // efectivo + ahorros + bolsillos
+  disponible: number; // efectivo + ahorros + bolsillos (convertido a COP)
   inversiones: number;
+  bienes: number;
   deudaTarjetas: number;
   deudaCreditos: number; // saldo pendiente registrado de los creditos activos
   creditosSinSaldo: number; // creditos activos sin saldo registrado: no suman a la deuda
   patrimonioNeto: number;
+}
+
+// Cupo disponible de una tarjeta y sus proximas fechas de corte/pago,
+// calculadas a partir de diaCorte/diaPago (ver TarjetasService).
+export interface TarjetaCiclo {
+  cuentaId: string;
+  cupoTotal: number | null;
+  cupoDisponible: number | null;
+  proximaFechaCorte: string | null;
+  proximaFechaPago: string | null;
+}
+
+export interface TasaCambio {
+  fecha: string;
+  moneda: 'USD' | 'EUR';
+  valorCop: number;
 }
 
 // --- Movimientos entre cuentas ---
@@ -406,6 +436,7 @@ export interface PatrimonioMes {
   periodo: string; // YYYY-MM
   disponible: number;
   inversiones: number;
+  bienes: number;
   deudas: number;
   patrimonioNeto: number;
 }

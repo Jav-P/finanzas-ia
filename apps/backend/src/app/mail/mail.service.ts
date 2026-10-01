@@ -101,6 +101,64 @@ export class MailService {
     }
   }
 
+  async enviarRecordatorioObligacion(
+    email: string,
+    descripcion: string,
+    monto: number,
+    fechaVencimiento: string,
+    diasRestantes: number,
+  ): Promise<boolean> {
+    const link = `${this.config.getOrThrow<string>('FRONTEND_URL')}/obligaciones`;
+    const montoTexto = monto.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+    const cuando = diasRestantes === 0 ? 'hoy' : diasRestantes === 1 ? 'mañana' : `en ${diasRestantes} días`;
+    try {
+      await this.getTransporter().sendMail({
+        from: REMITENTE,
+        to: email,
+        subject: `"${descripcion}" vence ${cuando} (${montoTexto})`,
+        html: this.plantilla({
+          titulo: 'Un vencimiento se acerca',
+          cuerpoHtml: `
+            <p><strong style="color:#edebf5;">${descripcion}</strong> por ${montoTexto} vence ${cuando} (${fechaVencimiento}).</p>
+          `,
+          boton: { texto: 'Ver obligaciones', link },
+        }),
+      });
+      return true;
+    } catch (error) {
+      this.logger.error('No se pudo enviar el recordatorio de obligacion', error instanceof Error ? error.stack : error);
+      return false;
+    }
+  }
+
+  async enviarRecordatorioTarjeta(
+    email: string,
+    nombreTarjeta: string,
+    fechaPago: string,
+    diasRestantes: number,
+  ): Promise<boolean> {
+    const link = `${this.config.getOrThrow<string>('FRONTEND_URL')}/cuentas`;
+    const cuando = diasRestantes === 0 ? 'hoy' : diasRestantes === 1 ? 'mañana' : `en ${diasRestantes} días`;
+    try {
+      await this.getTransporter().sendMail({
+        from: REMITENTE,
+        to: email,
+        subject: `El pago de "${nombreTarjeta}" vence ${cuando}`,
+        html: this.plantilla({
+          titulo: 'Fecha límite de pago cercana',
+          cuerpoHtml: `
+            <p>La fecha límite de pago de <strong style="color:#edebf5;">${nombreTarjeta}</strong> es ${cuando} (${fechaPago}).</p>
+          `,
+          boton: { texto: 'Ver tarjeta', link },
+        }),
+      });
+      return true;
+    } catch (error) {
+      this.logger.error('No se pudo enviar el recordatorio de tarjeta', error instanceof Error ? error.stack : error);
+      return false;
+    }
+  }
+
   async enviarRecuperacion(email: string, link: string): Promise<boolean> {
     try {
       await this.getTransporter().sendMail({

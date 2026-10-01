@@ -33,6 +33,10 @@
           <b class="mono">{{ p.inversiones | number: '1.0-0' }}</b>
         </div>
         <div class="patrimonio-linea">
+          <span>+ Bienes físicos</span>
+          <b class="mono">{{ p.bienes | number: '1.0-0' }}</b>
+        </div>
+        <div class="patrimonio-linea">
           <span>− Deuda en tarjetas</span>
           <b class="mono">{{ p.deudaTarjetas | number: '1.0-0' }}</b>
         </div>
@@ -47,6 +51,24 @@
           saldo registrado y no se está contando. Regístralo en <a class="auth-link" routerLink="/creditos">Créditos</a>.
         </p>
       }
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (tasasCambio(); as tasas) {
+  <mat-card class="card-section">
+    <mat-card-content>
+      <h2>Tasa de cambio hoy</h2>
+      <div class="tasas-cambio">
+        <div class="tasa-item">
+          <span>Dólar (USD)</span>
+          <b class="mono">{{ tasas.USD | number: '1.0-2' }} COP</b>
+        </div>
+        <div class="tasa-item">
+          <span>Euro (EUR)</span>
+          <b class="mono">{{ tasas.EUR | number: '1.0-2' }} COP</b>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 }
@@ -116,6 +138,7 @@
             <mat-option value="efectivo">Efectivo</mat-option>
             <mat-option value="tarjeta_credito">Tarjeta de crédito</mat-option>
             <mat-option value="inversion">Inversión (CDT, fondo, acciones)</mat-option>
+            <mat-option value="bien">Bien físico (carro, apartamento...)</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -150,6 +173,35 @@
           <input matInput appMonto name="saldo" [(ngModel)]="saldo" />
         </mat-form-field>
 
+        @if (tipo !== 'bolsillo') {
+          <mat-form-field appearance="outline">
+            <mat-label>Moneda</mat-label>
+            <mat-select name="moneda" [(ngModel)]="moneda">
+              <mat-option value="COP">Pesos colombianos (COP)</mat-option>
+              <mat-option value="USD">Dólares (USD)</mat-option>
+              <mat-option value="EUR">Euros (EUR)</mat-option>
+            </mat-select>
+          </mat-form-field>
+        }
+
+        @if (tipo === 'tarjeta_credito') {
+          <mat-form-field appearance="outline">
+            <mat-label>Cupo total (opcional)</mat-label>
+            <input matInput appMonto name="cupoTotal" [(ngModel)]="cupoTotal" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Día de corte (1-28, opcional)</mat-label>
+            <input matInput type="number" min="1" max="28" name="diaCorte" [(ngModel)]="diaCorte" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Día límite de pago (1-28, opcional)</mat-label>
+            <input matInput type="number" min="1" max="28" name="diaPago" [(ngModel)]="diaPago" />
+            <mat-hint>Si lo llenas, te avisamos por correo 3 y 1 día antes.</mat-hint>
+          </mat-form-field>
+        }
+
         <div class="form-actions">
           <button mat-flat-button type="submit" [disabled]="guardando()">Guardar</button>
           <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
@@ -169,6 +221,19 @@
             <div class="cuenta-info">
               <strong>{{ cuenta.nombre }}</strong>
               <span class="cuenta-tipo">{{ etiquetaTipo[cuenta.tipo] }} · actualizado {{ cuenta.saldoActualizadoEn }}</span>
+              @if (cuenta.tipo === 'tarjeta_credito' && cicloPorCuenta().get(cuenta.id); as ciclo) {
+                <span class="cuenta-tipo">
+                  @if (ciclo.cupoTotal != null) {
+                    Cupo disponible: {{ ciclo.cupoDisponible | number: '1.0-0' }} de {{ ciclo.cupoTotal | number: '1.0-0' }}
+                  }
+                  @if (ciclo.proximaFechaCorte) {
+                    · corta el {{ ciclo.proximaFechaCorte }}
+                  }
+                  @if (ciclo.proximaFechaPago) {
+                    · paga antes del {{ ciclo.proximaFechaPago }}
+                  }
+                </span>
+              }
             </div>
 
             @if (editandoId() === cuenta.id) {
@@ -185,10 +250,29 @@
                 <button mat-button (click)="guardarSaldo(cuenta.id)" [disabled]="guardando()">Guardar</button>
                 <button mat-button (click)="editandoId.set(null)">Cancelar</button>
               </div>
+            } @else if (editandoCicloId() === cuenta.id) {
+              <div class="cuenta-edicion">
+                <mat-form-field appearance="outline" class="cuenta-edicion-campo" subscriptSizing="dynamic">
+                  <input matInput appMonto name="cupoTotalEdit" [(ngModel)]="cupoTotalEdit" aria-label="Cupo total" placeholder="Cupo total" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="cuenta-edicion-campo" subscriptSizing="dynamic">
+                  <input matInput type="number" min="1" max="28" name="diaCorteEdit" [(ngModel)]="diaCorteEdit" aria-label="Día de corte" placeholder="Día corte" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="cuenta-edicion-campo" subscriptSizing="dynamic">
+                  <input matInput type="number" min="1" max="28" name="diaPagoEdit" [(ngModel)]="diaPagoEdit" aria-label="Día límite de pago" placeholder="Día pago" />
+                </mat-form-field>
+                <button mat-button (click)="guardarCiclo(cuenta.id)" [disabled]="guardando()">Guardar</button>
+                <button mat-button (click)="editandoCicloId.set(null)">Cancelar</button>
+              </div>
             } @else {
               <div class="cuenta-acciones">
-                <b class="mono cuenta-saldo">{{ cuenta.saldo | number: '1.0-0' }}</b>
+                <b class="mono cuenta-saldo">
+                  {{ cuenta.saldo | number: '1.0-0' }}{{ cuenta.moneda !== 'COP' ? ' ' + cuenta.moneda : '' }}
+                </b>
                 <button mat-button (click)="editarSaldo(cuenta)">Actualizar</button>
+                @if (cuenta.tipo === 'tarjeta_credito') {
+                  <button mat-button (click)="editarCiclo(cuenta)">Ciclo</button>
+                }
                 <button mat-button color="warn" (click)="eliminar(cuenta)">Eliminar</button>
               </div>
             }

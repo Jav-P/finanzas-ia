@@ -4,12 +4,16 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { toCuenta } from '../common/mappers';
 import { throwIfError } from '../common/throw-if-error';
 import { hoyColombia } from '../common/period';
+import { TasasCambioService } from './tasas-cambio.service';
 
 const TIPOS_DISPONIBLES = ['efectivo', 'ahorros', 'bolsillo'];
 
 @Injectable()
 export class CuentasService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(
+    private readonly supabase: SupabaseService,
+    private readonly tasasCambio: TasasCambioService,
+  ) {}
 
   async findByHogar(hogarId: string): Promise<Cuenta[]> {
     const { data, error } = await this.supabase.client
@@ -45,6 +49,10 @@ export class CuentasService {
         tipo: dto.tipo,
         cuenta_padre_id: esBolsillo ? dto.cuentaPadreId : null,
         saldo: dto.saldo ?? 0,
+        moneda: dto.moneda ?? 'COP',
+        cupo_total: dto.cupoTotal ?? null,
+        dia_corte: dto.diaCorte ?? null,
+        dia_pago: dto.diaPago ?? null,
       })
       .select()
       .single();
@@ -60,6 +68,9 @@ export class CuentasService {
       patch['saldo'] = dto.saldo;
       patch['saldo_actualizado_en'] = hoyColombia();
     }
+    if (dto.cupoTotal !== undefined) patch['cupo_total'] = dto.cupoTotal;
+    if (dto.diaCorte !== undefined) patch['dia_corte'] = dto.diaCorte;
+    if (dto.diaPago !== undefined) patch['dia_pago'] = dto.diaPago;
 
     const { data, error } = await this.supabase.client
       .from('cuentas')
@@ -88,14 +99,19 @@ export class CuentasService {
     throwIfError(error);
   }
 
-  // Lo que se tiene (plata disponible e inversiones) menos lo que se debe
-  // (tarjetas y el saldo pendiente registrado de los creditos activos).
+  // Lo que se tiene (plata disponible, inversiones y bienes) menos lo
+  // que se debe (tarjetas y el saldo pendiente de los creditos activos).
+  // Las cuentas en USD/EUR se convierten a COP con la ultima tasa
+  // conocida antes de sumar, asi que todo el patrimonio queda en COP.
   async patrimonio(hogarId: string): Promise<Patrimonio> {
     const cuentas = await this.findByHogar(hogarId);
+    const tasas = await this.tasasCambio.ultimasTasas();
+    const aCop = (c: Cuenta) => (c.moneda === 'COP' ? c.saldo : c.saldo * (tasas[c.moneda as 'USD' | 'EUR'] || 0));
     const sumar = (tipos: string[]) =>
-      cuentas.filter((c) => tipos.includes(c.tipo)).reduce((suma, c) => suma + c.saldo, 0);
+      cuentas.filter((c) => tipos.includes(c.tipo)).reduce((suma, c) => suma + aCop(c), 0);
     const disponible = sumar(TIPOS_DISPONIBLES);
     const inversiones = sumar(['inversion']);
+    const bienes = sumar(['bien']);
     const deudaTarjetas = sumar(['tarjeta_credito']);
 
     const { data: creditos, error } = await this.supabase.client
@@ -112,10 +128,11 @@ export class CuentasService {
     return {
       disponible,
       inversiones,
+      bienes,
       deudaTarjetas,
       deudaCreditos,
       creditosSinSaldo: (creditos ?? []).length - conSaldo.length,
-      patrimonioNeto: disponible + inversiones - deudaTarjetas - deudaCreditos,
+      patrimonioNeto: disponible + inversiones + bienes - deudaTarjetas - deudaCreditos,
     };
   }
 
@@ -129,6 +146,7 @@ export class CuentasService {
       periodo: `${hoyColombia().slice(0, 7)}-01`,
       disponible: p.disponible,
       inversiones: p.inversiones,
+      bienes: p.bienes,
       deudas: p.deudaTarjetas + p.deudaCreditos,
       patrimonio_neto: p.patrimonioNeto,
       actualizado_en: new Date().toISOString(),
@@ -150,6 +168,7 @@ export class CuentasService {
       periodo: String(row.periodo).slice(0, 7),
       disponible: Number(row.disponible),
       inversiones: Number(row.inversiones),
+      bienes: Number(row.bienes),
       deudas: Number(row.deudas),
       patrimonioNeto: Number(row.patrimonio_neto),
     }));

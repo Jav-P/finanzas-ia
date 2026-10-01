@@ -23,6 +23,8 @@ import type {
   CreateCuentaDto,
   CreateObligacionDto,
   Cuenta,
+  TarjetaCiclo,
+  TasaCambio,
   ConfirmarIngresoDto,
   IngresoPendiente,
   Movimiento,
@@ -285,6 +287,18 @@ export class ApiService {
 
   patrimonioHistorico() {
     return this.http.get<PatrimonioMes[]>(`${API_URL}/cuentas/patrimonio/historico`);
+  }
+
+  ciclosTarjetas() {
+    return this.http.get<TarjetaCiclo[]>(`${API_URL}/cuentas/tarjetas/ciclos`);
+  }
+
+  tasasCambioActuales() {
+    return this.http.get<Record<'USD' | 'EUR', number>>(`${API_URL}/cuentas/tasas-cambio/actuales`);
+  }
+
+  tasasCambioHistorico() {
+    return this.http.get<TasaCambio[]>(`${API_URL}/cuentas/tasas-cambio/historico`);
   }
 
   crearCuenta(dto: CreateCuentaDto) {

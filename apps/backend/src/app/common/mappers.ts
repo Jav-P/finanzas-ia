@@ -119,6 +119,10 @@ export function toCuenta(row: any): Cuenta {
     cuentaPadreId: row.cuenta_padre_id,
     saldo: Number(row.saldo),
     saldoActualizadoEn: row.saldo_actualizado_en,
+    moneda: row.moneda,
+    cupoTotal: row.cupo_total != null ? Number(row.cupo_total) : null,
+    diaCorte: row.dia_corte,
+    diaPago: row.dia_pago,
     createdAt: row.created_at,
   };
 }

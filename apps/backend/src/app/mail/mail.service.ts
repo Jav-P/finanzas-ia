@@ -1,30 +1,39 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
 
 const REMITENTE = '"Finanzas en pareja" <invitaciones@finanzasenpareja.com>';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private transporter: nodemailer.Transporter | null = null;
 
   constructor(private readonly config: ConfigService) {}
 
-  // Perezoso, igual que ClaudeService: si SMTP no esta configurado,
-  // solo falla el envio de correo, no el arranque del backend.
-  private getTransporter(): nodemailer.Transporter {
-    if (!this.transporter) {
-      this.transporter = nodemailer.createTransport({
-        host: this.config.getOrThrow<string>('SMTP_HOST'),
-        port: Number(this.config.getOrThrow<string>('SMTP_PORT')),
-        secure: false,
-        auth: this.config.get('SMTP_USER')
-          ? { user: this.config.get('SMTP_USER'), pass: this.config.get('SMTP_PASS') }
-          : undefined,
+  // Se usa la API HTTP de Resend (no SMTP): en contenedores Docker
+  // (Railway incluido) una conexion SMTP saliente puede tardar varios
+  // minutos en resolverse (DNS/IPv6 raro) antes de fallar o conectar;
+  // HTTPS no tiene ese problema y es ademas la via recomendada por
+  // Resend. SMTP_PASS ya es la api key de Resend (se reutiliza el
+  // nombre de variable que ya estaba configurado en Railway).
+  private async enviar(to: string, subject: string, html: string): Promise<boolean> {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.config.getOrThrow<string>('SMTP_PASS')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ from: REMITENTE, to, subject, html }),
       });
+      if (!res.ok) {
+        this.logger.error(`Resend respondio ${res.status}: ${await res.text()}`);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      this.logger.error('No se pudo enviar el correo', error instanceof Error ? error.stack : error);
+      return false;
     }
-    return this.transporter;
   }
 
   // Plantilla compartida con los mismos colores de la app (ver
@@ -82,26 +91,19 @@ export class MailService {
     `;
   }
 
-  async enviarInvitacion(email: string, hogarNombre: string, link: string): Promise<boolean> {
-    try {
-      await this.getTransporter().sendMail({
-        from: REMITENTE,
-        to: email,
-        subject: `Te invitaron al hogar "${hogarNombre}" en Finanzas en pareja`,
-        html: this.plantilla({
-          titulo: 'Te invitaron a un hogar',
-          cuerpoHtml: `<p>Te invitaron a unirte al hogar <strong style="color:#edebf5;">${hogarNombre}</strong> en Finanzas en pareja, para centralizar las finanzas juntos.</p>`,
-          boton: { texto: 'Unirme al hogar', link },
-        }),
-      });
-      return true;
-    } catch (error) {
-      this.logger.error('No se pudo enviar el correo de invitacion', error instanceof Error ? error.stack : error);
-      return false;
-    }
+  enviarInvitacion(email: string, hogarNombre: string, link: string): Promise<boolean> {
+    return this.enviar(
+      email,
+      `Te invitaron al hogar "${hogarNombre}" en Finanzas en pareja`,
+      this.plantilla({
+        titulo: 'Te invitaron a un hogar',
+        cuerpoHtml: `<p>Te invitaron a unirte al hogar <strong style="color:#edebf5;">${hogarNombre}</strong> en Finanzas en pareja, para centralizar las finanzas juntos.</p>`,
+        boton: { texto: 'Unirme al hogar', link },
+      }),
+    );
   }
 
-  async enviarRecordatorioObligacion(
+  enviarRecordatorioObligacion(
     email: string,
     descripcion: string,
     monto: number,
@@ -111,27 +113,20 @@ export class MailService {
     const link = `${this.config.getOrThrow<string>('FRONTEND_URL')}/obligaciones`;
     const montoTexto = monto.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
     const cuando = diasRestantes === 0 ? 'hoy' : diasRestantes === 1 ? 'mañana' : `en ${diasRestantes} días`;
-    try {
-      await this.getTransporter().sendMail({
-        from: REMITENTE,
-        to: email,
-        subject: `"${descripcion}" vence ${cuando} (${montoTexto})`,
-        html: this.plantilla({
-          titulo: 'Un vencimiento se acerca',
-          cuerpoHtml: `
-            <p><strong style="color:#edebf5;">${descripcion}</strong> por ${montoTexto} vence ${cuando} (${fechaVencimiento}).</p>
-          `,
-          boton: { texto: 'Ver obligaciones', link },
-        }),
-      });
-      return true;
-    } catch (error) {
-      this.logger.error('No se pudo enviar el recordatorio de obligacion', error instanceof Error ? error.stack : error);
-      return false;
-    }
+    return this.enviar(
+      email,
+      `"${descripcion}" vence ${cuando} (${montoTexto})`,
+      this.plantilla({
+        titulo: 'Un vencimiento se acerca',
+        cuerpoHtml: `
+          <p><strong style="color:#edebf5;">${descripcion}</strong> por ${montoTexto} vence ${cuando} (${fechaVencimiento}).</p>
+        `,
+        boton: { texto: 'Ver obligaciones', link },
+      }),
+    );
   }
 
-  async enviarRecordatorioTarjeta(
+  enviarRecordatorioTarjeta(
     email: string,
     nombreTarjeta: string,
     fechaPago: string,
@@ -139,45 +134,31 @@ export class MailService {
   ): Promise<boolean> {
     const link = `${this.config.getOrThrow<string>('FRONTEND_URL')}/cuentas`;
     const cuando = diasRestantes === 0 ? 'hoy' : diasRestantes === 1 ? 'mañana' : `en ${diasRestantes} días`;
-    try {
-      await this.getTransporter().sendMail({
-        from: REMITENTE,
-        to: email,
-        subject: `El pago de "${nombreTarjeta}" vence ${cuando}`,
-        html: this.plantilla({
-          titulo: 'Fecha límite de pago cercana',
-          cuerpoHtml: `
-            <p>La fecha límite de pago de <strong style="color:#edebf5;">${nombreTarjeta}</strong> es ${cuando} (${fechaPago}).</p>
-          `,
-          boton: { texto: 'Ver tarjeta', link },
-        }),
-      });
-      return true;
-    } catch (error) {
-      this.logger.error('No se pudo enviar el recordatorio de tarjeta', error instanceof Error ? error.stack : error);
-      return false;
-    }
+    return this.enviar(
+      email,
+      `El pago de "${nombreTarjeta}" vence ${cuando}`,
+      this.plantilla({
+        titulo: 'Fecha límite de pago cercana',
+        cuerpoHtml: `
+          <p>La fecha límite de pago de <strong style="color:#edebf5;">${nombreTarjeta}</strong> es ${cuando} (${fechaPago}).</p>
+        `,
+        boton: { texto: 'Ver tarjeta', link },
+      }),
+    );
   }
 
-  async enviarRecuperacion(email: string, link: string): Promise<boolean> {
-    try {
-      await this.getTransporter().sendMail({
-        from: REMITENTE,
-        to: email,
-        subject: 'Restablece tu contraseña en Finanzas en pareja',
-        html: this.plantilla({
-          titulo: 'Restablece tu contraseña',
-          cuerpoHtml: `
-            <p>Recibimos una solicitud para restablecer tu contraseña.</p>
-            <p>Si tú no la pediste, ignora este correo: tu contraseña actual sigue funcionando.</p>
-          `,
-          boton: { texto: 'Elegir contraseña nueva', link },
-        }),
-      });
-      return true;
-    } catch (error) {
-      this.logger.error('No se pudo enviar el correo de recuperacion', error instanceof Error ? error.stack : error);
-      return false;
-    }
+  enviarRecuperacion(email: string, link: string): Promise<boolean> {
+    return this.enviar(
+      email,
+      'Restablece tu contraseña en Finanzas en pareja',
+      this.plantilla({
+        titulo: 'Restablece tu contraseña',
+        cuerpoHtml: `
+          <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+          <p>Si tú no la pediste, ignora este correo: tu contraseña actual sigue funcionando.</p>
+        `,
+        boton: { texto: 'Elegir contraseña nueva', link },
+      }),
+    );
   }
 }

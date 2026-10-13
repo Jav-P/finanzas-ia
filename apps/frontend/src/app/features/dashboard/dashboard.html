@@ -68,7 +68,7 @@
 
             @if (confirmandoId() !== ingreso.ingresoId + '|' + ingreso.periodo) {
               <div class="ingreso-pendiente-acciones">
-                @if (cuentas().length) {
+                @if (cuentasDeposito().length) {
                   <button mat-flat-button (click)="prepararConfirmacion(ingreso)">Confirmar</button>
                 } @else {
                   <a mat-button routerLink="/cuentas">Crea una cuenta primero</a>
@@ -86,7 +86,7 @@
           <label class="cuenta-select-nativo">
             Cuenta
             <select name="cuentaConfirmarId" [(ngModel)]="cuentaConfirmarId">
-              @for (cuenta of cuentas(); track cuenta.id) {
+              @for (cuenta of cuentasDeposito(); track cuenta.id) {
                 <option [ngValue]="cuenta.id">{{ cuenta.nombre }}</option>
               }
             </select>

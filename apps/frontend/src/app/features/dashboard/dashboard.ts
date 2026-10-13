@@ -11,6 +11,7 @@ import type { Balance, Cuenta, IngresoPendiente, InstanciaConDetalle, Patrimonio
 import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
+import { esCuentaDeDeposito } from '../../core/cuentas-utils';
 
 const TODAS = 'todas' as const;
 
@@ -47,6 +48,9 @@ export class Dashboard implements OnInit {
   protected readonly recomendaciones = signal<Recomendacion[]>([]);
   protected readonly ingresosPendientes = signal<IngresoPendiente[]>([]);
   protected readonly cuentas = signal<Cuenta[]>([]);
+  // Solo cuentas liquidas: un ingreso (salario, etc.) no se deposita en
+  // una tarjeta de credito, una inversion o un bien fisico.
+  protected readonly cuentasDeposito = computed(() => this.cuentas().filter(esCuentaDeDeposito));
   protected readonly confirmandoId = signal<string | null>(null);
   protected cuentaConfirmarId = '';
   protected montoConfirmar: number | null = null;
@@ -97,7 +101,7 @@ export class Dashboard implements OnInit {
 
   prepararConfirmacion(ingreso: IngresoPendiente): void {
     this.confirmandoId.set(`${ingreso.ingresoId}|${ingreso.periodo}`);
-    this.cuentaConfirmarId = this.cuentas()[0]?.id ?? '';
+    this.cuentaConfirmarId = this.cuentasDeposito()[0]?.id ?? '';
     this.montoConfirmar = ingreso.monto;
   }
 

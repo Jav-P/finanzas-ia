@@ -178,6 +178,7 @@ export class MovimientosService {
   async confirmarIngreso(hogarId: string, dto: ConfirmarIngresoDto): Promise<Movimiento> {
     const ingreso = await this.buscarIngreso(hogarId, dto.ingresoId);
     await this.asegurarNoResuelto(dto.ingresoId, dto.periodo);
+    await this.asegurarCuentaDeDeposito(hogarId, dto.cuentaId);
 
     const movimiento = await this.registrar({
       hogarId,
@@ -270,6 +271,24 @@ export class MovimientosService {
   private async eliminarPorId(id: string): Promise<void> {
     const { error } = await this.supabase.client.rpc('eliminar_movimiento', { p_id: id });
     throwIfError(error);
+  }
+
+  // Un ingreso (salario, etc.) no se deposita en una tarjeta de credito
+  // (es deuda), una inversion o un bien fisico (su saldo es un valor
+  // manual, no efectivo recibido). El frontend ya filtra estas opciones
+  // del selector; esto es la validacion real del lado del servidor.
+  private async asegurarCuentaDeDeposito(hogarId: string, cuentaId: string): Promise<void> {
+    const { data, error } = await this.supabase.client
+      .from('cuentas')
+      .select('tipo')
+      .eq('hogar_id', hogarId)
+      .eq('id', cuentaId)
+      .maybeSingle();
+    throwIfError(error);
+    if (!data) throw new BadRequestException('Esa cuenta no existe en tu hogar');
+    if (!['efectivo', 'ahorros', 'bolsillo'].includes(data.tipo)) {
+      throw new BadRequestException('Un ingreso solo se puede depositar en efectivo, ahorros o un bolsillo');
+    }
   }
 
   private async validarCuentas(hogarId: string, ids: (string | null | undefined)[]): Promise<void> {

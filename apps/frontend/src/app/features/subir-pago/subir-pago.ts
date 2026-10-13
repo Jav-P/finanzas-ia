@@ -17,6 +17,7 @@ import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
 import { dateToIso, isoToDate } from '../../core/date-utils';
+import { esCuentaDePago } from '../../core/cuentas-utils';
 
 type Tipo = 'obligacion' | 'gasto';
 type TipoPago = 'completo' | 'parcial';
@@ -75,7 +76,7 @@ export class SubirPago implements OnInit {
 
   ngOnInit(): void {
     this.api.categorias().subscribe((categorias) => this.categorias.set(categorias));
-    this.api.cuentas().subscribe((cuentas) => this.cuentas.set(cuentas));
+    this.api.cuentas().subscribe((cuentas) => this.cuentas.set(cuentas.filter(esCuentaDePago)));
   }
 
   elegirTipo(tipo: Tipo): void {

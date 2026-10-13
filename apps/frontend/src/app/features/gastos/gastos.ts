@@ -24,6 +24,7 @@ import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
 import { dateToIso, isoToDate } from '../../core/date-utils';
+import { esCuentaDePago } from '../../core/cuentas-utils';
 
 interface ItemBorrador {
   productoNombre: string;
@@ -87,7 +88,7 @@ export class Gastos implements OnInit {
       this.lugares.set(lugares);
       this.mediosPago.set(mediosPago);
       this.productos.set(productos);
-      this.cuentas.set(cuentas);
+      this.cuentas.set(cuentas.filter(esCuentaDePago));
       const mercado = categorias.find((c) => c.nombre.toLowerCase() === 'mercado');
       this.categoriaId = mercado?.id ?? categorias[0]?.id ?? '';
       this.cuentaId = cuentas.find((c) => c.tipo === 'tarjeta_credito')?.id ?? '';

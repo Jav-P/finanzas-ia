@@ -16,6 +16,7 @@ import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
 import { dateToIso } from '../../core/date-utils';
+import { esCuentaDePago } from '../../core/cuentas-utils';
 
 @Component({
   selector: 'app-obligacion-detalle',
@@ -55,7 +56,7 @@ export class ObligacionDetalle implements OnInit {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.cargar(id);
     this.api.cuentas().subscribe((cuentas) => {
-      this.cuentas.set(cuentas);
+      this.cuentas.set(cuentas.filter(esCuentaDePago));
       this.cuentaId = cuentas.find((c) => c.tipo === 'ahorros')?.id ?? '';
     });
   }

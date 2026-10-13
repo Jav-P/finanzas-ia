@@ -4,21 +4,31 @@
       <span class="eyebrow">{{ b.periodo }}</span>
       <h1>Balance del hogar</h1>
     </div>
-    <a class="btn btn-primary" routerLink="/obligaciones/nueva">
-      <mat-icon>add</mat-icon>
-      Nueva obligación
-    </a>
+    <div class="page-head-acciones">
+      <button
+        mat-icon-button
+        (click)="montosVisibilidad.toggle()"
+        [attr.aria-label]="montosVisibilidad.visible() ? 'Ocultar montos' : 'Mostrar montos'"
+        [title]="montosVisibilidad.visible() ? 'Ocultar montos' : 'Mostrar montos'"
+      >
+        <mat-icon>{{ montosVisibilidad.visible() ? 'visibility' : 'visibility_off' }}</mat-icon>
+      </button>
+      <a class="btn btn-primary" routerLink="/obligaciones/nueva">
+        <mat-icon>add</mat-icon>
+        Nueva obligación
+      </a>
+    </div>
   </div>
 
   <div class="hero">
     <div class="hero-card hero-total">
       <div class="hero-label">Saldo consolidado</div>
       <div class="hero-amount mono" [class.positive]="b.saldo >= 0" [class.negative]="b.saldo < 0">
-        {{ b.saldo | number: '1.0-0' }}
+        <app-monto [valor]="b.saldo" />
       </div>
       <div class="hero-sub">
-        Ingresos {{ b.ingresos | number: '1.0-0' }} · Obligaciones {{ b.obligaciones | number: '1.0-0' }} · Gastos
-        {{ b.gastos | number: '1.0-0' }}
+        Ingresos <app-monto [valor]="b.ingresos" /> · Obligaciones <app-monto [valor]="b.obligaciones" /> · Gastos
+        <app-monto [valor]="b.gastos" />
       </div>
     </div>
 
@@ -26,10 +36,11 @@
       <a class="hero-card person-card" routerLink="/cuentas">
         <div class="hero-label">Patrimonio neto</div>
         <div class="hero-amount mono" [class.positive]="p.patrimonioNeto >= 0" [class.negative]="p.patrimonioNeto < 0">
-          {{ p.patrimonioNeto | number: '1.0-0' }}
+          <app-monto [valor]="p.patrimonioNeto" />
         </div>
         <div class="hero-sub">
-          Tengo {{ p.disponible + p.inversiones | number: '1.0-0' }} · Debo {{ p.deudaTarjetas + p.deudaCreditos | number: '1.0-0' }}
+          Tengo <app-monto [valor]="p.disponible + p.inversiones" /> · Debo
+          <app-monto [valor]="p.deudaTarjetas + p.deudaCreditos" />
         </div>
       </a>
     }
@@ -41,12 +52,12 @@
           <span class="person-name">{{ persona.nombre }}</span>
         </div>
         <div class="person-lines">
-          <div class="person-line">Ingresos <b class="mono">{{ persona.ingresos | number: '1.0-0' }}</b></div>
-          <div class="person-line">Obligaciones <b class="mono">{{ persona.obligaciones | number: '1.0-0' }}</b></div>
-          <div class="person-line">Gastos <b class="mono">{{ persona.gastos | number: '1.0-0' }}</b></div>
+          <div class="person-line">Ingresos <b class="mono"><app-monto [valor]="persona.ingresos" /></b></div>
+          <div class="person-line">Obligaciones <b class="mono"><app-monto [valor]="persona.obligaciones" /></b></div>
+          <div class="person-line">Gastos <b class="mono"><app-monto [valor]="persona.gastos" /></b></div>
         </div>
         <div class="person-balance">
-          Saldo <b class="mono">{{ persona.saldo | number: '1.0-0' }}</b>
+          Saldo <b class="mono"><app-monto [valor]="persona.saldo" /></b>
         </div>
       </div>
     }

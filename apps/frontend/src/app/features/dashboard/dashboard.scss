@@ -20,6 +20,12 @@
   font-size: 1.6rem;
 }
 
+.page-head-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .hero {
   display: grid;
   grid-template-columns: 1.3fr 1fr 1fr;

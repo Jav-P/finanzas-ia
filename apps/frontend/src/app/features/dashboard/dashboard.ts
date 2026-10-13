@@ -12,6 +12,8 @@ import { ApiService } from '../../core/api.service';
 import { SessionService } from '../../core/session.service';
 import { MontoInputDirective } from '../../core/monto-input.directive';
 import { esCuentaDeDeposito } from '../../core/cuentas-utils';
+import { MontoOculto } from '../../core/monto-oculto';
+import { MontosVisibilidadService } from '../../core/montos-visibilidad.service';
 
 const TODAS = 'todas' as const;
 
@@ -34,7 +36,17 @@ function diasRestantes(fechaVencimiento: string): number {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, DecimalPipe, FormsModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule, MontoInputDirective],
+  imports: [
+    RouterLink,
+    DecimalPipe,
+    FormsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MontoInputDirective,
+    MontoOculto,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -42,6 +54,7 @@ export class Dashboard implements OnInit {
   private readonly api = inject(ApiService);
   private readonly snackBar = inject(MatSnackBar);
   protected readonly session = inject(SessionService);
+  protected readonly montosVisibilidad = inject(MontosVisibilidadService);
 
   protected readonly balance = signal<Balance | null>(null);
   protected readonly patrimonio = signal<Patrimonio | null>(null);

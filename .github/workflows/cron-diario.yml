@@ -1,0 +1,20 @@
+name: Cron diario
+
+# Railway no garantiza que el proceso este despierto justo a la hora de
+# un @Cron en memoria. Este workflow le pega al endpoint protegido una
+# vez al dia para forzar que las tareas diarias corran siempre: generar
+# instancias de obligaciones, recordatorios por correo, tasas de cambio
+# y la foto de patrimonio.
+on:
+  schedule:
+    - cron: '0 11 * * *' # 6:00 a. m. hora Colombia (UTC-5)
+  workflow_dispatch: {} # permite correrlo a mano desde la pestaña Actions
+
+jobs:
+  disparar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar POST /api/cron/diario
+        run: |
+          curl -sf -X POST "https://finanzas-ia-production-b6f2.up.railway.app/api/cron/diario" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

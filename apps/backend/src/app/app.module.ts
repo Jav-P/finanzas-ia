@@ -25,6 +25,7 @@ import { AuthModule } from './auth/auth.module';
 import { HogaresModule } from './hogares/hogares.module';
 import { InvitacionesModule } from './invitaciones/invitaciones.module';
 import { MailModule } from './mail/mail.module';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { MailModule } from './mail/mail.module';
     ProductosModule,
     GastosModule,
     OcrModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [AppService],

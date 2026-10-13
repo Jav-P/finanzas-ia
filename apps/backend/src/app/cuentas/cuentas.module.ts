@@ -22,6 +22,6 @@ import { TarjetaRecordatoriosService } from './tarjeta-recordatorios.service';
     TarjetasService,
     TarjetaRecordatoriosService,
   ],
-  exports: [CuentasService, MovimientosService],
+  exports: [CuentasService, MovimientosService, CuentasSchedulerService, TarjetaRecordatoriosService],
 })
 export class CuentasModule {}

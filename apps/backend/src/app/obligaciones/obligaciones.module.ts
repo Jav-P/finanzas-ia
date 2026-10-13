@@ -12,6 +12,6 @@ import { RecordatoriosService } from './recordatorios.service';
   imports: [SupabaseModule, CuentasModule, UsuariosModule, MailModule],
   controllers: [ObligacionesController],
   providers: [ObligacionesService, InstanciasSchedulerService, RecordatoriosService],
-  exports: [ObligacionesService],
+  exports: [ObligacionesService, RecordatoriosService],
 })
 export class ObligacionesModule {}
